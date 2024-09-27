@@ -1,3 +1,7 @@
+#!/usr/bin/env vim
+" proompter.vim - Provide integration with local Ollama LLM API
+" Maintainer: S0AndS0 <https://github.com/S0AndS0>
+" URL: https://github.com/vim-utilities/proompter
 
 let g:proompter = {
       \   'select': {
