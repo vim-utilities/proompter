@@ -1,0 +1,12 @@
+[Unit]
+Description=Forwards traffic between Vim Proompter plugin and ollama.service
+Documentation=man:systemd.unit(5)
+After=ollama.service
+Wants=ollama.service
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+ExecStart={script_path} --host 127.0.0.1 --port 11435
+ExecStop=kill -INT $MAINPID
+
