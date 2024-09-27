@@ -61,7 +61,8 @@ proompter#SendHighlightedText({dictionary})    *proompter#SendHighlightedText*
                 separated {string} by way of |proompter#SendPrompt|
 
                 Parameters:
-                  - {string} |proompter-configuration| passed un-mutated
+                  - {string} prefix_input Optional text prefixed to line range
+                  - {dictionary} |proompter-configuration| passed un-mutated
 
 proompter#callback#channel#CompleteToHistory({string}, {string}, ...)  *proompter#callback#channel#CompleteToHistorye*
                 Handle fully resolved HTTP response from channel proxied API.

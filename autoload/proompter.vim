@@ -83,6 +83,7 @@ endfunction
 ""
 " Send range or visually selected text to LLM
 "
+" Parameter: {string} prefix_input Optional text prefixed to line range
 " Parameter: {define__configurations}
 "
 " Example: 
@@ -91,13 +92,18 @@ endfunction
 " :'<,'>call proompter#SendHighlightedText()
 "
 " :69,420call proompter#SendHighlightedText()
+"
+" :call proompter#SendHighlightedText('What does this line do?')
 " ```
 "
 " Throw: selection is zero length
 "
 " See: {docs} :help optional-function-argument
-function! proompter#SendHighlightedText(configurations = g:proompter) abort range
+function! proompter#SendHighlightedText(prefix_input = '', configurations = g:proompter) abort range
   let l:selection = getline(a:firstline, a:lastline)
+  if len(a:prefix_input)
+    let l:selection = [a:prefix_input, ''] + l:selection
+  endif
   let l:value = join(l:selection, "\n")
   call proompter#SendPrompt(l:value, a:configurations)
 endfunction
