@@ -48,8 +48,10 @@ command! -range -nargs=? ProompterSelection <line1>,<line2>call s:DefaultSelecti
 " ```vim
 " :ProompterSend Write a haiku about why Vim is the best text editor
 " ```
-command! -nargs=1 ProompterSend call proompter#SendPrompt(<f-args>, g:proompter)
+command! -nargs=? ProompterSend call s:DefaultSelectionArgs(function('proompter#SendPrompt'), { 'input': '', 'configuration': g:proompter }, <f-args>)
 
+""
+" Quality of life commands to clear `g:proompter_state`
 command! ProompterClearHistory let g:proompter_state.history = []
 command! ProompterClearResponses let g:proompter_state.responses = []
 
