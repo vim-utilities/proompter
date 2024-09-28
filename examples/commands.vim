@@ -5,26 +5,52 @@
 
 
 ""
+" Work around issues when `command -nargs=?` calls `function` with two
+" optional parameters without any input.
+"
+" Parameters:
+"   - {dictionary} defaults with "input" and "configuration" keys defined
+"   - {string} ... Optional value passed from Vim `command -nargs=?`
+"
+" Warning: `FunctionReference` must have `range` or else it will be called for
+" line in range passed to `s:DefaultSelectionArgs`
+function! s:DefaultSelectionArgs(FunctionReference, defaults, ...) abort range
+  if !exists('a:defaults.configuration')
+    throw 'Undefined a:defaults.configuration'
+  endif
+
+  let l:input = get(a:000, 0, get(a:defaults, 'input', '""'))[1:-2]
+
+  let l:command = a:firstline . ',' . a:lastline . 'call a:FunctionReference(l:input, a:defaults.configuration)'
+
+  execute l:command
+endfunction
+
+""
 " Call `proompter#SendHighlightedText` and assign `prefix_input` to input
 "
 " Example:
 "
 " ```vim
-" :69,420ProompterSelectionPrefixed 'Write some documentation about'
+" :69,420ProompterSelection 'Write some documentation about'
 "
-" :ProompterSelectionPrefixed 'What does this line do?'
+" :ProompterSelection 'What does this line do?'
+"
+" :1337ProompterSelection
 " ```
-command! -range -nargs=? ProompterSelectionPrefixed <line1>,<line2>call proompter#SendHighlightedText(<args>, g:proompter)
+command! -range -nargs=? ProompterSelection <line1>,<line2>call s:DefaultSelectionArgs(function('proompter#SendHighlightedText'), { 'input': '', 'configuration': g:proompter }, <f-args>)
 
 ""
-" Call `proompter#SendHighlightedText` with last/current visually selection
+" Send arguments as a string to API, note quotes _should_ be honored
 "
 " Example:
 "
 " ```vim
-" :69,420ProompterSelectionPrefixed
-"
-" :ProompterSelectionPrefixed
+" :ProompterSend Write a haiku about why Vim is the best text editor
 " ```
-command! -range -nargs=? ProompterSelectionNow <line1>,<line2>call proompter#SendHighlightedText('', g:proompter)
+command! -nargs=1 ProompterSend call proompter#SendPrompt(<f-args>, g:proompter)
 
+command! ProompterClearHistory let g:proompter_state.history = []
+command! ProompterClearResponses let g:proompter_state.responses = []
+
+" vim: expandtab
