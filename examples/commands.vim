@@ -53,4 +53,8 @@ command! -nargs=1 ProompterSend call proompter#SendPrompt(<f-args>, g:proompter)
 command! ProompterClearHistory let g:proompter_state.history = []
 command! ProompterClearResponses let g:proompter_state.responses = []
 
+""
+" Turns out closing a channel on Vim side propagates through proxy to API?!
+command! ProompterCancel call proompter#cancel(g:proompter_state, g:proompter)
+
 " vim: expandtab

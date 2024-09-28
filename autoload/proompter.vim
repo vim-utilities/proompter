@@ -108,4 +108,10 @@ function! proompter#SendHighlightedText(prefix_input = '', configurations = g:pr
   call proompter#SendPrompt(l:value, a:configurations)
 endfunction
 
+""
+" Wrapper for `ch_close` for whatever channel is in `a:state.channel`
+function proompter#cancel(state = g:proompter_state, configurations = g:proompter) abort
+  call ch_close(a:state.channel)
+endfunction
+
 " vim: expandtab
