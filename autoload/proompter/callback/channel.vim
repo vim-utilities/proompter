@@ -203,7 +203,7 @@ function! proompter#callback#channel#StreamToBuffer(kwargs) abort
 
   if l:history_entry.type == 'new'
     let l:new_buffer_lines = [
-          \   '## Response ' . strftime("%Y-%m-%d %H:%M:%S") . ' ' . g:proompter.select.model_name,
+          \   '## Response ' . strftime("%Y-%m-%d %H:%M:%S") . ' `' . g:proompter.select.model_name . '`',
           \   '',
           \   '',
           \ ]
