@@ -8,6 +8,10 @@
 " Return bufnr of new buffer after setting it up for logging proompts
 "
 " Parameter: {string|v:null} buffer_name - Name output buffer should use
+"
+" Attribution:
+"
+"   - https://stackoverflow.com/questions/8316139/how-to-set-the-default-to-unfolded-when-you-open-a-file
 function! proompter#lib#GetOrMakeProomptBuffer(buffer_name) abort
   let l:old_bufnr = bufnr('%')
 
@@ -28,6 +32,8 @@ function! proompter#lib#GetOrMakeProomptBuffer(buffer_name) abort
   setlocal wrap
   setlocal filetype=markdown
   " setlocal readonly
+
+  %foldopen!
 
   execute 'file ' . l:new_buffer_name
 
