@@ -33,7 +33,7 @@ function! proompter#lib#GetOrMakeProomptBuffer(buffer_name) abort
   setlocal filetype=markdown
   " setlocal readonly
 
-  %foldopen!
+  " silent! %foldopen
 
   execute 'file ' . l:new_buffer_name
 
