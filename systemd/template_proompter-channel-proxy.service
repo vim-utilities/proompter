@@ -10,3 +10,6 @@ RemainAfterExit=yes
 ExecStart={script_path} --host 127.0.0.1 --port 11435
 ExecStop=kill -INT $MAINPID
 
+[Install]
+WantedBy=default.target
+
