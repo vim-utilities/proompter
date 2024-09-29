@@ -27,11 +27,11 @@
 " {"model":"codellama","created_at":"2024-09-20T23:25:06.675058548Z","response":"","done":true,"done_reason":"stop","context":[...],"total_duration":7833808817,"load_duration":10021098,"prompt_eval_count":31,"prompt_eval_duration":2122796000,"eval_count":35,"eval_duration":5658536000}
 " ```
 function! proompter#callback#channel#CompleteToHistory(channel_response, api_response, ...) abort
-  let l:response = proompter#parse#HeaderAndBodyFromHTTPResponse(a:api_response)
+  let l:http_response = proompter#parse#HTTPResponse(a:api_response)
 
   let l:data = {
         \   'type': 'response',
-        \   'value': join(map(split(l:response.body, '\n'), {_key, value -> json_decode(value).response}), ''),
+        \   'value': join(map(l:http_response.body, {_index, value -> value.response}), ''),
         \ }
 
   call add(g:proompter_state.history, l:data)
@@ -64,11 +64,11 @@ endfunction
 " {"model":"codellama","created_at":"2024-09-20T23:25:01.177902785Z","response":"im","done":false}
 " ```
 function! proompter#callback#channel#StreamToHistory(channel_response, api_response, ...) abort
-  let l:response = proompter#parse#HeaderAndBodyFromHTTPResponse(a:api_response)
+  let l:http_response = proompter#parse#HTTPResponse(a:api_response)
 
   let l:data = {
         \   'type': 'response',
-        \   'value': join(map(split(l:response.body, '\n'), {_key, value -> json_decode(value).response}), ''),
+        \   'value': join(map(l:http_response.body, {_index, value -> value.response}), ''),
         \ }
 
   call add(g:proompter_state.history, l:data)
@@ -142,46 +142,18 @@ endfunction
 "       \ }
 " ```
 function! proompter#callback#channel#StreamToBuffer(kwargs) abort
-  let l:http_response = proompter#parse#HeaderAndBodyFromHTTPResponse(a:kwargs.api_response)
-  let l:body = ''
-  if type(get(l:http_response, 'part')) == type('')
-    if len(g:proompter_state.responses) == 0
-      " Assume we got new "headers" now!
-      call add(g:proompter_state.responses, l:http_response.part)
-      return
-    else
-      " Assume we got missing "body"
-      let l:body = l:http_response.part
-      let g:proompter_state.responses = []
-    endif
-  elseif type(get(l:http_response, 'headers')) == type('') && type(get(l:http_response, 'body')) == type('')
-    if len(l:http_response.body) == 0
-      echoe 'l:http_response ->' l:http_response
-      throw 'Missing body in HTTP response'
-    endif
-    let l:body = l:http_response.body
-  else
-    echoe 'l:http_response ->' l:http_response
-    throw 'Malformed HTTP parser response'
-  endif
-
-  let l:json = js_decode(l:body)
-  if l:json.done == v:true 
-    if l:json.done_reason == 'stop'
-      let g:proompter.responses = []
-    elseif l:json.done_reason == 'load'
-      echoe 'l:json ->' l:json
-      throw 'API is still loading, please retry in a minute'
-    else
-      echoe 'l:json ->' l:json
-      throw 'Unknown reason for "done_reason"'
-    endif
+  let l:http_response = proompter#parse#HTTPResponse(a:kwargs.api_response)
+  if !len(l:http_response.body)
+    " echoe 'No body in HTTP Response' l:http_response
+    return
   endif
 
   let l:out_bufnr = get(a:kwargs, 'out_bufnr', v:null)
   if l:out_bufnr == v:null || type(l:out_bufnr) == type('')
     let l:out_bufnr = proompter#lib#GetOrMakeProomptBuffer(l:out_bufnr)
   endif
+
+  let l:json_responses = join(map(l:http_response.body, {_index, value -> value.response}), '')
 
   ""
   " We may use the "type" == "new" check until the end of this function
@@ -190,14 +162,14 @@ function! proompter#callback#channel#StreamToBuffer(kwargs) abort
         \   -1,
         \   {
         \     'type': 'new',
-        \     'value': l:json.response,
+        \     'value': l:json_responses,
         \   }
         \ )
 
   if l:history_entry.type == 'response'
-    let l:history_entry.value .= l:json.response
+    let l:history_entry.value .= l:json_responses
   else
-    call add(g:proompter_state.history, { 'type': 'new', 'value': l:json.response })
+    call add(g:proompter_state.history, { 'type': 'new', 'value': l:json_responses })
   endif
   let l:history_entry = g:proompter_state.history[-1]
 
@@ -212,7 +184,7 @@ function! proompter#callback#channel#StreamToBuffer(kwargs) abort
   endif
 
   " TODO: maybe find a better way
-  call setbufline(l:out_bufnr, '$', split(getbufline(l:out_bufnr, '$')[0] . l:json.response, '\n', 1))
+  call setbufline(l:out_bufnr, '$', split(getbufline(l:out_bufnr, '$')[0] . l:json_responses, '\n', 1))
 
   let l:history_entry.type = 'response'
 endfunction
