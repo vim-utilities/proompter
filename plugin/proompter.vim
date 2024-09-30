@@ -81,12 +81,10 @@ let s:defaults = {
       \ }
 
 ""
-" TODO: change `responses` to `history` and use `channel.id` somehow
-" Per-buffer state this plugin uses for tracking Vim channel state and callback
+" TODO: change `history` to `messages`
 " Type: define__proompter_state
 let g:proompter_state = {
       \  'channel': v:null,
-      \  'responses': [],
       \  'history': [],
       \ }
 
@@ -122,10 +120,6 @@ let g:proompter_state = {
 ""
 " Type Definition: {dictionary} define__proompter_state
 "
-" Property: {define__proompter_state__response[]} responses - List of proxied
-"           responses from LLM API, useful for streaming callbacks that are
-"           triggered with body-less "head" responses, followed by second
-"           event with headless "body" response
 " Property: {define__proompter_state__response[]} history - List of parsed
 "           input/output-s
 " Property: {dictionary} channel - See: {docs} :help ch_info()
