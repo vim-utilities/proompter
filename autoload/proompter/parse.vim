@@ -84,7 +84,8 @@ endfunction
 "     "model": "codellama",
 "     "created_at": "2024-09-20T23:25:01.670272033Z",
 "     "response": ' "foo',
-"     "done": v:true}
+"     "done": v:true
+"   }
 " ]
 " ```
 "
