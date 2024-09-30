@@ -8,7 +8,7 @@
 " Parameter: {string} value - What will eventually be sent to LLM
 " Parameter: {define__configurations} configurations
 "
-" Example: 
+" Example:
 "
 " ```vim
 " :call proompter#SendPrompt('Tell me in one sentence why Bash is the best scripting language')
@@ -86,7 +86,7 @@ endfunction
 " Parameter: {string} prefix_input Optional text prefixed to line range
 " Parameter: {define__configurations}
 "
-" Example: 
+" Example:
 "
 " ```vim
 " :'<,'>call proompter#SendHighlightedText()

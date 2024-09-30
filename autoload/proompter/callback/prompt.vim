@@ -24,7 +24,7 @@
 "     help clue-in LLM of past context
 "   - {dictionary} input_tags - With `start` and `stop` values defined to help
 "     LLM focus on latest input
-" 
+"
 " Example: configuration snippet
 "
 " ```vim
@@ -112,7 +112,7 @@ endfunction
 "   - {string} value - Text to prompt LLM with
 "   - {dictionary} input_tags - With `start` and `stop` values defined to help
 "     LLM focus on latest input
-" 
+"
 " Example: configuration snippet
 "
 " ```vim
