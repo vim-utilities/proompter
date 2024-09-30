@@ -152,7 +152,7 @@ proompter#callback#channel#StreamToBuffer({dictionary})  *proompter#callback#cha
   Server: SimpleHTTP/0.6 Python/3.12.6
   Date: Fri, 20 Sep 2024 23:25:06 GMT
   Content-Type: application/json
-  
+
   {"model":"codellama","created_at":"2024-09-20T23:25:01.01645329Z","response":"V","done":false}
 <
               Example: expects series of `api_response` similar to 2 of 2 >
@@ -160,7 +160,7 @@ proompter#callback#channel#StreamToBuffer({dictionary})  *proompter#callback#cha
   Server: SimpleHTTP/0.6 Python/3.12.6
   Date: Fri, 20 Sep 2024 23:25:01 GMT
   Content-Type: application/json
-  
+
   {"model":"codellama","created_at":"2024-09-20T23:25:01.177902785Z","response":"im","done":false}
 <
 
@@ -367,14 +367,68 @@ proompter#lib#GetOrMakeProomptBuffer({string})  *proompter#lib#GetOrMakeProomptB
                   - |proompter#callback#prompt#Post|
                 ...  Nether of which are used by default.
 
-proompter#parse#HeaderAndBodyFromHTTPResponse({string})  *proompter#parse#HeaderAndBodyFromHTTPResponse*
-                Parses HTTP response data into 'headers' and 'body'.  The
-                'headers' are anything before two consecutive carriage-return
-                newline characters ('\r\n\r\n') of the response and the body
+proompter#parse#HeadersFromHTTPResponse({string})  *proompter#parse#HeadersFromHTTPResponse*
+                Convert HTTP headers into Vim dictionary, or returns empty
+                dictionary if no headers are parsed from input data.
+
+                Example: HTTP response >
+  Server: SimpleHTTP/0.6 Python/3.12.6
+  Date: Sat, 28 Sep 2024 23:29:00 GMT
+  Content-Type: application/json
+
+  {"model": "codellama", "created_at": "2024-09-28T23:29:00.299380014Z", "response": " V", "done": false}
+<
+                Example: resulting Vim dictionary >
+  {
+    'Content-Type': 'application/json',
+    'Date': 'Sat, 28 Sep 2024 23:29:00 GMT',
+    'Server': 'SimpleHTTP/0.6 Python/3.12.6'
+  }
+<
+proompter#parse#JSONLinesFromHTTPResponse({string})  *proompter#parse#JSONLinesFromHTTPResponse*
+                Returns {dictionary} {list} built by parsing body as JSON
+                dictionaries, separated by any number of space,
+                carriage-return, and/or newline characters.
+
+                Example: HTTP response >
+  Server: SimpleHTTP/0.6 Python/3.12.6
+  Date: Sat, 28 Sep 2024 23:29:00 GMT
+  Content-Type: application/json
+
+  {"model": "codellama", "created_at": "2024-09-28T23:29:00.299380014Z", "response": " {", "done": false}
+  {"model": "codellama", "created_at": "2024-09-20T23:25:01.670272033Z", "response": " \"foo", "done": true}
+<
+                Example: resulting Vim dictionary >
+  [
+    {
+      "model": "codellama",
+      "created_at": "2024-09-28T23:29:00.299380014Z",
+      "response": " {",
+      "done": v:false
+    },
+    {
+      "model": "codellama",
+      "created_at": "2024-09-20T23:25:01.670272033Z",
+      "response": ' "foo',
+      "done": v:true}
+  ]
+<
+proompter#parse#HTTPResponse({string})          *proompter#parse#HTTPResponse*
+                Parses HTTP response data into `headers` {dictionary} and
+                `body` {dictionary} list.  The 'headers' are anything before
+                two consecutive carriage-return newline characters
+                (`\r\n\r\n`), or any number of characters before the first
+                opening curly brace (`{`) of the response, and the body
                 is everything after that.
 
-                Returns: {dictionary} with keys 'headers' and 'body' which
-                contain the raw HTTP headers and body respectively.
+                Check the following functions for type details and examples;
+                  - |proompter#parse#HeadersFromHTTPResponse|
+                  - |proompter#parse#JSONLinesFromHTTPResponse|
+
+                Returns: {dictionary} with keys `headers` and `body` defined.
+
+                Note: callers _should_ check the length before assuming any
+                sub-values to be present on top-level keys.
 
 ==============================================================================
 2. Configuration                               *proompter-configuration*
@@ -468,7 +522,6 @@ preserving defaults, here's an Ex mode one-liner to help with that; >
 <
 ... Additionally it may be wise to also clear some of the shared state; >
   let g:proompter_state.history = []
-  let g:proompter_state.responses = []
 <
 
 ==============================================================================
