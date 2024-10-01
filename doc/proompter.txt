@@ -19,21 +19,41 @@ under name-spaces provided by `autoload/` directory and file paths.
 Development details about auto loading maybe found via; |autoload-functions|,
 |autoload| |E746|, and section |52.2|.
 
-proompter#SendPromptToGenerate({string}, {dictionary})          *proompter#SendPromptToGenerate()*
+proompter#SendPrompt({string}, {dictionary}, {dictionary})  *proompter#SendPrompt*
+                Detects API endpoint in `configurations.api.url` and forward
+                call to one of the following functions;
+                  - |proompter#SendPromptToGenerate|
+
+                Parameters:
+                  - {string} `value` What to send to LLM
+                  - {dictionary} `configurations` Defaults to `g:proompter`
+                  - {dictionary} `state` Defaults to `g:proompter_state`
+
+proompter#SendHighlightedText({dictionary})    *proompter#SendHighlightedText*
+                Send range or visually selected text to LLM as newline
+                separated {string} by way of |proompter#SendPrompt|
+
+                Parameters:
+                  - {string} prefix_input Optional text prefixed to line range
+                  - {dictionary} |proompter-configuration| passed un-mutated
+
+proompter#SendPromptToGenerate({string}, {dictionary}, {dictionary})  *proompter#SendPromptToGenerate*
                 Using options read from {dictionary} try to format {string} as
                 value for encoding into JSON value sent to LLM.  For many
                 use-cases this function is your entry point for this plugin.
 
                 Saves the `value` to `g:proompter_state.messages` >
   {
-    "type": "prompt",
-    "value": "Tell me in one sentence why Vim is the best for programming."
+    'message': {
+      'role': 'user',
+      'content': 'Tell me in one sentence why Vim is the best text editor.',
+    },
   }
 <
-
                 Parameters:
                   - {string} `value` What to send to LLM
                   - {dictionary} `configurations` Defaults to `g:proompter`
+                  - {dictionary} `state` Defaults to `g:proompter_state`
 
                 Note: if `g:proompter.models['model_name'].prompt_callbacks` is
                 defined then resulting prompt sent to LLM is built by
@@ -56,15 +76,7 @@ proompter#SendPromptToGenerate({string}, {dictionary})          *proompter#SendP
                 Example `g:proompter.models['model_name'].prompt_callbacks`;
                   - |proompter#callback#prompt#Generate_Pre| -- May prefix prompt
 
-proompter#SendHighlightedText({dictionary})    *proompter#SendHighlightedText*
-                Send range or visually selected text to LLM as newline
-                separated {string} by way of |proompter#SendPrompt|
-
-                Parameters:
-                  - {string} prefix_input Optional text prefixed to line range
-                  - {dictionary} |proompter-configuration| passed un-mutated
-
-proompter#callback#channel#CompleteToHistory({string}, {string}, ...)  *proompter#callback#channel#CompleteToHistorye*
+proompter#callback#channel#CompleteToHistory({string}, {dictionary}, {dictionary}, ...)  *proompter#callback#channel#CompleteToHistorye*
                 Handle fully resolved HTTP response from channel proxied API.
 
                 By default is attached to `g:proompter_state.channel` when
@@ -74,22 +86,30 @@ proompter#callback#channel#CompleteToHistory({string}, {string}, ...)  *proompte
                 |proompter#callback#channel#StreamToHistory| for details when
                 `g:proompter.models['model_name'].data.stream` is `v:true`.
 
-                Saves response returned from API in `g:proompter_state.histor`
-                with _shape_ similar to; >
+                Saves HTTP response data returned from API in
+                `g:proompter_state.messages` with _shape_ similar to; >
   {
-    "type": "response",
-    "value": "Vim is the best"
+    'model': 'codellama',
+    'created_at': '2024-09-20T23:25:06.675058548Z',
+    'done': true,
+    'done_reason': 'stop',
+    'message': {
+      'role': 'assistant',
+      'content': 'Vim is the best',
+      'images': v:null,
+    },
   }
 <
                 Parameters:
-                  - {string} `channel_response` Status reported by Vim, eg.
-                    "channel 529 closed".
-                  - {string} `api_response` HTTP response similar to: >
+                  - {string} `api_response` HTTP response
+                  - {dictionary} `configurations` Defaults to `g:proompter`
+                  - {dictionary} `state` Defaults to `g:proompter_state`
+
+                Expects HTTP response similar to: >
   HTTP/1.0 200 OK
   Server: SimpleHTTP/0.6 Python/3.12.6
   Date: Fri, 20 Sep 2024 23:25:06 GMT
   Content-Type: application/json
-
 
   {"model":"codellama","created_at":"2024-09-20T23:25:01.01645329Z","response":"V","done":false}
   {"model":"codellama","created_at":"2024-09-20T23:25:01.177902785Z","response":"im","done":false}
@@ -110,22 +130,30 @@ proompter#callback#channel#StreamToHistory({string}, {string}, ...)  *proompter#
                 when `g:proompter.models['model_name'].data.stream` is
                 `v:false`.
 
-                Saves response streamed from API in `g:proompter_state.histor`
-                with _shape_ similar to; >
+                Saves HTTP response data returned from API in
+                `g:proompter_state.messages` with _shape_ similar to; >
   {
-    "type": "response",
-    "value": "V"
+    'model': 'codellama',
+    'created_at': '2024-09-20T23:25:06.675058548Z',
+    'done': true,
+    'done_reason': 'stop',
+    'message': {
+      'role': 'assistant',
+      'content': 'Vim is the best',
+      'images': v:null,
+    },
   }
 <
                 Parameters:
-                  - {string} `channel_response` Status reported by Vim, eg.
-                    "channel 529 closed".
-                  - {string} `api_response` HTTP response similar to: >
+                  - {string} `api_response` HTTP response
+                  - {dictionary} `configurations` Defaults to `g:proompter`
+                  - {dictionary} `state` Defaults to `g:proompter_state`
+
+                Expects HTTP response similar to: >
   HTTP/1.0 200 OK
   Server: SimpleHTTP/0.6 Python/3.12.6
   Date: Fri, 20 Sep 2024 23:25:06 GMT
   Content-Type: application/json
-
 
   {"model":"codellama","created_at":"2024-09-20T23:25:01.01645329Z","response":"V","done":false}
 
@@ -135,19 +163,16 @@ proompter#callback#channel#StreamToBuffer({dictionary})  *proompter#callback#cha
                 last entry of `{"type": "response"}` or by creating a new
                 entry, as well as outputting to target text buffer.
 
-                Parameter: {dictionary} `kwargs` Has following defined
-                  - {string} `channel_response` Status reported by Vim, eg.
-                    'channel 529 closed'
-                  - {string} `response_tag` XML tag name to surround response
-                    with
-                  - {dictionary} `response_tag` With `start` and `stop` values
-                    defined to help LLM focus on latest input
-                  - {dictionary} `out_bufnr` 'state' and `out` keys pointing
-                    to buffer number callback should use for state and output.
-                  - {string} `api_response` HTTP response _shape_ similar to
-                    following examples
+                Parameters:
+                  - {string} `api_response` HTTP response
+                  - {dictionary} `configurations` Defaults to `g:proompter`
+                  - {dictionary} `state` Defaults to `g:proompter_state`
+                  - {string} `out_bufnr` Default to "proompt-log.md"
+                    WARNING: no checks are currently implemented by default to
+                    prevent writing to preexisting buffers, or special buffers
+                    such as a terminal session!
 
-              Example: expects series of `api_response` similar to 1 of 2 >
+                Example: expects series of `api_response` similar to 1 of 2 >
   HTTP/1.0 200 OK
   Server: SimpleHTTP/0.6 Python/3.12.6
   Date: Fri, 20 Sep 2024 23:25:06 GMT
@@ -155,7 +180,7 @@ proompter#callback#channel#StreamToBuffer({dictionary})  *proompter#callback#cha
 
   {"model":"codellama","created_at":"2024-09-20T23:25:01.01645329Z","response":"V","done":false}
 <
-              Example: expects series of `api_response` similar to 2 of 2 >
+                Example: expects series of `api_response` similar to 2 of 2 >
   HTTP/1.0 200 OK
   Server: SimpleHTTP/0.6 Python/3.12.6
   Date: Fri, 20 Sep 2024 23:25:01 GMT
@@ -163,18 +188,26 @@ proompter#callback#channel#StreamToBuffer({dictionary})  *proompter#callback#cha
 
   {"model":"codellama","created_at":"2024-09-20T23:25:01.177902785Z","response":"im","done":false}
 <
-
-                Warning: expects buffer history to be dictionary list _shaped_
-                similar to >
+                  WARNING: expects buffer history to be {dictionary} {list}
+                  _shaped_ similar to >
   [
     {
-      "type": "prompt",
-      "value": "... Maybe a question about a technical topic...",
+      'message': {
+        'role': 'user',
+        'content': 'Tell me in one sentence why Vim is the best text editor.',
+      },
     },
     {
-      "type": "response",
-      "value": "Are your finger-tips talking to you too?",
-    }
+      'model': 'codellama',
+      'created_at': '2024-09-20T23:25:06.675058548Z',
+      'done': true,
+      'done_reason': 'stop',
+      'message': {
+        'role': 'assistant',
+        'content': 'Vim',
+        'images': v:null,
+      },
+    },
   ]
 <
 
@@ -182,20 +215,19 @@ proompter#callback#channel#StreamToBuffer({dictionary})  *proompter#callback#cha
   let g:proompter = {
         \   'channel': {
         \     'options': {
-        \       'callback': { channel_response, api_response ->
-        \         proompter#callback#channel#StreamToBuffer({
-        \           'channel_response': channel_response,
-        \           'api_response': api_response,
-        \           'response_tag': 'RESPONSE',
-        \           'buffers': { 'state': bufnr('%'), 'out': v:null },
-        \         })
+        \       'callback': { api_response, configurations, state ->
+        \         proompter#callback#channel#StreamToBuffer(
+        \           api_response,
+        \           configurations,
+        \           state,
+        \           v:null,
+        \         )
         \       },
         \     },
         \   },
         \ }
 <
-proompter#callback#prompt#Generate_Pre({dictionary})   *proompter#callback#prompt#Generate_Pre*
-
+proompter#callback#prompt#Generate_Pre({dictionary})  *proompter#callback#prompt#Generate_Pre*
                 When there is no message history, or history would cause
                 `prompt_callbacks.post` to drop this prefix, return start of
                 prompt with content similar to following; >
@@ -208,45 +240,13 @@ proompter#callback#prompt#Generate_Pre({dictionary})   *proompter#callback#promp
   please pay most attention to the last instance.
 <
                 Parameter: {dictionary} `kwargs` Has following defined
+                  - {dictionary} `configurations` Defaults to `g:proompter`
+                  - {dictionary} `state` Defaults to `g:proompter_state`
                   - {number} `context_size` Max prompt/response results that
                     are re-shared
                   - {string} `filetype` What file type is operated on
                   - {dictionary} `history_tags` With `start` and `stop` values
                     defined to help clue-in LLM of past context
-                  - {dictionary} `input_tags` With `start` and `stop` values
-                    defined to help LLM focus on latest input
-
-                Example: configuration snippet >
-    let g:proompter = {
-          \   'select': {
-          \     'model_name': 'codellama',
-          \   },
-          \   'models': {
-          \     'codellama': {
-          \       'prompt_callbacks': {
-          \         'pre': { ->
-          \           proompter#callback#prompt#Generate_Pre({
-          \             'context_size': 5,
-          \             'filetype': &filetype,
-          \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
-          \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
-          \           })
-          \         },
-          \       },
-          \     },
-          \   },
-          \ }
-<
-proompter#callback#prompt#Generate_Input({dictionary}) *proompter#callback#prompt#Generate_Input*
-                Returns string formatted from `kwargs.input` and
-                `kwargs.input_tags` >
-
-  <PROOMPT>
-  Tell me in one sentence why Vim is the best editor for programming.
-  </PROOMPT>
-<
-                Parameter: {dictionary} `kwargs` Has following defined
-                  - {string} `value` Text to prompt LLM with
                   - {dictionary} `input_tags` With `start` and `stop` values
                     defined to help LLM focus on latest input
 
@@ -258,10 +258,49 @@ proompter#callback#prompt#Generate_Input({dictionary}) *proompter#callback#promp
         \   'models': {
         \     'codellama': {
         \       'prompt_callbacks': {
-        \         'input': { value ->
+        \         'pre': { configurations, state ->
+        \           proompter#callback#prompt#Generate_Pre({
+        \             'configurations': configurations,
+        \             'state': state,
+        \             'context_size': 5,
+        \             'filetype': 'javascript',
+        \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
+        \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
+        \           })
+        \         },
+        \       },
+        \     },
+        \   },
+        \ }
+<
+proompter#callback#prompt#Generate_Input({dictionary})  *proompter#callback#prompt#Generate_Input*
+                Returns string formatted from `kwargs.input` and
+                `kwargs.input_tags` similar to >
+  <PROOMPT>
+  Tell me in one sentence why Vim is the best editor for programming.
+  </PROOMPT>
+<
+                Parameter: {dictionary} `kwargs` Has following defined
+                  - {string} `value` Text to prompt LLM with
+                  - {dictionary} `input_tags` With `start` and `stop` values
+                    defined to help LLM focus on latest input
+                  - {dictionary} `configurations` Defaults to `g:proompter`
+                  - {dictionary} `state` Defaults to `g:proompter_state`
+
+                Example: configuration snippet >
+  let g:proompter = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \   'models': {
+        \     'codellama': {
+        \       'prompt_callbacks': {
+        \         'input': { value, configurations, state ->
         \           proompter#callback#prompt#Generate_Input({
         \             'value': value,
-        \             'input_tag': 'PROOMPT',
+        \             'configurations': configurations,
+        \             'state': state,
+        \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
         \           })
         \         },
         \       },
@@ -289,13 +328,30 @@ proompter#callback#prompt#Generate_Post({dictionary})  *proompter#callback#promp
                     customize the buffer name.
                   - {dictionary} `history_tags` With `start` and `stop` values
                     defined to help clue-in LLM of past context
+                  - {dictionary} `configurations` Defaults to `g:proompter`
+                  - {dictionary} `state` Defaults to `g:proompter_state`
 
-                  Warning: expects `g:proompter_state.messages` to be
+                  WARNING: expects `g:proompter_state.messages` to be
                   dictionary list _shaped_ similar to; >
-  {
-    "type": "prompt",
-    "value": "some text"
-  }
+  [
+    {
+      'message': {
+        'role': 'user',
+        'content': 'Tell me in one sentence why Vim is the best text editor.',
+      },
+    },
+    {
+      'model': 'codellama',
+      'created_at': '2024-09-20T23:25:06.675058548Z',
+      'done': true,
+      'done_reason': 'stop',
+      'message': {
+        'role': 'assistant',
+        'content': 'Vim',
+        'images': v:null,
+      },
+    },
+  ]
 <
                 Example: configuration snippet >
   let g:proompter = {
@@ -305,9 +361,11 @@ proompter#callback#prompt#Generate_Post({dictionary})  *proompter#callback#promp
         \   'models': {
         \     'codellama': {
         \       'prompt_callbacks': {
-        \         'post': { prompt_callbacks_data ->
+        \         'post': { prompt_callbacks_data, configurations, state ->
         \           proompter#callback#prompt#Generate_Post({
         \             'data': prompt_callbacks_data,
+        \             'configurations': configurations,
+        \             'state': state,
         \             'context_size': 5,
         \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
         \             'out_bufnr': v:null,
@@ -475,43 +533,62 @@ proompter#parse#HTTPResponse({string})          *proompter#parse#HTTPResponse*
 
                 Example of defining custom callback functions; >
   let g:proompter = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \   'api': {
+        \     'url': 'http://127.0.0.1:11434/api/generate',
+        \   },
         \   'channel': {
+        \     'address': '127.0.0.1:11435',
         \     'options': {
-        \       'callback': { channel_response, api_response ->
-        \         proompter#callback#channel#StreamToBuffer({
-        \           'channel_response': channel_response,
-        \           'api_response': api_response,
-        \           'response_tag': 'RESPONSE',
-        \           'out_bufnr': v:null,
-        \         })
+        \       'mode': 'raw',
+        \       'callback': { _channel_response, api_response ->
+        \         proompter#callback#channel#StreamToBuffer(
+        \           api_response,
+        \           g:proompter,
+        \           g:proompter_state,
+        \           v:null,
+        \         )
         \       },
         \     },
         \   },
         \   'models': {
         \     'codellama': {
         \       'prompt_callbacks': {
-        \         'pre': { ->
+        \         'pre': { configurations, state ->
         \           proompter#callback#prompt#Generate_Pre({
+        \             'configurations': configurations,
+        \             'state': state,
         \             'context_size': 5,
         \             'filetype': 'javascript',
         \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
         \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
         \           })
         \         },
-        \         'input': { value ->
+        \         'input': { value, configurations, state ->
         \           proompter#callback#prompt#Generate_Input({
         \             'value': value,
-        \             'input_tag': 'PROOMPT',
+        \             'configurations': configurations,
+        \             'state': state,
+        \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
         \           })
         \         },
-        \         'post': { prompt_callbacks_data ->
+        \         'post': { prompt_callbacks_data, configurations, state ->
         \           proompter#callback#prompt#Generate_Post({
         \             'data': prompt_callbacks_data,
+        \             'configurations': configurations,
+        \             'state': state,
         \             'context_size': 5,
         \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
         \             'out_bufnr': v:null,
         \           })
         \         },
+        \       },
+        \       'data': {
+        \         'prompt': '',
+        \         'raw': v:false,
+        \         'stream': v:true,
         \       },
         \     },
         \   },
