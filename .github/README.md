@@ -155,15 +155,11 @@ functions for creating your own Vim/LLM integration experience!
 
 ```vim
 function! MyProompterLineStreamCallback(channel_response, api_response, ...) abort
-  let l:response = proompter#parse#HeaderAndBodyFromResponse(a:api_response)
-
-  let l:data = {
-        \   'headers': l:response.headers,
-        \   'body': l:response.body,
-        \   'text': join(map(split(l:response.body, '\n'), function('proompter#callback#map#ExtractResponse')), ''),
-        \ }
-
-  echoe 'l:data ->' l:data
+  let l:http_response = proompter#parse#HTTPResponse(a:api_response)
+  for l:http_body_data in l:http_response.body
+    let l:api_data = proompter#parse#MessageOrResponseFromAPI(l:http_body_data)
+    echoe 'l:api_data ->' l:api_data
+  endfor
 endfunction
 ```
 
@@ -230,7 +226,7 @@ ______
   "&#x1F4C8; Options for contributing to proompter and vim-utilities"
 
 
-Options for contributing to proompter and vim-utilities
+Options for contributing to Proompter and Vim Utilities
 
 
 ---
