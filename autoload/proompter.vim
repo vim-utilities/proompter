@@ -114,4 +114,49 @@ function proompter#cancel(state = g:proompter_state, configurations = g:proompte
   call ch_close(a:state.channel)
 endfunction
 
+""
+"
+function! proompter#load(configurations = g:proompter, state = g:proompter_state) abort
+  let l:model_data = { "model": a:configurations.select.model_name }
+
+  let l:endpoint = split(a:configurations.api.url, '/')[-1]
+  if l:endpoint == 'chat'
+    let l:model_data.messages = []
+  elseif l:endpoint == 'generate'
+    let l:model_data.prompt = ''
+  else
+    throw 'Unknown endpoing in -> a:configurations.api.url'
+  endif
+
+  let l:post_payload = proompter#format#HTTPPost(l:model_data, a:configurations)
+
+  let l:channel = proompter#channel#GetOrSetOpen(a:configurations, a:state)
+
+  call ch_sendraw(l:channel, l:post_payload)
+endfunction
+
+""
+"
+function! proompter#unload(configurations = g:proompter, state = g:proompter_state) abort
+  let l:model_data = {
+        \   "model": a:configurations.select.model_name,
+        \   "keep_alive": 0,
+        \ }
+
+  let l:endpoint = split(a:configurations.api.url, '/')[-1]
+  if l:endpoint == 'chat'
+    let l:model_data.messages = []
+  elseif l:endpoint == 'generate'
+    let l:model_data.prompt = ''
+  else
+    throw 'Unknown endpoing in -> a:configurations.api.url'
+  endif
+
+  let l:post_payload = proompter#format#HTTPPost(l:model_data, a:configurations)
+
+  let l:channel = proompter#channel#GetOrSetOpen(a:configurations, a:state)
+
+  call ch_sendraw(l:channel, l:post_payload)
+endfunction
+
 " vim: expandtab

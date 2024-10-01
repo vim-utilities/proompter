@@ -56,6 +56,11 @@ command! ProompterClearHistory let g:proompter_state.history = []
 command! ProompterClearResponses let g:proompter_state.responses = []
 
 ""
+" Quality of life commands to load/unload currently configured model
+command! ProompterLoad call proompter#load(g:proompter, g:proompter_state)
+command! ProompterUnload call proompter#unload(g:proompter, g:proompter_state)
+
+""
 " Turns out closing a channel on Vim side propagates through proxy to API?!
 command! ProompterCancel call proompter#cancel(g:proompter_state, g:proompter)
 
