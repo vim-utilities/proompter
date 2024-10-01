@@ -1,0 +1,32 @@
+
+""
+" {{{
+Execute (proompter#format#HTTPPost -- Creates HTTP POST request as expected):
+  let data = {
+        \   'prompt': '',
+        \   'raw': v:false,
+        \   'stream': v:true,
+        \ }
+
+  let configurations = {
+        \   'api': {
+        \     'url': 'http://127.0.0.1:68419/generate',
+        \   },
+        \   'channel': {
+        \     'address': 'http://127.0.0.1:41968',
+        \   },
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+
+  let post_payload = proompter#format#HTTPPost(data, configurations)
+
+  let separator = "\r\n"
+  let post_payload_lines = split(post_payload, separator)
+
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+  Assert match(post_payload_lines[0], configurations.api.url) > -1
+  Assert match(post_payload_lines[1], configurations.channel.address) > -1
+  AssertEqual post_payload_lines[-1], json_encode(data)
+" }}}
+
