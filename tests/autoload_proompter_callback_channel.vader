@@ -1,0 +1,229 @@
+
+""
+" {{{
+Execute (proompter#callback#channel#CompleteToHistory -- Handles well formated HTTP response without images):
+  let separator = "\r\n"
+
+  let api_response = join([
+        \   'Server: SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date: Sat, 28 Sep 2024 23:29:00 GMT',
+        \   'Content-Type: application/json',
+        \   '',
+        \   json_encode({
+        \     'model': 'mistral',
+        \     'created_at': '2023-11-03T15:36:02.583064Z',
+        \     'response': ' The sky appears blue because of a phenomenon called Rayleigh scattering.',
+        \     'done': v:true,
+        \     'total_duration': 8493852375,
+        \     'load_duration': 6589624375,
+        \     'prompt_eval_count': 14,
+        \     'prompt_eval_duration': 119039000,
+        \     'eval_count': 110,
+        \     'eval_duration': 1779061000,
+        \   }),
+        \ ], separator)
+
+  let configurations = {
+        \   'select': {
+        \     'model_name': 'mistral',
+        \   },
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+
+  let state = { 'messages': [] }
+
+  let expected_state = {
+        \   'messages': [
+        \     {
+        \       'model': 'mistral',
+        \       'created_at': '2023-11-03T15:36:02.583064Z',
+        \       'done': v:true,
+        \       'done_reason': v:null,
+        \       'message': {
+        \         'role': 'assistant',
+        \         'content': ' The sky appears blue because of a phenomenon called Rayleigh scattering.',
+        \         'images': v:null,
+        \       },
+        \     },
+        \   ],
+        \ }
+
+  call proompter#callback#channel#CompleteToHistory(api_response, configurations, state)
+
+  AssertEqual state, expected_state
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+
+" }}}
+""
+
+""
+" {{{
+Execute (proompter#callback#channel#StreamToMessages -- Handles JSON stream with one header):
+  let separator = "\r\n"
+
+  let api_response = join([
+        \   'Server: SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date: Fri, 20 Sep 2024 23:25:06 GMT',
+        \   'Content-Type: application/json',
+        \   '',
+        \   json_encode({
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-20T23:25:01.01645329Z',
+        \     'response': 'V',
+        \     'done': v:false,
+        \   }),
+        \   json_encode({
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-20T23:25:01.177902785Z',
+        \     'response': 'im',
+        \     'done': v:false,
+        \   }),
+        \   json_encode({
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-20T23:25:01.341776729Z',
+        \     'response': ' is',
+        \     'done': v:false,
+        \   }),
+        \   json_encode({
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-20T23:25:01.506237509Z',
+        \     'response': ' the',
+        \     'done': v:false,
+        \   }),
+        \   json_encode({
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-20T23:25:06.675058548Z',
+        \     'response': ' best',
+        \     'done': v:true,
+        \     'done_reason': 'stop',
+        \     'total_duration': 7833808817,
+        \     'load_duration': 10021098,
+        \     'prompt_eval_count': 31,
+        \     'prompt_eval_duration': 2122796000,
+        \     'eval_count': 35,
+        \     'eval_duration': 5658536000,
+        \   }),
+        \ ], separator)
+
+
+  let configurations = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+
+  let state = { 'messages': [] }
+
+  let expected_state = {
+        \   'messages': [
+        \     {
+        \       'model': 'codellama',
+        \       'created_at': '2024-09-20T23:25:06.675058548Z',
+        \       'done': v:true,
+        \       'done_reason': 'stop',
+        \       'message': {
+        \         'role': 'assistant',
+        \         'content': 'Vim is the best',
+        \         'images': v:null,
+        \       },
+        \     },
+        \   ],
+        \ }
+
+  call proompter#callback#channel#StreamToMessages(api_response, configurations, state)
+
+  AssertEqual state, expected_state
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+" }}}
+""
+
+""
+" {{{
+Execute (proompter#callback#channel#StreamToBuffer -- Handles JSON stream with one header):
+  let separator = "\r\n"
+
+  let api_response = join([
+        \   'Server: SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date: Fri, 20 Sep 2024 23:25:06 GMT',
+        \   'Content-Type: application/json',
+        \   '',
+        \   json_encode({
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-20T23:25:01.01645329Z',
+        \     'response': 'V',
+        \     'done': v:false,
+        \   }),
+        \   json_encode({
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-20T23:25:01.177902785Z',
+        \     'response': 'im',
+        \     'done': v:false,
+        \   }),
+        \   json_encode({
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-20T23:25:01.341776729Z',
+        \     'response': ' is',
+        \     'done': v:false,
+        \   }),
+        \   json_encode({
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-20T23:25:01.506237509Z',
+        \     'response': ' the',
+        \     'done': v:false,
+        \   }),
+        \   json_encode({
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-20T23:25:06.675058548Z',
+        \     'response': ' best',
+        \     'done': v:true,
+        \     'done_reason': 'stop',
+        \     'total_duration': 7833808817,
+        \     'load_duration': 10021098,
+        \     'prompt_eval_count': 31,
+        \     'prompt_eval_duration': 2122796000,
+        \     'eval_count': 35,
+        \     'eval_duration': 5658536000,
+        \   }),
+        \ ], separator)
+
+
+  let configurations = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+
+  let state = { 'messages': [] }
+
+  let expected_state = {
+        \   'messages': [
+        \     {
+        \       'model': 'codellama',
+        \       'created_at': '2024-09-20T23:25:06.675058548Z',
+        \       'done': v:true,
+        \       'done_reason': 'stop',
+        \       'message': {
+        \         'role': 'assistant',
+        \         'content': 'Vim is the best',
+        \         'images': v:null,
+        \       },
+        \     },
+        \   ],
+        \ }
+
+  call proompter#callback#channel#StreamToBuffer(
+        \   api_response,
+        \   configurations,
+        \   state,
+        \   'vader_proompter-logs.md',
+        \ )
+
+  AssertEqual state, expected_state
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+" }}}
+

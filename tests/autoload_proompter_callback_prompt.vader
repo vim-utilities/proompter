@@ -1,0 +1,153 @@
+
+""
+" {{{
+Execute (proompter#callback#prompt#Generate_Pre -- Returns empty string when state messages length is short enough):
+  let configurations = {}
+
+  let state = {
+        \   'messages': [
+        \     {
+        \       'model': 'codellama',
+        \       'created_at': '2024-09-20T23:25:06.675058548Z',
+        \       'done': v:true,
+        \       'done_reason': 'stop',
+        \       'message': {
+        \         'role': 'assistant',
+        \         'content': 'Vim is the best',
+        \         'images': v:null,
+        \       },
+        \     },
+        \   ],
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+  let expected_state = deepcopy(state)
+
+  let result = proompter#callback#prompt#Generate_Pre({
+        \   'configurations': configurations,
+        \   'state': state,
+        \   'context_size': 5,
+        \   'filetype': 'javascript',
+        \   'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
+        \   'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
+        \ })
+
+  let expected_result = ''
+
+  AssertEqual result, expected_result
+  AssertEqual state, expected_state
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+
+Execute (proompter#callback#prompt#Generate_Pre -- Returns prompt prefix when state messages could cause loss of primer):
+  let configurations = {}
+
+  let state = {
+        \   'messages': [
+        \     {
+        \       'model': 'codellama',
+        \       'created_at': '2024-09-20T23:25:06.675058548Z',
+        \       'done': v:true,
+        \       'done_reason': 'stop',
+        \       'message': {
+        \         'role': 'assistant',
+        \         'content': 'Vim is the best',
+        \         'images': v:null,
+        \       },
+        \     },
+        \   ],
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+  let expected_state = deepcopy(state)
+
+  let result = proompter#callback#prompt#Generate_Pre({
+        \   'configurations': configurations,
+        \   'state': state,
+        \   'context_size': 0,
+        \   'filetype': 'javascript',
+        \   'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
+        \   'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
+        \ })
+
+  Assert len(result) > 0, 'Expected a lengthy result'
+  AssertEqual state, expected_state, 'Unexpected mutation of state'
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+" }}}
+""
+
+""
+" {{{
+Execute (proompter#callback#prompt#Generate_Input -- Produces output without mutation of shared state):
+  let configurations = {}
+
+  let state = {
+        \   'messages': [
+        \     {
+        \       'model': 'codellama',
+        \       'created_at': '2024-09-20T23:25:06.675058548Z',
+        \       'done': v:true,
+        \       'done_reason': 'stop',
+        \       'message': {
+        \         'role': 'assistant',
+        \         'content': 'Vim is the best',
+        \         'images': v:null,
+        \       },
+        \     },
+        \   ],
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+  let expected_state = deepcopy(state)
+
+  let result = proompter#callback#prompt#Generate_Input({
+        \   'value': 'Tell me Vim is the best',
+        \   'configurations': configurations,
+        \   'state': state,
+        \   'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
+        \ })
+
+  Assert len(result) > 0, 'Expected a lengthy result'
+  AssertEqual state, expected_state, 'Unexpected mutation of state'
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+" }}}
+
+""
+" {{{
+Execute (proompter#callback#prompt#Generate_Post -- Is okay with empty data values for; 'pre', 'prompt', and 'input'):
+  let configurations = {}
+
+  let state = {
+        \   'messages': [
+        \     {
+        \       'model': 'codellama',
+        \       'created_at': '2024-09-20T23:25:06.675058548Z',
+        \       'done': v:true,
+        \       'done_reason': 'stop',
+        \       'message': {
+        \         'role': 'assistant',
+        \         'content': 'Vim is the best',
+        \         'images': v:null,
+        \       },
+        \     },
+        \   ],
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+  let expected_state = deepcopy(state)
+
+  call proompter#callback#prompt#Generate_Post({
+        \   'data': {
+        \     'pre': '',
+        \     'prompt': '',
+        \     'input': '',
+        \   },
+        \   'configurations': configurations,
+        \   'state': state,
+        \   'context_size': 0,
+        \   'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
+        \   'out_bufnr': 'vader_proompter-logs.md',
+        \ })
+
+  AssertEqual state, expected_state, 'Unexpected mutation of state'
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+" }}}
