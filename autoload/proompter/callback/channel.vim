@@ -5,10 +5,12 @@
 
 
 ""
-" Handle completely resolved HTTP response from channel proxied API
+" Handle completely resolved HTTP response from channel proxied API and append
+" results to `state.messages`
 "
-" Parameter: {string} channel_response - Status reported by Vim, eg. 'channel 529 closed'
 " Parameter: {string} api_response - HTTP response with the following _shape_
+" Parameter: {define__configurations} configurations - Dictionary
+" Parameter: {define__proompter_state} state - Dictionary
 "
 " Example: expects `api_response` similar to
 "
@@ -26,23 +28,51 @@
 " ...
 " {"model":"codellama","created_at":"2024-09-20T23:25:06.675058548Z","response":"","done":true,"done_reason":"stop","context":[...],"total_duration":7833808817,"load_duration":10021098,"prompt_eval_count":31,"prompt_eval_duration":2122796000,"eval_count":35,"eval_duration":5658536000}
 " ```
-function! proompter#callback#channel#CompleteToHistory(channel_response, api_response, ...) abort
+function! proompter#callback#channel#CompleteToHistory(api_response, configurations = g:proompter, state = g:proompter_state, ...) abort
   let l:http_response = proompter#parse#HTTPResponse(a:api_response)
 
-  let l:data = {
-        \   'type': 'response',
-        \   'value': join(map(l:http_response.body, {_index, value -> value.response}), ''),
+  let l:entry = {
+        \   'model': l:http_response.body[-1].model,
+        \   'created_at': '',
+        \   'done': l:http_response.body[-1].done,
+        \   'done_reason': l:http_response.body[-1].done_reason,
+        \   'message': {
+        \     'role': 'assistant',
+        \     'content': '',
+        \     'images': v:null,
+        \   },
         \ }
 
-  call add(g:proompter_state.history, l:data)
+  for l:http_body_data in l:http_response.body
+    let l:api_data = proompter#parse#MessageOrResponseFromAPI(l:http_body_data)
+
+    let l:entry.message.content .= l:api_data.message.content
+
+    if l:api_data.message.images != v:null
+      if type(l:entry.message.images) != v:t_list
+        let l:entry.message.images = []
+      endif
+
+      call extend(l:entry.message.images, l:api_data.message.images)
+    endif
+
+    if !len(l:entry.created_at)
+      let l:entry.created_at = l:api_data.created_at
+    endif
+  endfor
+
+  call add(a:state.messages, l:entry)
 endfunction
 
 
 ""
-" Handle stream of HTTP responses from channel proxied API
+" Handle stream of HTTP responses from channel proxied API by appending to
+" `state.messages` list, if the last message is not from an assistant, and in
+" either case appending the `message.content` to latest assistant response.
 "
-" Parameter: {string} channel_response - Status reported by Vim, eg. 'channel 529 closed'
 " Parameter: {string} api_response - HTTP response with the following _shape_
+" Parameter: {define__configurations} configurations - Dictionary
+" Parameter: {define__proompter_state} state - Dictionary
 "
 " Example: expects series of `api_response` similar to
 "
@@ -63,30 +93,67 @@ endfunction
 "
 " {"model":"codellama","created_at":"2024-09-20T23:25:01.177902785Z","response":"im","done":false}
 " ```
-function! proompter#callback#channel#StreamToHistory(channel_response, api_response, ...) abort
-  let l:http_response = proompter#parse#HTTPResponse(a:api_response)
-
-  let l:data = {
-        \   'type': 'response',
-        \   'value': join(map(l:http_response.body, {_index, value -> value.response}), ''),
+function! proompter#callback#channel#StreamToMessages(api_response, configurations = g:proompter, state = g:proompter_state, ...) abort
+  ""
+  " We may use the "role" == "pending" check until the end of this function
+  let l:entry_fallback = {
+        \   'model': a:configurations.select.model_name,
+        \   'created_at': v:null,
+        \   'done': v:null,
+        \   'done_reason': v:null,
+        \   'message': {
+        \     'role': 'pending',
+        \     'content': '',
+        \     'images': v:null,
+        \   },
         \ }
 
-  call add(g:proompter_state.history, l:data)
+  let l:http_response = proompter#parse#HTTPResponse(a:api_response)
+  if len(l:http_response.body) <= 0
+    " echoe 'Skipping HTTP response with empty body'
+    return
+  endif
+
+  let l:entry = get(a:state.messages, -1, l:entry_fallback)
+  if l:entry.message.role != 'assistant' || a:configurations.select.model_name != l:http_response.body[0].model
+    call add(a:state.messages, l:entry_fallback)
+  endif
+  let l:entry = a:state.messages[-1]
+  let l:entry.model = l:http_response.body[0].model
+
+  for l:http_body_data in l:http_response.body
+    let l:api_data = proompter#parse#MessageOrResponseFromAPI(l:http_body_data)
+
+    let l:entry.message.content .= l:api_data.message.content
+
+    if l:api_data.message.images != v:null
+      if type(l:entry.message.images) != v:t_list
+        let l:entry.message.images = []
+      endif
+
+      call extend(l:entry.message.images, l:api_data.message.images)
+    endif
+  endfor
+
+  if l:http_response.body[-1].done
+    let l:entry.created_at = l:http_response.body[-1].created_at
+    let l:entry.model = l:http_response.body[-1].model
+    let l:entry.done = l:http_response.body[-1].done
+    let l:entry.done_reason = get(l:http_response.body[-1], 'done_reason', v:null)
+  endif
+
+  let l:entry.message.role = 'assistant'
 endfunction
 
 ""
 " Handle stream of HTTP responses from channel proxied API by appending to
 " buffer history, and outputting to target split.
 "
-" Parameter: {dictionary} kwargs - Has the following key/value pares defined
-"
-"   - {string} channel_response - Status reported by Vim, eg. 'channel 529 closed'
-"   - {dictionary} response_tags - With `start` and `stop` values defined to
-"     help LLM focus on latest input
-"   - {dictionary} out_bufnr - 'state' and `out` keys pointing to buffer
-"     number callback should use for state and output.
-"   - {string} api_response - HTTP response _shape_ similar to following
-"     examples
+" Parameter: {string} api_response - HTTP response _shape_ similar to following examples
+" Parameter: {define__configurations} configurations - Dictionary
+" Parameter: {define__proompter_state} state - Dictionary
+" Parameter: {string} out_bufnr - Named or number of buffer to create, if
+" necessary, and append responses to
 "
 " Example: expects series of `api_response` similar to
 "
@@ -106,21 +173,6 @@ endfunction
 " Content-Type: application/json
 "
 " {"model":"codellama","created_at":"2024-09-20T23:25:01.177902785Z","response":"im","done":false}
-" ```
-"
-" Warning: expects buffer history to be dictionary list _shaped_ similar to
-"
-" ```
-" [
-"   {
-"     "type": "prompt",
-"     "value": "... Maybe a question about a technical topic...",
-"   },
-"   {
-"     "type": "response",
-"     "value": "Are your finger-tips talking to you too?",
-"   }
-" ]
 " ```
 "
 " Example: configuration snippet
@@ -129,53 +181,53 @@ endfunction
 " let g:proompter = {
 "       \   'channel': {
 "       \     'options': {
-"       \       'callback': { channel_response, api_response ->
-"       \         proompter#callback#channel#StreamToBuffer({
-"       \           'channel_response': channel_response,
-"       \           'api_response': api_response,
-"       \           'response_tag': 'RESPONSE',
-"       \           'out_bufnr': v:null,
-"       \         })
+"       \       'callback': { api_response, configurations, state ->
+"       \         proompter#callback#channel#StreamToBuffer(
+"       \           api_response,
+"       \           configurations,
+"       \           state,
+"       \           v:null,
+"       \         )
 "       \       },
 "       \     },
 "       \   },
 "       \ }
 " ```
-function! proompter#callback#channel#StreamToBuffer(kwargs) abort
-  let l:http_response = proompter#parse#HTTPResponse(a:kwargs.api_response)
-  if !len(l:http_response.body)
-    " echoe 'No body in HTTP Response' l:http_response
+function! proompter#callback#channel#StreamToBuffer(api_response, configurations, state, out_bufnr, ...) abort
+  if a:out_bufnr == v:null || type(a:out_bufnr) == v:t_string
+    let l:out_bufnr = proompter#lib#GetOrMakeProomptBuffer(a:out_bufnr)
+  endif
+
+  ""
+  " We may use the "role" == "pending" check until the end of this function
+  let l:entry_fallback = {
+        \   'model': v:null,
+        \   'created_at': v:null,
+        \   'done': v:null,
+        \   'done_reason': v:null,
+        \   'message': {
+        \     'role': 'pending',
+        \     'content': '',
+        \     'images': v:null,
+        \   },
+        \ }
+
+  let l:http_response = proompter#parse#HTTPResponse(a:api_response)
+  if len(l:http_response.body) <= 0
+    " echoe 'Skipping HTTP response with empty body'
     return
   endif
 
-  let l:out_bufnr = get(a:kwargs, 'out_bufnr', v:null)
-  if l:out_bufnr == v:null || type(l:out_bufnr) == type('')
-    let l:out_bufnr = proompter#lib#GetOrMakeProomptBuffer(l:out_bufnr)
+  let l:entry = get(a:state.messages, -1, l:entry_fallback)
+  if l:entry.message.role != 'assistant' || a:configurations.select.model_name != l:http_response.body[0].model
+    call add(a:state.messages, l:entry_fallback)
   endif
+  let l:entry = a:state.messages[-1]
+  let l:entry.model = l:http_response.body[0].model
 
-  let l:json_responses = join(map(l:http_response.body, {_index, value -> value.response}), '')
-
-  ""
-  " We may use the "type" == "new" check until the end of this function
-  let l:history_entry = get(
-        \   g:proompter_state.history,
-        \   -1,
-        \   {
-        \     'type': 'new',
-        \     'value': l:json_responses,
-        \   }
-        \ )
-
-  if l:history_entry.type == 'response'
-    let l:history_entry.value .= l:json_responses
-  else
-    call add(g:proompter_state.history, { 'type': 'new', 'value': l:json_responses })
-  endif
-  let l:history_entry = g:proompter_state.history[-1]
-
-  if l:history_entry.type == 'new'
+  if l:entry.message.role == 'pending'
     let l:new_buffer_lines = [
-          \   '## Response ' . strftime("%Y-%m-%d %H:%M:%S") . ' `' . g:proompter.select.model_name . '`',
+          \   '## Response ' . strftime("%Y-%m-%d %H:%M:%S") . ' `' . a:configurations.select.model_name . '`',
           \   '',
           \   '',
           \ ]
@@ -183,10 +235,32 @@ function! proompter#callback#channel#StreamToBuffer(kwargs) abort
     call appendbufline(l:out_bufnr, '$', l:new_buffer_lines)
   endif
 
-  " TODO: maybe find a better way
-  call setbufline(l:out_bufnr, '$', split(getbufline(l:out_bufnr, '$')[0] . l:json_responses, '\n', 1))
+  for l:http_body_data in l:http_response.body
+    let l:api_data = proompter#parse#MessageOrResponseFromAPI(l:http_body_data)
 
-  let l:history_entry.type = 'response'
+    let l:entry.message.content .= l:api_data.message.content
+
+    let l:buffer_last_line = get(getbufline(l:out_bufnr, '$'), 0, '')
+    let l:buffer_last_line .= l:api_data.message.content
+    call setbufline(l:out_bufnr, '$', split(l:buffer_last_line, '\n', 1))
+
+    if l:api_data.message.images != v:null
+      if type(l:entry.message.images) != v:t_list
+        let l:entry.message.images = []
+      endif
+
+      call extend(l:entry.message.images, l:api_data.message.images)
+    endif
+  endfor
+
+  if l:http_response.body[-1].done
+    let l:entry.created_at = l:http_response.body[-1].created_at
+    let l:entry.model = l:http_response.body[-1].model
+    let l:entry.done = l:http_response.body[-1].done
+    let l:entry.done_reason = get(l:http_response.body[-1], 'done_reason', v:null)
+  endif
+
+  let l:entry.message.role = 'assistant'
 endfunction
 
 " vim: expandtab

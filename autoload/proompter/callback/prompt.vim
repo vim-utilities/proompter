@@ -5,7 +5,7 @@
 
 
 ""
-" When there is no history, or history would cause `prompt_callbacks.post` to
+" When there is no messages, or messages would cause `prompt_callbacks.post` to
 " drop this prefix, return start of prompt with content similar to following;
 "
 "   You an expert with javascript and delight in solving problems succinctly!
@@ -18,6 +18,8 @@
 "
 " Parameter: {dictionary} kwargs - Has the following key/value pares defined
 "
+"   - {define__configurations} configurations - Dictionary
+"   - {define__proompter_state} state - Dictionary
 "   - {number} context_size - Max prompt/response results that are re-shared
 "   - {string} filetype - What file type is operated on
 "   - {dictionary} history_tags - With `start` and `stop` values defined to
@@ -35,8 +37,10 @@
 "       \   'models': {
 "       \     'codellama': {
 "       \       'prompt_callbacks': {
-"       \         'pre': { ->
-"       \           proompter#callback#prompt#Pre({
+"       \         'pre': { configurations, state ->
+"       \           proompter#callback#prompt#Generate_Pre({
+"       \             'configurations': configurations,
+"       \             'state': state,
 "       \             'context_size': 5,
 "       \             'filetype': 'javascript',
 "       \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
@@ -48,18 +52,16 @@
 "       \   },
 "       \ }
 " ```
-function! proompter#callback#prompt#Pre(kwargs) abort
+function! proompter#callback#prompt#Generate_Pre(kwargs) abort
   let l:lines = []
 
-  " TODO: fix following checks?
-  let l:context_size = get(a:kwargs, 'context_size', 0)
-  if len(g:proompter_state.history) >= l:context_size
+  if a:kwargs.context_size >= len(a:kwargs.state.messages)
     return join(l:lines, "\n")
   endif
 
   let l:starter = 'You are an expert'
   let l:filetype = get(a:kwargs, 'filetype')
-  if type(l:filetype) == type('') && len(a:kwargs.filetype)
+  if type(l:filetype) == v:t_string && len(a:kwargs.filetype)
     let l:starter .= ' with ' . l:filetype
   endif
 
@@ -123,10 +125,12 @@ endfunction
 "       \   'models': {
 "       \     'codellama': {
 "       \       'prompt_callbacks': {
-"       \         'input': { value ->
-"       \           proompter#callback#prompt#Input({
+"       \         'input': { value, configurations, state ->
+"       \           proompter#callback#prompt#Generate_Input({
 "       \             'value': value,
-"       \             'input_tag': 'PROOMPT',
+"       \             'configurations': configurations,
+"       \             'state': state,
+"       \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
 "       \           })
 "       \         },
 "       \       },
@@ -140,7 +144,7 @@ endfunction
 " ```vim
 " echo substitute(_input_, '</\?PROOMPT>', '', 'g')
 " ```
-function! proompter#callback#prompt#Input(kwargs) abort
+function! proompter#callback#prompt#Generate_Input(kwargs) abort
   let l:lines = []
 
   let l:input_tags = get(a:kwargs, 'input_tags', {})
@@ -167,7 +171,7 @@ endfunction
 "
 "   - {dictionary} data - with `pre`, `prompt`, and `input` keys pointing to
 "     string values.
-"   - {number} context_size - Max results from `g:proompter_state.history` to
+"   - {number} context_size - Max results from `a:kwargs.state.messages` to
 "     provide LLM context.
 "   - {dictionary} out_bufnr - buffer number used for output, if `v:null` one
 "     will be created automatically via `proompter#lib#GetOrMakeProomptBuffer`
@@ -176,19 +180,23 @@ endfunction
 "   - {dictionary} history_tags - With `start` and `stop` values defined to
 "     help clue-in LLM of past context.
 "
-" Warning: expects `g:proompter_state.history` to be dictionary list _shaped_
+" Warning: expects `a:kwargs.state.messages` to be dictionary list _shaped_
 " similar to;
 "
 " ```
 " [
 "   {
-"     "type": "prompt",
-"     "value": "... Maybe a question about a technical topic...",
+"     "message": {
+"       "role": "user",
+"       "content": "... Maybe a question about a technical topic...",
+"     },
 "   },
 "   {
-"     "type": "response",
-"     "value": "Are your finger-tips talking to you too?",
-"   }
+"     "message": {
+"       "role": "assistant",
+"       "content": "Are your finger-tips talking to you too?",
+"     },
+"   },
 " ]
 " ```
 "
@@ -202,9 +210,11 @@ endfunction
 "       \   'models': {
 "       \     'codellama': {
 "       \       'prompt_callbacks': {
-"       \         'post': { prompt_callbacks_data ->
-"       \           proompter#callback#prompt#Post({
+"       \         'post': { prompt_callbacks_data, configurations, state ->
+"       \           proompter#callback#prompt#Generate_Post({
 "       \             'data': prompt_callbacks_data,
+"       \             'configurations': configurations,
+"       \             'state': state,
 "       \             'context_size': 5,
 "       \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
 "       \             'out_bufnr': v:null,
@@ -215,9 +225,9 @@ endfunction
 "       \   },
 "       \ }
 " ```
-function! proompter#callback#prompt#Post(kwargs) abort
+function! proompter#callback#prompt#Generate_Post(kwargs) abort
   let l:context_size = get(a:kwargs, 'context_size', 0)
-  let l:history_lines = g:proompter_state.history[max([len(g:proompter_state.history) - l:context_size, 0]):]
+  let l:history_lines = a:kwargs.state.messages[max([len(a:kwargs.state.messages) - l:context_size, 0]):]
 
   let l:lines = []
 
@@ -235,12 +245,12 @@ function! proompter#callback#prompt#Post(kwargs) abort
       let l:lines += [
             \   l:history_tag__start,
             \   map(l:history_lines, { _index, history_data ->
-            \     substitute(history_data.value, l:pattern, '', 'g')
+            \     substitute(history_data.message.content, l:pattern, '', 'g')
             \   }),
             \   l:history_tag__stop,
             \ ]
     else
-      let l:lines += map(l:history_lines, { _index, history_data -> history_data.value })
+      let l:lines += map(l:history_lines, { _index, history_data -> history_data.message.content })
     endif
   endif
 
@@ -253,7 +263,7 @@ function! proompter#callback#prompt#Post(kwargs) abort
   endif
 
   let l:out_bufnr = get(a:kwargs, 'out_bufnr', v:null)
-  if l:out_bufnr == v:null || type(l:out_bufnr) == type('')
+  if l:out_bufnr == v:null || type(l:out_bufnr) == v:t_string
     let l:out_bufnr = proompter#lib#GetOrMakeProomptBuffer(l:out_bufnr)
   endif
 

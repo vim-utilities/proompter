@@ -16,7 +16,7 @@ function! proompter#lib#GetOrMakeProomptBuffer(buffer_name) abort
   let l:old_bufnr = bufnr('%')
 
   let l:new_buffer_name = 'proompt-log.md'
-  if type(a:buffer_name) == type('')
+  if type(a:buffer_name) == v:t_string
     let l:new_buffer_name = a:buffer_name
   endif
 

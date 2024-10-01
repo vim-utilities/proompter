@@ -141,11 +141,11 @@ endfunction
 "
 " - https://github.com/ollama/ollama/blob/main/docs/api.md#chat-request-with-history
 "
-" TODO: detect API endpoint from `g:proompter.api.url
-" `
-" - `/generate` returns {"response": "{string} }
+" Recognized API endpoint from `g:proompter.api.url`;
 "
-" - `/chat` returns either;
+" - `/api/generate` returns {"response": "{string} }
+"
+" - `/api/chat` returns either;
 "   - {"message": {"role":"assistant"}, {"content":"{string}"}, {"images":null}}
 "   - {"message": {"role":"assistant"}, {"content":"{string}"}, {"images":["Base64"]}}
 function! proompter#parse#MessageOrResponseFromAPI(data) abort

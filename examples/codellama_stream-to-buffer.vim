@@ -14,36 +14,42 @@ let g:proompter = {
       \     'address': '127.0.0.1:11435',
       \     'options': {
       \       'mode': 'raw',
-      \       'callback': { channel_response, api_response ->
-      \         proompter#callback#channel#StreamToBuffer({
-      \           'channel_response': channel_response,
-      \           'api_response': api_response,
-      \           'response_tag': 'RESPONSE',
-      \           'out_bufnr': v:null,
-      \         })
+      \       'callback': { _channel_response, api_response ->
+      \         proompter#callback#channel#StreamToBuffer(
+      \           api_response,
+      \           g:proompter,
+      \           g:proompter_state,
+      \           v:null,
+      \         )
       \       },
       \     },
       \   },
       \   'models': {
       \     'codellama': {
       \       'prompt_callbacks': {
-      \         'pre': { ->
-      \           proompter#callback#prompt#Pre({
+      \         'pre': { configurations, state ->
+      \           proompter#callback#prompt#Generate_Pre({
+      \             'configurations': configurations,
+      \             'state': state,
       \             'context_size': 5,
       \             'filetype': 'javascript',
       \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
       \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
       \           })
       \         },
-      \         'input': { value ->
-      \           proompter#callback#prompt#Input({
+      \         'input': { value, configurations, state ->
+      \           proompter#callback#prompt#Generate_Input({
       \             'value': value,
-      \             'input_tag': 'PROOMPT',
+      \             'configurations': configurations,
+      \             'state': state,
+      \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
       \           })
       \         },
-      \         'post': { prompt_callbacks_data ->
-      \           proompter#callback#prompt#Post({
+      \         'post': { prompt_callbacks_data, configurations, state ->
+      \           proompter#callback#prompt#Generate_Post({
       \             'data': prompt_callbacks_data,
+      \             'configurations': configurations,
+      \             'state': state,
       \             'context_size': 5,
       \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
       \             'out_bufnr': v:null,

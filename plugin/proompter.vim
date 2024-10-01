@@ -85,7 +85,7 @@ let s:defaults = {
 " Type: define__proompter_state
 let g:proompter_state = {
       \  'channel': v:null,
-      \  'history': [],
+      \  'messages': [],
       \ }
 
 ""
@@ -120,31 +120,27 @@ let g:proompter_state = {
 ""
 " Type Definition: {dictionary} define__proompter_state
 "
-" Property: {define__proompter_state__response[]} history - List of parsed
-"           input/output-s
 " Property: {dictionary} channel - See: {docs} :help ch_info()
+" Property: {define__proompter_state__message[]} history - List of parsed
+"           input/output-s
 
 
 ""
-" Type Definition: {dictionary} define__proompter_state__response
+" Type Definition: {dictionary} define__proompter_state__message
 "
-" Property: {string} headers - New-line (`\r\n`) separated list of HTTP response headers
-" Property: {string} body - Serialized JSON data
-" Property: {string} text - JSON parsed value from `define__ollama_http_response__200.response`
+" See: https://github.com/ollama/ollama/blob/main/docs/api.md
 "
-" Examples:
+" Property: {dictionary} `message` Data from API or user
+" Property: {string} `message`.role Maybe "assistant" or "user"
+" Property: {string} `message.content` Data sent to/from "assistant" or "user"
+" Property: {list} `message.images` Either `v:null` or list of Base64 strings
 "
-" - Print headers of last response as list
-"
-" ```vim
-" :echo split(copy(g:proompter_state.responses[-1].headers), "\r\n")
-" ```
-"
-" - Print all `text` values from `g:proompter_state.responses` list and join into string
-"
-" ```vim
-" :echo join(map(deepcopy(g:proompter_state.responses), { _k, v -> v.text }), '')
-" ```
+" If `message.role` == "assistant" following properties _should_ be available
+" Property: {string} `model` Name of model that generated `message.content`
+" Property: {string} `created_at` Last date/time-stamp of generated responses
+" Property: {boolean} `done` Set to `v:false` or `v:true`
+" Property: {string} `done_reason` When `done` == `v:true` may be "stop",
+"           "load", or "unload"
 
 
 ""
@@ -171,7 +167,7 @@ function! s:DictMerge(defaults, ...) abort
 
   for l:override in a:000
     for [l:key, l:Value] in items(l:override)
-      if type(l:Value) == type({}) && type(get(l:new, l:key)) == type({})
+      if type(l:Value) == v:t_dict && type(get(l:new, l:key)) == v:t_dict
         let l:new[l:key] = s:DictMerge(l:new[l:key], l:Value)
       else
         let l:new[l:key] = l:Value
@@ -188,11 +184,11 @@ endfunction
 " See: {docs} :help readfile()
 " See: {docs} :help json_decode()
 if exists('g:proompter')
-  if type(g:proompter) == type('') && fnamemodify(g:proompter, ':e') == 'json'
+  if type(g:proompter) == v:t_string && fnamemodify(g:proompter, ':e') == 'json'
     let g:proompter = json_decode(join(readfile(g:proompter), ''))
   endif
 
-  if type(g:proompter) == type({})
+  if type(g:proompter) == v:t_dict
     let g:proompter = s:DictMerge(s:defaults, g:proompter)
   else
     let g:proompter = deepcopy(s:defaults)

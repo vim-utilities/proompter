@@ -51,9 +51,8 @@ command! -range -nargs=? ProompterSelection <line1>,<line2>call s:DefaultSelecti
 command! -nargs=? ProompterSend call s:DefaultSelectionArgs(function('proompter#SendPrompt'), { 'input': '', 'configuration': g:proompter }, <f-args>)
 
 ""
-" Quality of life commands to clear `g:proompter_state`
-command! ProompterClearHistory let g:proompter_state.history = []
-command! ProompterClearResponses let g:proompter_state.responses = []
+" Quality of life commands to clear `g:proompter_state.messages`
+command! ProompterClearMessages let g:proompter_state.messages = []
 
 ""
 " Quality of life commands to load/unload currently configured model
