@@ -119,4 +119,49 @@ function! proompter#parse#HTTPResponse(data) abort
   return { 'headers': l:headers, 'body': l:body }
 endfunction
 
+""
+" Normalize response from Ollama API endpoints
+"
+" Returns: dictionary with shape similar to
+"
+" ```
+" {
+"   "model": "llama3.2",
+"   "created_at": "2023-08-04T08:52:19.385406455-07:00",
+"   "message": {
+"     "role": "assistant",
+"     "content": "The",
+"     "images": v:null
+"   },
+"   "done": v:false
+" }
+" ```
+"
+" Attribution:
+"
+" - https://github.com/ollama/ollama/blob/main/docs/api.md#chat-request-with-history
+"
+" TODO: detect API endpoint from `g:proompter.api.url
+" `
+" - `/generate` returns {"response": "{string} }
+"
+" - `/chat` returns either;
+"   - {"message": {"role":"assistant"}, {"content":"{string}"}, {"images":null}}
+"   - {"message": {"role":"assistant"}, {"content":"{string}"}, {"images":["Base64"]}}
+function! proompter#parse#MessageOrResponseFromAPI(data) abort
+  let l:result = {
+        \   'model': a:data.model,
+        \   'created_at': a:data.created_at,
+        \   'message': {
+        \     'role': 'assistant',
+        \     'content': get(a:data, 'response', get(get(a:data, 'message', {}), 'content', '')),
+        \     'images': get(a:data, 'images', v:null),
+        \   },
+        \   'done': a:data.done,
+        \   'done_reason': get(a:data, 'done_reason', v:null),
+        \ }
+
+  return l:result
+endfunction
+
 " vim: expandtab
