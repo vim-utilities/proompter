@@ -20,7 +20,86 @@
 " Note: if `g:proompter.models['model_name'].prompt_callbacks` is defined then
 "       resulting prompt sent to LLM is built by `prompt_callbacks.post`
 "       callback if available, else the following are appended in order;
-"       `pre`, `prompt`, and `input`
+"       `preamble`, `prompt`, and `input`
+"
+"       else `g:proompter.models['model_name'].prompt_callbacks` is undefined
+"       `g:proompter.models['model_name'].data.prompt` is prepended to `value`
+"       before being sent to LLM at `g:proompter.api.url` via channel proxy
+"
+" Dev: without the slicing output of `shellescape` the append/prepend-ed
+"      single-quotes which ain't gonna be good within a larger JSON object
+function! proompter#SendPromptToChat(value, configurations = g:proompter, state = g:proompter_state) abort
+  if len(a:value) == 0
+    throw 'Proompter: empty input value'
+  endif
+
+  let l:model_name = a:configurations.select.model_name
+  let l:model = deepcopy(a:configurations.models[l:model_name])
+  let l:model.data.model = l:model_name
+
+  let l:messages = get(l:model.data, 'messages', [])
+  if type(get(l:model, 'prompt_callbacks')) == v:t_dict
+    let l:callbacks_results = {
+          \   'preamble': [],
+          \   'context': [],
+          \   'input': [],
+          \ }
+
+    if type(get(l:model.prompt_callbacks, 'preamble')) == v:t_func
+      call extend(l:callbacks_results.preamble, l:model.prompt_callbacks.preamble(a:configurations, a:state))
+    endif
+
+    if type(get(l:model.prompt_callbacks, 'context')) == v:t_func
+      call extend(l:callbacks_results.context, l:model.context_callbacks.context(a:configurations, a:state))
+    endif
+
+    if type(get(l:model.prompt_callbacks, 'input')) == v:t_func
+      call extend(l:callbacks_results.input, l:model.prompt_callbacks.input(a:value, a:configurations, a:state))
+    endif
+
+    if type(get(l:model.prompt_callbacks, 'post')) == v:t_func
+      call extend(l:messages, l:model.prompt_callbacks.post(l:callbacks_results, a:configurations, a:state))
+    else
+      call extend(l:messages, l:callbacks_results.preamble)
+      call extend(l:messages, l:callbacks_results.context)
+      call extend(l:messages, l:callbacks_results.input)
+    endif
+  else
+    call add(l:messages, { 'role': 'user', 'content': a:value })
+  endif
+  let l:model.data.messages = l:messages
+
+  call add(a:state.messages, {
+        \   'message': {
+        \     'role': 'user',
+        \     'content':  a:value
+        \   },
+        \ })
+
+  let l:post_payload = proompter#format#HTTPPost(l:model.data, a:configurations)
+
+  let l:channel = proompter#channel#GetOrSetOpen(a:configurations, a:state)
+
+  call ch_sendraw(l:channel, l:post_payload)
+endfunction
+
+""
+" Parameter: {string} value - What will eventually be sent to LLM
+" Parameter: {define__configurations} configurations
+" Parameter: {define__proompter_state} state - Dictionary
+"
+" Example:
+"
+" ```vim
+" :call proompter#SendPromptToGenerate('Tell me in one sentence why Bash is the best scripting language')
+" ```
+"
+" Throw: when `value` is empty or zero length
+"
+" Note: if `g:proompter.models['model_name'].prompt_callbacks` is defined then
+"       resulting prompt sent to LLM is built by `prompt_callbacks.post`
+"       callback if available, else the following are appended in order;
+"       `preamble`, `prompt`, and `input`
 "
 "       else `g:proompter.models['model_name'].prompt_callbacks` is undefined
 "       `g:proompter.models['model_name'].data.prompt` is prepended to `value`
