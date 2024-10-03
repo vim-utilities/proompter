@@ -58,4 +58,38 @@ function! proompter#lib#ConcatenateWithLastLineOfBuffer(bufnr, content) abort
   call setbufline(a:bufnr, '$', split(l:buffer_last_line, '\n', 1))
 endfunction
 
+""
+"
+function! proompter#lib#MessagesJSONRead(file_path, configurations = g:proompter, state = g:proompter_state) abort
+  let l:file_path = expand(a:file_path)
+
+  if !filereadable(l:file_path)
+    throw 'Cannot read file at -> ' . a:file_path
+  endif
+
+  return json_decode(readfile(l:file_path))
+endfunction
+
+""
+"
+function! proompter#lib#MessagesJSONWrite(file_path, configurations = g:proompter, state = g:proompter_state) abort
+  let l:file_path = expand(a:file_path)
+
+  let l:messages = []
+  if filereadable(l:file_path)
+    if !filewritable(l:file_path)
+      throw 'File exists but cannot be written to at -> ' . a:file_path
+    endif
+
+    let l:messages = json_decode(readfile(l:file_path))
+  endif
+  let l:messages = extend(l:messages, deepcopy(a:state.messages))
+
+  if !len(l:messages)
+    throw 'No messages to write'
+  endif
+
+  writefile(json_encode(l:messages), a:file_path, 's')
+endfunction
+
 " vim: expandtab

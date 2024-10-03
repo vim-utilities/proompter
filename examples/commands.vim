@@ -52,7 +52,15 @@ command! -nargs=? ProompterSend call s:DefaultSelectionArgs(function('proompter#
 
 ""
 " Quality of life commands to clear `g:proompter_state.messages`
-command! ProompterClearMessages let g:proompter_state.messages = []
+command! ProompterMessagesClear let g:proompter_state.messages = []
+
+""
+" Save `g:proompter_state.messages` to file path
+command! -nargs=1 -complete=file ProompterMessagesSave call proompter#lib#MessagesJSONWrite(<f-args>, g:proompter, g:proompter_state)
+
+""
+" Load and extend `g:proompter_state.messages` from file path
+command! -nargs=1 -complete=file ProompterMessagesLoad call extend(g:proompter_state.messages, proompter#lib#MessagesJSONRead(<f-args>, g:proompter, g:proompter_state))
 
 ""
 " Quality of life commands to load/unload currently configured model
