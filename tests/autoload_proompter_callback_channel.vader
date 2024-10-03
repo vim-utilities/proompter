@@ -221,7 +221,7 @@ Execute (proompter#callback#channel#StreamToBuffer -- Handles JSON stream with o
         \   api_response,
         \   configurations,
         \   state,
-        \   'vader_proompter-logs.md',
+        \   '[Vader-workbench]',
         \ )
 
   AssertEqual state, expected_state

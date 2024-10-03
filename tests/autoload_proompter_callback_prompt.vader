@@ -103,7 +103,9 @@ Execute (proompter#callback#prompt#Generate_Input -- Produces output without mut
         \   'value': 'Tell me Vim is the best',
         \   'configurations': configurations,
         \   'state': state,
-        \   'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
+        \   'context_size': 0,
+        \   'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
+        \   'out_bufnr': '[Vader-workbench]',
         \ })
 
   Assert len(result) > 0, 'Expected a lengthy result'
@@ -145,7 +147,7 @@ Execute (proompter#callback#prompt#Generate_Post -- Is okay with empty data valu
         \   'state': state,
         \   'context_size': 0,
         \   'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
-        \   'out_bufnr': 'vader_proompter-logs.md',
+        \   'out_bufnr': '[Vader-workbench]',
         \ })
 
   AssertEqual state, expected_state, 'Unexpected mutation of state'
