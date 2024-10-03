@@ -21,7 +21,6 @@
 " Parameter: {dictionary} kwargs - Has the following key/value pares defined
 "
 "   - {define__configurations} configurations - Dictionary
-"   - {define__proompter_state} state - Dictionary
 "   - {number} context_size - Max prompt/response results that are re-shared
 "   - {string} filetype - What file type is operated on
 "   - {dictionary} history_tags - With `start` and `stop` values defined to
@@ -41,10 +40,9 @@
 "       \   'models': {
 "       \     'codellama': {
 "       \       'prompt_callbacks': {
-"       \         'preamble': { configurations, state ->
+"       \         'preamble': { configurations, _state ->
 "       \           proompter#callback#prompt#Generate_Preamble({
 "       \             'configurations': configurations,
-"       \             'state': state,
 "       \             'filetype': 'javascript',
 "       \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
 "       \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
@@ -261,11 +259,10 @@ endfunction
 "       \   'models': {
 "       \     'codellama': {
 "       \       'prompt_callbacks': {
-"       \         'input': { value, configurations, state ->
+"       \         'input': { value, configurations, _state ->
 "       \           proompter#callback#prompt#Generate_Input({
 "       \             'value': value,
 "       \             'configurations': configurations,
-"       \             'state': state,
 "       \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
 "       \           })
 "       \         },
@@ -311,8 +308,6 @@ endfunction
 "     will be created automatically via `proompter#lib#GetOrMakeProomptBuffer`
 "     with the name "proompt-log.md", or you man set a {string} value to
 "     customize the buffer name.
-"   - {dictionary} history_tags - With `start` and `stop` values defined to
-"     help clue-in LLM of past context.
 "
 " Example: configuration snippet
 "
@@ -324,12 +319,10 @@ endfunction
 "       \   'models': {
 "       \     'codellama': {
 "       \       'prompt_callbacks': {
-"       \         'post': { prompt_callbacks_data, configurations, state ->
+"       \         'post': { prompt_callbacks_data, configurations, _state ->
 "       \           proompter#callback#prompt#Generate_Post({
 "       \             'data': prompt_callbacks_data,
 "       \             'configurations': configurations,
-"       \             'state': state,
-"       \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
 "       \             'out_bufnr': v:null,
 "       \           })
 "       \         },
