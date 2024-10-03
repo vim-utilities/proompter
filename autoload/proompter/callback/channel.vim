@@ -240,9 +240,7 @@ function! proompter#callback#channel#StreamToBuffer(api_response, configurations
 
     let l:entry.message.content .= l:api_data.message.content
 
-    let l:buffer_last_line = get(getbufline(l:out_bufnr, '$'), 0, '')
-    let l:buffer_last_line .= l:api_data.message.content
-    call setbufline(l:out_bufnr, '$', split(l:buffer_last_line, '\n', 1))
+    call proompter#lib#ConcatenateWithLastLineOfBuffer(l:out_bufnr, l:api_data.message.content)
 
     if l:api_data.message.images != v:null
       if type(l:entry.message.images) != v:t_list
@@ -258,6 +256,7 @@ function! proompter#callback#channel#StreamToBuffer(api_response, configurations
     let l:entry.model = l:http_response.body[-1].model
     let l:entry.done = l:http_response.body[-1].done
     let l:entry.done_reason = get(l:http_response.body[-1], 'done_reason', v:null)
+    call proompter#lib#ConcatenateWithLastLineOfBuffer(l:out_bufnr, "\n\n")
   endif
 
   let l:entry.message.role = 'assistant'

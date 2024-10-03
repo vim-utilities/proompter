@@ -284,7 +284,12 @@ function! proompter#callback#prompt#Generate_Post(kwargs) abort
     call appendbufline(l:out_bufnr, '$', [''] + l:prompt_heading_lines)
     call appendbufline(l:out_bufnr, '$', split(a:kwargs.data.input, "\n"))
   endif
-  call appendbufline(l:out_bufnr, '$', ['', ''])
+  call extend(l:prompt_heading_lines, ['', ''])
+
+  call proompter#lib#ConcatenateWithLastLineOfBuffer(
+        \   l:out_bufnr,
+        \   join(l:prompt_heading_lines, "\n")
+        \ )
 
   return join(l:lines, "\n")
 endfunction

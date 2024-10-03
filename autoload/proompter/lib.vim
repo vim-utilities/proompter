@@ -41,4 +41,21 @@ function! proompter#lib#GetOrMakeProomptBuffer(buffer_name) abort
   return l:new_bufnr
 endfunction
 
+""
+" Unlike `appendbufline` this first attempts to append to preexisting line,
+" and only if new `content` contains a newline character (`\n`) will a newline
+" be inserted into target buffer.
+"
+" Parameter: {number} `bufnr` Any available buffer to write to
+" Parameter: {string} `content` Line, or lines separated by `\n`, to write
+"
+" See: {doc} :help getbufline()
+" See: {doc} :help split()
+" See: {doc} :help setbufline()
+function! proompter#lib#ConcatenateWithLastLineOfBuffer(bufnr, content) abort
+  let l:buffer_last_line = get(getbufline(a:bufnr, '$'), 0, '')
+  let l:buffer_last_line .= a:content
+  call setbufline(a:bufnr, '$', split(l:buffer_last_line, '\n', 1))
+endfunction
+
 " vim: expandtab
