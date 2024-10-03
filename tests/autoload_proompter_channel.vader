@@ -26,7 +26,7 @@ Execute (proompter#channel#CreateOptions -- Attaches default channel callback fo
 
   let channel_options = proompter#channel#CreateOptions(configurations, state)
 
-  Assert type(channel_options.callback), v:t_funct
+  Assert type(channel_options.callback), v:t_func
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
   AssertEqual state, expected_state, 'Unexpected mutation of state'
 
@@ -55,7 +55,7 @@ Execute (proompter#channel#CreateOptions -- Attaches default channel callback fo
 
   let channel_options = proompter#channel#CreateOptions(configurations, state)
 
-  Assert type(channel_options.callback), v:t_funct
+  Assert type(channel_options.callback), v:t_func
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
   AssertEqual state, expected_state, 'Unexpected mutation of state'
 
@@ -88,7 +88,7 @@ Execute (proompter#channel#CreateOptions -- Attaches custom channel callback whe
 
   let channel_options = proompter#channel#CreateOptions(configurations, state)
 
-  Assert type(channel_options.callback), v:t_funct
+  Assert type(channel_options.callback), v:t_func
   AssertEqual channel_options.callback, configurations.channel.options.callback
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
   AssertEqual state, expected_state, 'Unexpected mutation of state'
@@ -124,7 +124,7 @@ Execute (proompter#channel#GetOrSetOpen -- Creates a new channel when state is v
 
   let channel = proompter#channel#GetOrSetOpen(configurations, state)
 
-  " Assert type(channel_options.callback), v:t_funct
+  " Assert type(channel_options.callback), v:t_func
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
   AssertEqual state.messages, expected_state.messages, 'Unexpected mutation of state.messages'
   AssertEqual type(state.channel), v:t_channel
