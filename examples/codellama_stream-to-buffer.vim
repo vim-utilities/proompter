@@ -27,14 +27,24 @@ let g:proompter = {
       \   'models': {
       \     'codellama': {
       \       'prompt_callbacks': {
-      \         'pre': { configurations, state ->
-      \           proompter#callback#prompt#Generate_Pre({
+      \         'preamble': { configurations, state ->
+      \           proompter#callback#prompt#Generate_Preamble({
       \             'configurations': configurations,
       \             'state': state,
-      \             'context_size': 5,
       \             'filetype': 'javascript',
       \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
       \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
+      \             'response_tags': { 'start': '<RESPONSE>', 'end': '</RESPONSE>'},
+      \           })
+      \         },
+      \         'context': { configurations, state ->
+      \           proompter#callback#prompt#Generate_Context({
+      \             'configurations': configurations,
+      \             'state': state,
+      \             'context_size': 5,
+      \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
+      \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
+      \             'response_tags': { 'start': '<RESPONSE>', 'end': '</RESPONSE>'},
       \           })
       \         },
       \         'input': { value, configurations, state ->
@@ -64,3 +74,5 @@ let g:proompter = {
       \     },
       \   },
       \ }
+
+" vim: expandtab

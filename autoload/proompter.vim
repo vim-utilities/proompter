@@ -7,6 +7,7 @@
 ""
 " Parameter: {string} value - What will eventually be sent to LLM
 " Parameter: {define__configurations} configurations
+" Parameter: {define__proompter_state} state - Dictionary
 "
 " Example:
 "
@@ -36,21 +37,23 @@ function! proompter#SendPromptToGenerate(value, configurations = g:proompter, st
   let l:model = deepcopy(a:configurations.models[l:model_name])
   let l:model.data.model = l:model_name
 
+  let l:prompt = get(l:model.data, 'prompt', '')
+
   ""
   " Next is all about setting `l:model.data.prompt`
   if type(get(l:model, 'prompt_callbacks')) == v:t_dict
     let l:callbacks_results = {
-          \   'pre': '',
-          \   'prompt': '',
+          \   'preamble': '',
+          \   'context': '',
           \   'input': '',
           \ }
 
-    if type(get(l:model.prompt_callbacks, 'pre')) == v:t_func
-      let l:callbacks_results.pre .= l:model.prompt_callbacks.pre(a:configurations, a:state)
+    if type(get(l:model.prompt_callbacks, 'preamble')) == v:t_func
+      let l:callbacks_results.preamble .= l:model.prompt_callbacks.preamble(a:configurations, a:state)
     endif
 
-    if type(get(l:model.prompt_callbacks, 'prompt')) == v:t_func
-      let l:callbacks_results.prompt .= l:model.prompt_callbacks.prompt(l:model.data.prompt, a:configurations, a:state)
+    if type(get(l:model.prompt_callbacks, 'context')) == v:t_func
+      let l:callbacks_results.context .= l:model.context_callbacks.context(a:configurations, a:state)
     endif
 
     if type(get(l:model.prompt_callbacks, 'input')) == v:t_func
@@ -58,16 +61,16 @@ function! proompter#SendPromptToGenerate(value, configurations = g:proompter, st
     endif
 
     if type(get(l:model.prompt_callbacks, 'post')) == v:t_func
-      let l:model.data.prompt = l:model.prompt_callbacks.post(l:callbacks_results, a:configurations, a:state)
+      let l:prompt .= l:model.prompt_callbacks.post(l:callbacks_results, a:configurations, a:state)
     else
-      let l:prompt = l:callbacks_results.pre
-      let l:prompt .= l:callbacks_results.prompt
+      let l:prompt .= l:callbacks_results.preamble
+      let l:prompt .= l:callbacks_results.context
       let l:prompt .= l:callbacks_results.input
-      let l:model.data.prompt = l:prompt
     endif
   else
-    let l:model.data.prompt .= a:value
+    let l:prompt .= a:value
   endif
+  let l:model.data.prompt = l:prompt
 
   call add(a:state.messages, {
         \   'message': {
@@ -98,7 +101,7 @@ endfunction
 " Note: if `g:proompter.models['model_name'].prompt_callbacks` is defined then
 "       resulting prompt sent to LLM is built by `prompt_callbacks.post`
 "       callback if available, else the following are appended in order;
-"       `pre`, `prompt`, and `input`
+"       `preamble`, `prompt`, and `input`
 "
 "       else `g:proompter.models['model_name'].prompt_callbacks` is undefined
 "       `g:proompter.models['model_name'].data.prompt` is prepended to `value`
@@ -108,10 +111,12 @@ endfunction
 "      single-quotes which ain't gonna be good within a larger JSON object
 function! proompter#SendPrompt(value, configurations = g:proompter, state = g:proompter_state) abort
   let l:api_endpoint = split(a:configurations.api.url, '/')[-1]
-  if l:api_endpoint == 'generate'
+  if l:api_endpoint == 'chat'
+    return proompter#SendPromptToChat(a:value, a:configurations, a:state)
+  elseif l:api_endpoint == 'generate'
     return proompter#SendPromptToGenerate(a:value, a:configurations, a:state)
   endif
-  throw 'Nothing implemented for API endpoint in `a:configurations.api.url`'
+  throw 'Nothing implemented for API endpoint in  ->' . a:configurations.api.url
 endfunction
 
 ""

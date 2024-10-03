@@ -66,13 +66,11 @@ let s:defaults = {
       \   'models': {
       \     'codellama': {
       \       'prompt_callbacks': {
-      \         'pre': v:null,
-      \         'prompt': v:null,
+      \         'preamble': v:null,
       \         'input': v:null,
       \         'post': v:null,
       \       },
       \       'data': {
-      \         'prompt': '',
       \         'raw': v:false,
       \         'stream': v:true,
       \       },
@@ -103,12 +101,12 @@ let g:proompter_state = {
 " Property: {dictionary} models['model_name'].prompt_callbacks - All defined
 "           callbacks in dictionary must return a string if defined.  These
 "           callbacks _should_ have the same buffer scope as caller
-" Property: {function} models['model_name'].prompt_callbacks.pre - takes no
+" Property: {function} models['model_name'].prompt_callbacks.preamble - takes no
 "           arguments
 " Property: {function} models['model_name'].prompt_callbacks.input - takes
 "           string input from client
 " Property: {function} models['model_name'].prompt_callbacks.post - takes
-"           dictionary of strings with following keys; `pre`, `input`, and
+"           dictionary of strings with following keys; `preamble`, `input`, and
 "           `prompt` from `models['model_name'].data.prompt`
 "
 " Property: {dictionary} models['model_name'].data - 
