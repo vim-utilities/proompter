@@ -41,7 +41,7 @@
 "       \     'codellama': {
 "       \       'prompt_callbacks': {
 "       \         'preamble': { configurations, _state ->
-"       \           proompter#callback#prompt#Generate_Preamble({
+"       \           proompter#callback#prompt#generate#Preamble({
 "       \             'configurations': configurations,
 "       \             'filetype': 'javascript',
 "       \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
@@ -54,7 +54,7 @@
 "       \   },
 "       \ }
 " ```
-function! proompter#callback#prompt#Generate_Preamble(kwargs) abort
+function! proompter#callback#prompt#generate#Preamble(kwargs) abort
   let l:lines = []
 
   let l:starter = 'You are an expert'
@@ -169,7 +169,7 @@ endfunction
 "       \     'codellama': {
 "       \       'prompt_callbacks': {
 "       \         'context': { configurations, state ->
-"       \           proompter#callback#prompt#Generate_Context({
+"       \           proompter#callback#prompt#generate#Context({
 "       \             'configurations': configurations,
 "       \             'state': state,
 "       \             'context_size': 5,
@@ -189,7 +189,7 @@ endfunction
 " ```vim
 " echo substitute(_input_, '</\?PROOMPT>', '', 'g')
 " ```
-function! proompter#callback#prompt#Generate_Context(kwargs) abort
+function! proompter#callback#prompt#generate#Context(kwargs) abort
   let l:lines = []
 
   let l:context_size = get(a:kwargs, 'context_size', 0)
@@ -260,7 +260,7 @@ endfunction
 "       \     'codellama': {
 "       \       'prompt_callbacks': {
 "       \         'input': { value, configurations, _state ->
-"       \           proompter#callback#prompt#Generate_Input({
+"       \           proompter#callback#prompt#generate#Input({
 "       \             'value': value,
 "       \             'configurations': configurations,
 "       \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
@@ -277,7 +277,7 @@ endfunction
 " ```vim
 " echo substitute(_input_, '</\?PROOMPT>', '', 'g')
 " ```
-function! proompter#callback#prompt#Generate_Input(kwargs) abort
+function! proompter#callback#prompt#generate#Input(kwargs) abort
   let l:lines = []
 
   let l:input_tags = get(a:kwargs, 'input_tags', {})
@@ -320,7 +320,7 @@ endfunction
 "       \     'codellama': {
 "       \       'prompt_callbacks': {
 "       \         'post': { prompt_callbacks_data, configurations, _state ->
-"       \           proompter#callback#prompt#Generate_Post({
+"       \           proompter#callback#prompt#generate#Post({
 "       \             'data': prompt_callbacks_data,
 "       \             'configurations': configurations,
 "       \             'out_bufnr': v:null,
@@ -331,7 +331,7 @@ endfunction
 "       \   },
 "       \ }
 " ```
-function! proompter#callback#prompt#Generate_Post(kwargs) abort
+function! proompter#callback#prompt#generate#Post(kwargs) abort
   let l:lines = []
 
   if len(a:kwargs.data.preamble)

@@ -74,13 +74,13 @@ proompter#SendPromptToGenerate({string}, {dictionary}, {dictionary})  *proompter
                   - |proompter#channel#GetOrSetOpen| -- Prepares |channel-raw|
 
                 Example `g:proompter.models['model_name'].prompt_callbacks`;
-                  - |proompter#callback#prompt#Generate_Preamble| Prefixes
+                  - |proompter#callback#prompt#generate#Preamble| Prefixes
                     prompt with text to prime LLM behavior.
-                  - |proompter#callback#prompt#Generate_Context| Prefixes
+                  - |proompter#callback#prompt#generate#Context| Prefixes
                     prompt with history of last few prompt/response-s.
-                  - |proompter#callback#prompt#Generate_Input| Provides
+                  - |proompter#callback#prompt#generate#Input| Provides
                     additional formatting to prompt input.
-                  - |proompter#callback#prompt#Generate_Post| Concatenates
+                  - |proompter#callback#prompt#generate#Post| Concatenates
                     results of previous callbacks, where defined, and writes
                     to configured Vim buffer.
 
@@ -235,7 +235,7 @@ proompter#callback#channel#StreamToBuffer({dictionary})  *proompter#callback#cha
         \   },
         \ }
 <
-proompter#callback#prompt#Generate_Preamble({dictionary})  *proompter#callback#prompt#Generate_Preamble*
+proompter#callback#prompt#generate#Preamble({dictionary})  *proompter#callback#prompt#generate#Preamble*
                 When there is no message history, or history would cause
                 `prompt_callbacks.post` to drop this prefix, return start of
                 prompt with content similar to following; >
@@ -266,7 +266,7 @@ proompter#callback#prompt#Generate_Preamble({dictionary})  *proompter#callback#p
         \     'codellama': {
         \       'prompt_callbacks': {
         \         'preamble': { configurations, _state ->
-        \           proompter#callback#prompt#Generate_Preamble({
+        \           proompter#callback#prompt#generate#Preamble({
         \             'configurations': configurations,
         \             'filetype': 'javascript',
         \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
@@ -279,7 +279,7 @@ proompter#callback#prompt#Generate_Preamble({dictionary})  *proompter#callback#p
         \   },
         \ }
 <
-proompter#callback#prompt#Generate_Input({dictionary})  *proompter#callback#prompt#Generate_Input*
+proompter#callback#prompt#generate#Input({dictionary})  *proompter#callback#prompt#generate#Input*
                 Returns string formatted from `kwargs.input` and
                 `kwargs.input_tags` similar to >
   <PROOMPT>
@@ -301,7 +301,7 @@ proompter#callback#prompt#Generate_Input({dictionary})  *proompter#callback#prom
         \     'codellama': {
         \       'prompt_callbacks': {
         \         'input': { value, configurations, _state ->
-        \           proompter#callback#prompt#Generate_Input({
+        \           proompter#callback#prompt#generate#Input({
         \             'value': value,
         \             'configurations': configurations,
         \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
@@ -315,7 +315,7 @@ proompter#callback#prompt#Generate_Input({dictionary})  *proompter#callback#prom
                 Dev tip: remove tags surrounding later via something like >
   echo substitute(_input_, '</\?PROOMPT>', '', 'g')
 <
-proompter#callback#prompt#Generate_Post({dictionary})  *proompter#callback#prompt#Generate_Post*
+proompter#callback#prompt#generate#Post({dictionary})  *proompter#callback#prompt#generate#Post*
                 Merge together outputs from other prompt callback functions as
                 well as history of past input/response-s into a single string
                 to pass to LLM.
@@ -365,7 +365,7 @@ proompter#callback#prompt#Generate_Post({dictionary})  *proompter#callback#promp
         \     'codellama': {
         \       'prompt_callbacks': {
         \         'post': { prompt_callbacks_data, configurations, _state ->
-        \           proompter#callback#prompt#Generate_Post({
+        \           proompter#callback#prompt#generate#Post({
         \             'data': prompt_callbacks_data,
         \             'configurations': configurations,
         \             'out_bufnr': v:null,
@@ -425,7 +425,7 @@ proompter#lib#GetOrMakeProomptBuffer({string})  *proompter#lib#GetOrMakeProomptB
 
                 Note: this function is used internally by;
                   - |proompter#callback#channel#StreamToBuffer|
-                  - |proompter#callback#prompt#Generate_Post|
+                  - |proompter#callback#prompt#generate#Post|
                 ...  Nether of which are used by default.
 
 proompter#parse#HeadersFromHTTPResponse({string})  *proompter#parse#HeadersFromHTTPResponse*

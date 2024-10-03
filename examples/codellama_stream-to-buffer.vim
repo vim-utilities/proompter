@@ -28,7 +28,7 @@ let g:proompter = {
       \     'codellama': {
       \       'prompt_callbacks': {
       \         'preamble': { configurations, state ->
-      \           proompter#callback#prompt#Generate_Preamble({
+      \           proompter#callback#prompt#generate#Preamble({
       \             'configurations': configurations,
       \             'state': state,
       \             'filetype': 'javascript',
@@ -38,7 +38,7 @@ let g:proompter = {
       \           })
       \         },
       \         'context': { configurations, state ->
-      \           proompter#callback#prompt#Generate_Context({
+      \           proompter#callback#prompt#generate#Context({
       \             'configurations': configurations,
       \             'state': state,
       \             'context_size': 5,
@@ -48,7 +48,7 @@ let g:proompter = {
       \           })
       \         },
       \         'input': { value, configurations, state ->
-      \           proompter#callback#prompt#Generate_Input({
+      \           proompter#callback#prompt#generate#Input({
       \             'value': value,
       \             'configurations': configurations,
       \             'state': state,
@@ -56,7 +56,7 @@ let g:proompter = {
       \           })
       \         },
       \         'post': { prompt_callbacks_data, configurations, state ->
-      \           proompter#callback#prompt#Generate_Post({
+      \           proompter#callback#prompt#generate#Post({
       \             'data': prompt_callbacks_data,
       \             'configurations': configurations,
       \             'state': state,

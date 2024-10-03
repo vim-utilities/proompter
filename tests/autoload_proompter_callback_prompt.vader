@@ -1,7 +1,7 @@
 
 ""
 " {{{
-Execute (proompter#callback#prompt#Generate_Preamble -- Returns prompt prefix when state messages could cause loss of primer):
+Execute (proompter#callback#prompt#generate#Preamble -- Returns prompt prefix when state messages could cause loss of primer):
   let configurations = {}
 
   let state = {
@@ -23,7 +23,7 @@ Execute (proompter#callback#prompt#Generate_Preamble -- Returns prompt prefix wh
   let expected_configurations = deepcopy(configurations)
   let expected_state = deepcopy(state)
 
-  let result = proompter#callback#prompt#Generate_Preamble({
+  let result = proompter#callback#prompt#generate#Preamble({
         \   'configurations': configurations,
         \   'state': state,
         \   'context_size': 0,
@@ -40,7 +40,7 @@ Execute (proompter#callback#prompt#Generate_Preamble -- Returns prompt prefix wh
 
 ""
 " {{{
-Execute (proompter#callback#prompt#Generate_Input -- Produces output without mutation of shared state):
+Execute (proompter#callback#prompt#generate#Input -- Produces output without mutation of shared state):
   let configurations = {}
 
   let state = {
@@ -62,7 +62,7 @@ Execute (proompter#callback#prompt#Generate_Input -- Produces output without mut
   let expected_configurations = deepcopy(configurations)
   let expected_state = deepcopy(state)
 
-  let result = proompter#callback#prompt#Generate_Input({
+  let result = proompter#callback#prompt#generate#Input({
         \   'value': 'Tell me Vim is the best',
         \   'configurations': configurations,
         \   'state': state,
@@ -76,7 +76,7 @@ Execute (proompter#callback#prompt#Generate_Input -- Produces output without mut
 
 ""
 " {{{
-Execute (proompter#callback#prompt#Generate_Post -- Is okay with empty data values for; 'preamble', 'context', and 'input'):
+Execute (proompter#callback#prompt#generate#Post -- Is okay with empty data values for; 'preamble', 'context', and 'input'):
   let configurations = {}
 
   let state = {
@@ -98,7 +98,7 @@ Execute (proompter#callback#prompt#Generate_Post -- Is okay with empty data valu
   let expected_configurations = deepcopy(configurations)
   let expected_state = deepcopy(state)
 
-  call proompter#callback#prompt#Generate_Post({
+  call proompter#callback#prompt#generate#Post({
         \   'data': {
         \     'preamble': '',
         \     'context': '',
@@ -114,7 +114,7 @@ Execute (proompter#callback#prompt#Generate_Post -- Is okay with empty data valu
   AssertEqual state, expected_state, 'Unexpected mutation of state'
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
 
-Execute (proompter#callback#prompt#Generate_Post -- Is okay with data values defined for; 'preamble', 'context', and 'input'):
+Execute (proompter#callback#prompt#generate#Post -- Is okay with data values defined for; 'preamble', 'context', and 'input'):
   let configurations = {}
 
   let state = {
@@ -136,7 +136,7 @@ Execute (proompter#callback#prompt#Generate_Post -- Is okay with data values def
   let expected_configurations = deepcopy(configurations)
   let expected_state = deepcopy(state)
 
-  call proompter#callback#prompt#Generate_Post({
+  call proompter#callback#prompt#generate#Post({
         \   'data': {
         \     'preamble': 'Pretend you are a programming genius named Tom',
         \     'context': join([
