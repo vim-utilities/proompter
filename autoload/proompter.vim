@@ -204,6 +204,9 @@ endfunction
 " Parameter: {string} prefix_input Optional text prefixed to line range
 " Parameter: {define__configurations}
 "
+" Note: if `&filetype` is recognized member of `g:markdown_fenced_languages`
+" then selected text will be fenced with a name triple backticks.
+"
 " Example:
 "
 " ```vim
@@ -214,14 +217,28 @@ endfunction
 " :call proompter#SendHighlightedText('What does this line do?')
 " ```
 "
-" Throw: selection is zero length
-"
 " See: {docs} :help optional-function-argument
+" See: {docs} :help g:markdown_fenced_languages
 function! proompter#SendHighlightedText(prefix_input = '', configurations = g:proompter) abort range
   let l:selection = getline(a:firstline, a:lastline)
   if len(a:prefix_input)
     let l:selection = [a:prefix_input, ''] + l:selection
   endif
+
+  if len(&filetype) && exists('g:markdown_fenced_languages')
+    let l:index = indexof(g:markdown_fenced_languages, { _index, entry ->
+          \   match(entry, '\v<' . &filetype . '>')
+          \ })
+
+    if l:index >= 0
+      let l:selection = join([
+            \   '```' . &filetype,
+            \   l:selection,
+            \   '```',
+            \ ])
+    endif
+  endif
+
   let l:value = join(l:selection, "\n")
   call proompter#SendPrompt(l:value, a:configurations)
 endfunction
