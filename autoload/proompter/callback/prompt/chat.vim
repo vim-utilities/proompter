@@ -261,11 +261,11 @@ function! proompter#callback#prompt#chat#Post(kwargs) abort
         \   join(l:prompt_heading_lines, "\n")
         \ )
 
-  let l:keys = [ 'preamble', 'context', 'input' ]
   let l:messages = []
-  call foreach(l:keys, { _index, key ->
-        \   extend(l:messages, get(a:kwargs.data, key, []))
-        \ })
+  let l:keys = [ 'preamble', 'context', 'input' ]
+  for l:key in l:keys
+    call extend(l:messages, get(a:kwargs.data, l:key, []))
+  endfor
   return l:messages
 endfunction
 
