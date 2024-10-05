@@ -88,19 +88,48 @@ endfunction
 "   }
 " ]
 " ```
-"
-" Attribution:
-"
-" - `l:pattern` Mixtral 8x7B gurgitated `(".*\zs\{[^}]*\}\ze")@<!(\{[^}]*\})`
 function! proompter#parse#JSONLinesFromHTTPResponse(data) abort
-  let l:pattern = '\v(\r\n|\n|\s)*(".*\{[^}]*\}")@<!(\{[^}]*\})(\r\n|\n|\s)*'
   let l:dictionary_list = []
 
-  let [l:json_line, l:index_start, l:index_end] = matchstrpos(a:data, l:pattern, 0)
-  while l:index_start > -1 && l:index_end > -1
-    call add(l:dictionary_list, json_decode(l:json_line))
-    let [l:json_line, l:index_start, l:index_end] = matchstrpos(a:data, l:pattern, l:index_end)
+  let l:index = 0
+  let l:slice_start = 0
+  let l:inside_string = v:false
+  let l:escape_count = 0
+  let l:curly_depth = 0
+  while l:index < len(a:data)
+    let l:character = a:data[l:index]
+
+    if l:inside_string
+      if l:character == '\'
+        let l:escape_count += 1
+      elseif l:character == '"'
+        if l:escape_count % 2 == 0
+          let l:inside_string = v:false
+        else
+          let l:inside_string = v:true
+        endif
+        let l:escape_count = 0
+      endif
+    elseif l:character == '"'
+      let l:inside_string = v:true
+    elseif l:character == '{'
+      let l:curly_depth += 1
+    elseif l:character == '}'
+      let l:curly_depth -= 1
+      if l:curly_depth == 0
+        call add(l:dictionary_list, json_decode(a:data[l:slice_start:l:index]))
+
+        let l:slice_start = l:index + 1
+        let l:inside_string = v:false
+        let l:escape_count = 0
+      endif
+    elseif l:curly_depth == 0
+      let l:slice_start = l:index + 1
+    endif
+
+    let l:index += 1
   endwhile
+
   return l:dictionary_list
 endfunction
 
