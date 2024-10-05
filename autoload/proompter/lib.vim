@@ -92,4 +92,29 @@ function! proompter#lib#MessagesJSONWrite(file_path, configurations = g:proompte
   writefile(json_encode(l:messages), a:file_path, 's')
 endfunction
 
+""
+" Merged dictionaries without mutation
+" Parameter: {dict} defaults - Dictionary of default key/value pares
+" Parameter: {...dict[]} override - Up to 20 dictionaries to merge into return
+" Return: {dict}
+" See: {docs} :help type()
+" See: {link} https://vi.stackexchange.com/questions/20842/how-can-i-merge-two-dictionaries-in-vim
+function! proompter#lib#DictMerge(defaults, ...) abort
+  let l:new = deepcopy(a:defaults)
+  if a:0 == 0
+    return l:new
+  endif
+
+  for l:override in a:000
+    for [l:key, l:Value] in items(l:override)
+      if type(l:Value) == v:t_dict && type(get(l:new, l:key)) == v:t_dict
+        let l:new[l:key] = proompter#lib#DictMerge(l:new[l:key], l:Value)
+      else
+        let l:new[l:key] = l:Value
+      endif
+    endfor
+  endfor
+
+  return l:new
+endfunction
 " vim: expandtab

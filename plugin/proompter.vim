@@ -142,32 +142,6 @@ let g:proompter_state = {
 
 
 ""
-" Merged dictionaries without mutation
-" Parameter: {dict} defaults - Dictionary of default key/value pares
-" Parameter: {...dict[]} override - Up to 20 dictionaries to merge into return
-" Return: {dict}
-" See: {docs} :help type()
-" See: {link} https://vi.stackexchange.com/questions/20842/how-can-i-merge-two-dictionaries-in-vim
-function! s:DictMerge(defaults, ...) abort
-  let l:new = deepcopy(a:defaults)
-  if a:0 == 0
-    return l:new
-  endif
-
-  for l:override in a:000
-    for [l:key, l:Value] in items(l:override)
-      if type(l:Value) == v:t_dict && type(get(l:new, l:key)) == v:t_dict
-        let l:new[l:key] = s:DictMerge(l:new[l:key], l:Value)
-      else
-        let l:new[l:key] = l:Value
-      endif
-    endfor
-  endfor
-
-  return l:new
-endfunction
-
-""
 " Merge global customization with defaults to `g:proompter`
 " See: {docs} :help fnamemodify()
 " See: {docs} :help readfile()
@@ -178,7 +152,7 @@ if exists('g:proompter')
   endif
 
   if type(g:proompter) == v:t_dict
-    let g:proompter = s:DictMerge(s:defaults, g:proompter)
+    let g:proompter = proompter#lib#DictMerge(s:defaults, g:proompter)
   else
     let g:proompter = deepcopy(s:defaults)
   endif
