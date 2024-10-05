@@ -24,7 +24,7 @@ jobs:
           vim -Nu <(cat << VIMRC
           set rtp+=vader.vim
           set rtp+=.
-          VIMRC) -c 'silent Vader! test/**/*.vader' > /dev/null
+          VIMRC) -c 'silent Vader! tests/**/*.vader' > /dev/null
 
 
 ##
