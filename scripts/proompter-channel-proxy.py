@@ -181,7 +181,7 @@ if __name__ == '__main__':
 
         Tip, list SystemD unit paths via:
 
-            systemd-analyze unit-paths 
+            systemd-analyze unit-paths
             systemd-analyze --user unit-paths
 
         ...  For services not maintained by a package-manager using a path with "local" sub-directory may be wise.
@@ -202,7 +202,7 @@ if __name__ == '__main__':
             os.makedirs(install_systemd_directory)
             if args.verbose:
                 print(f"Created SystemD directory at: {install_systemd_directory}")
-        
+
         project_directory = os.path.dirname(os.path.dirname(__file__))
         template_systemd_path = os.path.join(project_directory, 'systemd', 'template_proompter-channel-proxy.service')
         if os.path.exists(template_systemd_path) is not True:
