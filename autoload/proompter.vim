@@ -92,12 +92,7 @@ function! proompter#SendPromptToChat(value, configurations = g:proompter, state 
   endif
   let l:model.data.messages = l:messages
 
-  call add(a:state.messages, {
-        \   'message': {
-        \     'role': 'user',
-        \     'content':  a:value
-        \   },
-        \ })
+  call add(a:state.messages, l:entry)
 
   let l:post_payload = proompter#format#HTTPPost(l:model.data, a:configurations)
 

@@ -164,25 +164,8 @@ endfunction
 "       \   },
 "       \ }
 " ```
-"
-" See: {docs} :help strftime()
-" See: {docs} :help reltime()
-"
-" TODO: preform feature detection for `strftime` and `reltime`
-function! proompter#callback#prompt#chat#Input(input, configurations, state, ...) abort
-  let l:entry = {
-        \   'model': a:configurations.select.model_name,
-        \   'created_at': strftime('%FT%T.') . reltime()[1] . 'Z',
-        \   'message': {
-        \     'role': 'user',
-        \     'content': a:input,
-        \     'image': v:null,
-        \   },
-        \ }
-
-  " call add(a:state.messages, l:entry)
-
-  return [{ 'role': l:entry.message.role, 'content': l:entry.message.content }]
+function! proompter#callback#prompt#chat#Input(input, _configurations, _state, ...) abort
+  return [{ 'role': 'user', 'content': a:input }]
 endfunction
 
 ""
