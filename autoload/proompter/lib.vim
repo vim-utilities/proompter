@@ -117,4 +117,5 @@ function! proompter#lib#DictMerge(defaults, ...) abort
 
   return l:new
 endfunction
+
 " vim: expandtab
