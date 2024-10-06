@@ -55,6 +55,10 @@ let s:defaults = {
       \   },
       \   'api': {
       \     'url': 'http://127.0.0.1:11434/api/generate',
+      \     'prompt_callbacks': {
+      \       'chat': {},
+      \       'generate': {},
+      \     },
       \   },
       \   'channel': {
       \     'address': '127.0.0.1:11435',
@@ -66,9 +70,8 @@ let s:defaults = {
       \   'models': {
       \     'codellama': {
       \       'prompt_callbacks': {
-      \         'preamble': v:null,
-      \         'input': v:null,
-      \         'post': v:null,
+      \         'chat': {},
+      \         'generate': {},
       \       },
       \       'data': {
       \         'raw': v:false,
