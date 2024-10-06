@@ -42,8 +42,8 @@ endfunction
 " - Will attempt to re-open channel if state is "closed"
 " - We must use a closure to capture bufnr and pass it into callback
 function! proompter#channel#GetOrSetOpen(configurations = g:proompter, state = g:proompter_state) abort
-  if a:state.channel == v:null
-    let l:channel_options = proompter#channel#CreateOptions(a:configurations)
+  if get(a:state, 'channel', v:null) == v:null
+    let l:channel_options = proompter#channel#CreateOptions(a:configurations, a:state)
     let a:state.channel = ch_open(a:configurations.channel.address, l:channel_options)
     return a:state.channel
   endif
