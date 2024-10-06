@@ -199,11 +199,14 @@ Execute (proompter#callback#prompt#chat#Post -- Collects inputs and preforms onl
         \ )
   call add(expected_result, { 'role': 'user', 'content': input })
 
-  echoe 'result ->' result "\nexpected_result ->" expected_result
-  for [index, entry] in items(result)
-    AssertEqual entry, expected_result[index]
-  endfor
+  ""
+  " Vim 8.2 may not like the following
+  " for [index, entry] in items(result)
+  "   AssertEqual entry, expected_result[index]
+  " endfor
+
   AssertEqual len(result), len(expected_result)
+  AssertEqual result, expected_result
 
   AssertEqual state, expected_state, 'Unexpected mutation of state'
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
