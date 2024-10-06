@@ -46,17 +46,17 @@
 "       \ }
 " ```
 function! proompter#callback#prompt#chat#Preamble(kwargs) abort
+  let l:messages = []
+
   let l:filetype = get(a:kwargs, 'filetype', &filetype)
   if !len(l:filetype)
-    return []
+    return l:messages
   endif
 
-  return [
-        \   {
-        \     'role': 'system',
-        \     'content': 'You are an expert with ' . l:filetype
-        \   },
-        \ ]
+  return extend(l:messages, [{
+        \   'role': 'system',
+        \   'content': 'You are an expert with ' . l:filetype
+        \ }])
 endfunction
 
 ""
