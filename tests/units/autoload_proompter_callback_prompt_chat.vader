@@ -199,6 +199,7 @@ Execute (proompter#callback#prompt#chat#Post -- Collects inputs and preforms onl
         \ )
   call add(expected_result, { 'role': 'user', 'content': input })
 
+  echoe 'result ->' result "\nexpected_result ->" expected_result
   for [index, entry] in items(result)
     AssertEqual entry, expected_result[index]
   endfor
