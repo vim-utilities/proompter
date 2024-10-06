@@ -1,0 +1,192 @@
+
+
+""
+" {{{
+Execute (proompter#SendPromptToChat -- Uses default channel callback when streaming):
+  let response_data = {
+        \   'model': 'codellama',
+        \   'created_at': '2024-09-28T23:29:00.299380014Z',
+        \   'response': 'This is a mock chat streaming response from the proxy!',
+        \   'done': v:true,
+        \ }
+
+  let base64_encoded_response = proompter#base64#encode(join([
+        \   'HTTP/1.1 200 OK',
+        \   'Server: SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date: ' . strftime('%a, %d %b %Y %T GMT'),
+        \   'Content-Type: application/json',
+        \   '',
+        \   json_encode(response_data),
+        \ ], "\r\n"))
+
+  let configurations = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \   'api': {
+        \     'url': 'http://127.0.0.1:11434/api/chat?response=' . base64_encoded_response,
+        \   },
+        \   'channel': {
+        \     'address': '127.0.0.1:41968',
+        \     'options': {
+        \       'mode': 'raw',
+        \       'callback': v:null,
+        \     },
+        \   },
+        \   'models': {
+        \     'codellama': {
+        \       'data': {
+        \         'raw': v:false,
+        \         'stream': v:true,
+        \       },
+        \     },
+        \   },
+        \ }
+
+  let state = {
+        \   'messages': [
+        \     {
+        \       'model': 'codellama',
+        \       'created_at': '2024-09-20T23:25:06.675058548Z',
+        \       'done': v:true,
+        \       'done_reason': 'stop',
+        \       'message': {
+        \         'role': 'assistant',
+        \         'content': 'Vim is the best',
+        \         'images': v:null,
+        \       },
+        \     },
+        \   ],
+        \   'channel': v:null,
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+
+  let expected_state = deepcopy(state)
+  let expected_entry = {
+        \   'model': configurations.select.model_name,
+        \   'created_at': response_data.created_at,
+        \   'done': response_data.done,
+        \   'done_reason': v:null,
+        \   'message': {
+        \     'role': 'assistant',
+        \     'content': response_data.response,
+        \     'images': v:null,
+        \   },
+        \ }
+  call add(expected_state.messages, expected_entry)
+
+  let value = 'This is a streaming request from Vim!'
+
+  try
+    call proompter#SendPromptToChat(
+          \   value,
+          \   configurations,
+          \   state,
+          \ )
+    sleep 1m
+
+    AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+    AssertEqual state.messages[-1], expected_state.messages[-1]
+  finally
+    if ch_info(state.channel).status != 'closed'
+      call ch_close(state.channel)
+    endif
+  endtry
+
+Execute (proompter#SendPromptToChat -- Uses default channel callback when non-streaming):
+  let response_data = {
+        \   'model': 'codellama',
+        \   'created_at': '2024-09-28T23:29:00.299380014Z',
+        \   'response': 'This is a mock chat non-streaming response from the proxy!',
+        \   'done_reason': 'stop',
+        \   'done': v:true,
+        \ }
+
+  let base64_encoded_response = proompter#base64#encode(join([
+        \   'HTTP/1.1 200 OK',
+        \   'Server: SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date: ' . strftime('%a, %d %b %Y %T GMT'),
+        \   'Content-Type: application/json',
+        \   '',
+        \   json_encode(response_data),
+        \ ], "\r\n"))
+
+  let configurations = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \   'api': {
+        \     'url': 'http://127.0.0.1:11434/api/chat?response=' . base64_encoded_response,
+        \   },
+        \   'channel': {
+        \     'address': '127.0.0.1:41968',
+        \     'options': {
+        \       'mode': 'raw',
+        \       'callback': v:null,
+        \     },
+        \   },
+        \   'models': {
+        \     'codellama': {
+        \       'data': {
+        \         'raw': v:false,
+        \         'stream': v:false,
+        \       },
+        \     },
+        \   },
+        \ }
+
+  let state = {
+        \   'messages': [
+        \     {
+        \       'model': 'codellama',
+        \       'created_at': '2024-09-20T23:25:06.675058548Z',
+        \       'done': v:true,
+        \       'done_reason': 'stop',
+        \       'message': {
+        \         'role': 'assistant',
+        \         'content': 'Vim is the best',
+        \         'images': v:null,
+        \       },
+        \     },
+        \   ],
+        \   'channel': v:null,
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+
+  let expected_state = deepcopy(state)
+  let expected_entry = {
+        \   'model': configurations.select.model_name,
+        \   'created_at': response_data.created_at,
+        \   'done': response_data.done,
+        \   'done_reason': response_data.done_reason,
+        \   'message': {
+        \     'role': 'assistant',
+        \     'content': response_data.response,
+        \     'images': v:null,
+        \   },
+        \ }
+  call add(expected_state.messages, expected_entry)
+
+  let value = 'This is a non-streaming request from Vim!'
+
+  try
+    call proompter#SendPromptToChat(
+          \   value,
+          \   configurations,
+          \   state,
+          \ )
+    sleep 1m
+
+    AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+    AssertEqual state.messages[-1], expected_state.messages[-1]
+  finally
+    if ch_info(state.channel).status != 'closed'
+      call ch_close(state.channel)
+    endif
+  endtry
+
+" }}}
+""
+
