@@ -11,8 +11,8 @@
 " ```
 " [
 "   {
-"     'role': 'system',
-"     'content': 'You an expert with javascript and delight in solving problems succinctly!',
+"     "role": "system",
+"     "content": "You an expert with javascript and delight in solving problems succinctly!",
 "   },
 " ]
 " ```
@@ -21,23 +21,23 @@
 "
 "   - {define__configurations} configurations - Dictionary
 "   - {define__proompter_state} state - Dictionary
-"   - {string} filetype - What file type is operated on
+"   - {string} filetype - What file type is operated on, if not defined will
+"     attempt to default with `&filetype` and if that is undefined return an
+"     empty list.
 "
 " Example: configuration snippet
 "
 " ```vim
 " let g:proompter = {
-"       \   'select': {
-"       \     'model_name': 'codellama',
-"       \   },
-"       \   'models': {
-"       \     'codellama': {
-"       \       'prompt_callbacks': {
-"       \         'preamble': { configurations, state ->
+"       \   "api": {
+"       \     "url": "http://127.0.0.1:11434/api/chat",
+"       \     "prompt_callbacks": {
+"       \       "chat": {
+"       \         "preamble": { _configurations, _state ->
 "       \           proompter#callback#prompt#chat#Preamble({
-"       \             'configurations': configurations,
-"       \             'state': state,
-"       \             'filetype': 'javascript',
+"       \             "configurations": _configurations,
+"       \             "state": _state,
+"       \             "filetype": "javascript",
 "       \           })
 "       \         },
 "       \       },
@@ -65,12 +65,12 @@ endfunction
 " ```
 " [
 "   {
-"     'role': 'user',
-"     'content': 'Tell me in one sentence why Vim is the best text editor.',
+"     "role": "user",
+"     "content": "Tell me in one sentence why Vim is the best text editor.",
 "   },
 "   {
-"     'role': 'assistant',
-"     'content': 'Vim is the best!',
+"     "role": "assistant",
+"     "content": "Vim is the best!",
 "   },
 " ]
 " ```
@@ -82,7 +82,7 @@ endfunction
 "   - {number} context_size - Max prompt/response results that are re-shared
 "
 " Warning: expects `a:kwargs.state.messages` to be dictionary list _shaped_
-" similar to;
+" minimally similar to;
 "
 " ```
 " [
@@ -105,17 +105,15 @@ endfunction
 "
 " ```vim
 " let g:proompter = {
-"       \   'select': {
-"       \     'model_name': 'codellama',
-"       \   },
-"       \   'models': {
-"       \     'codellama': {
-"       \       'prompt_callbacks': {
-"       \         'context': { configurations, state ->
+"       \   "api": {
+"       \     "url": "http://127.0.0.1:11434/api/chat",
+"       \     "prompt_callbacks": {
+"       \       "chat": {
+"       \         "context": { configurations, state ->
 "       \           proompter#callback#prompt#chat#Context({
-"       \             'configurations': configurations,
-"       \             'state': state,
-"       \             'context_size': 5,
+"       \             "configurations": configurations,
+"       \             "state": state,
+"       \             "context_size": 5,
 "       \           })
 "       \         },
 "       \       },
@@ -142,24 +140,10 @@ endfunction
 " ```
 " [
 "   {
-"     'role': 'user',
-"     'content': 'Tell me in one sentence why Vim is the best editor for programming.',
-"   }
+"     "role": "user",
+"     "content": "Tell me in one sentence why Vim is the best editor for programming.",
+"   },
 " ]
-" ```
-"
-" ... Entry added to `a:state.messages` will have a format similar to;
-"
-" ```
-" {
-"   'model': a:configurations.select.model_name,
-"   'created_at': strftime('%FT%T.') . '000000000Z',
-"   'message': {
-"     'role': 'user',
-"     'content': a:input,
-"     'image': v:null,
-"   }
-" }
 " ```
 "
 " Parameter: {string} `value` Text to prompt LLM with
@@ -170,13 +154,11 @@ endfunction
 "
 " ```vim
 " let g:proompter = {
-"       \   'select': {
-"       \     'model_name': 'codellama',
-"       \   },
-"       \   'models': {
-"       \     'codellama': {
-"       \       'prompt_callbacks': {
-"       \         'input': proompter#callback#prompt#chat#Input,
+"       \   "api": {
+"       \     "url": "http://127.0.0.1:11434/api/chat",
+"       \     "prompt_callbacks": {
+"       \       "chat": {
+"       \         "input": function("proompter#callback#prompt#chat#Input"),
 "       \       },
 "       \     },
 "       \   },
@@ -220,24 +202,52 @@ endfunction
 "
 " ```vim
 " let g:proompter = {
-"       \   'select': {
-"       \     'model_name': 'codellama',
-"       \   },
-"       \   'models': {
-"       \     'codellama': {
-"       \       'prompt_callbacks': {
-"       \         'post': { prompt_callbacks_data, configurations, state ->
+"       \   "api": {
+"       \     "url": "http://127.0.0.1:11434/api/chat",
+"       \     "prompt_callbacks": {
+"       \       "chat": {
+"       \         "post": { prompt_callbacks_data, configurations, state ->
 "       \           proompter#callback#prompt#chat#Post({
-"       \             'data': prompt_callbacks_data,
-"       \             'configurations': configurations,
-"       \             'state': state,
-"       \             'out_bufnr': v:null,
+"       \             "data": prompt_callbacks_data,
+"       \             "configurations": configurations,
+"       \             "state": state,
+"       \             "out_bufnr": v:null,
 "       \           })
 "       \         },
 "       \       },
 "       \     },
 "       \   },
 "       \ }
+" ```
+"
+" Example: `out_bufnr` content
+"
+" ````markdown
+" ## Prompt 2024-10-04 20:06:09
+"
+"
+" Write documentation for the following function using JS-Doc comment syntax
+"
+" ```javascript
+" function greet(who = 'World') {
+"   return `Hello ${who}!`;
+" }
+" ```
+" ````
+"
+" Example: `l:messages` returned data
+"
+" ```
+" [
+"   {
+"     "role": "system",
+"     "content": "You an expert with javascript and delight in solving problems succinctly!",
+"   },
+"   {
+"     "role": "user",
+"     "content": "Write documentation for the following...",
+"   },
+" ]
 " ```
 function! proompter#callback#prompt#chat#Post(kwargs) abort
   let l:out_bufnr = get(a:kwargs, 'out_bufnr', v:null)

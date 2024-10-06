@@ -9,6 +9,24 @@
 " Parameter: {define__configurations} configurations
 " Parameter: {define__proompter_state} state - Dictionary
 "
+" Entry added to `a:state.messages` will have a format similar to;
+"
+" ```
+" {
+"   "model": "codellama",
+"   "created_at": "2024-09-20T23:25:06.675058548Z",
+"   "message": {
+"     "role": "user",
+"     "content": "Tell me Vim is the best text editor.",
+"     "image": v:null,
+"   }
+" }
+" ```
+"
+" ...  if an input callback function can be found then `message.content` in
+" above example will be overwritten by content values of that function
+" separated by two newlines.
+"
 " Example:
 "
 " ```vim
@@ -28,6 +46,11 @@
 "
 " Dev: without the slicing output of `shellescape` the append/prepend-ed
 "      single-quotes which ain't gonna be good within a larger JSON object
+"
+" See: {docs} :help strftime()
+" See: {docs} :help reltime()
+"
+" TODO: preform feature detection for `strftime` and `reltime`
 function! proompter#SendPromptToChat(value, configurations = g:proompter, state = g:proompter_state) abort
   if len(a:value) == 0
     throw 'Proompter: empty input value'

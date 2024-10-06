@@ -34,12 +34,10 @@
 "
 " ```vim
 " let g:proompter = {
-"       \   'select': {
-"       \     'model_name': 'codellama',
-"       \   },
-"       \   'models': {
-"       \     'codellama': {
-"       \       'prompt_callbacks': {
+"       \   'api': {
+"       \     'url': 'http://127.0.0.1:11434/api/generate',
+"       \     'prompt_callbacks': {
+"       \       'generate': {
 "       \         'preamble': { configurations, _state ->
 "       \           proompter#callback#prompt#generate#Preamble({
 "       \             'configurations': configurations,
@@ -162,12 +160,10 @@ endfunction
 "
 " ```vim
 " let g:proompter = {
-"       \   'select': {
-"       \     'model_name': 'codellama',
-"       \   },
-"       \   'models': {
-"       \     'codellama': {
-"       \       'prompt_callbacks': {
+"       \   'api': {
+"       \     'url': 'http://127.0.0.1:11434/api/generate',
+"       \     'prompt_callbacks': {
+"       \       'generate': {
 "       \         'context': { configurations, state ->
 "       \           proompter#callback#prompt#generate#Context({
 "       \             'configurations': configurations,
@@ -253,12 +249,10 @@ endfunction
 "
 " ```vim
 " let g:proompter = {
-"       \   'select': {
-"       \     'model_name': 'codellama',
-"       \   },
-"       \   'models': {
-"       \     'codellama': {
-"       \       'prompt_callbacks': {
+"       \   'api': {
+"       \     'url': 'http://127.0.0.1:11434/api/generate',
+"       \     'prompt_callbacks': {
+"       \       'generate': {
 "       \         'input': { value, configurations, _state ->
 "       \           proompter#callback#prompt#generate#Input({
 "       \             'value': value,
@@ -313,12 +307,10 @@ endfunction
 "
 " ```vim
 " let g:proompter = {
-"       \   'select': {
-"       \     'model_name': 'codellama',
-"       \   },
-"       \   'models': {
-"       \     'codellama': {
-"       \       'prompt_callbacks': {
+"       \   'api': {
+"       \     'url': 'http://127.0.0.1:11434/api/generate',
+"       \     'prompt_callbacks': {
+"       \       'generate': {
 "       \         'post': { prompt_callbacks_data, configurations, _state ->
 "       \           proompter#callback#prompt#generate#Post({
 "       \             'data': prompt_callbacks_data,
