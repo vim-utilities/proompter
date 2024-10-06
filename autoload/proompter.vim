@@ -264,22 +264,17 @@ endfunction
 " See: {docs} :help g:markdown_fenced_languages
 function! proompter#SendHighlightedText(prefix_input = '', configurations = g:proompter) abort range
   let l:selection = getline(a:firstline, a:lastline)
-  if len(a:prefix_input)
-    let l:selection = [a:prefix_input, ''] + l:selection
+  if len(&filetype)
+        \ && exists('g:markdown_fenced_languages')
+        \ && indexof(g:markdown_fenced_languages, { _index, entry ->
+        \      match(entry, '\v<' . &filetype . '>')
+        \    }) >= 0
+
+    let l:selection = ['```' . &filetype] + l:selection + ['```']
   endif
 
-  if len(&filetype) && exists('g:markdown_fenced_languages')
-    let l:index = indexof(g:markdown_fenced_languages, { _index, entry ->
-          \   match(entry, '\v<' . &filetype . '>')
-          \ })
-
-    if l:index >= 0
-      let l:selection = join([
-            \   '```' . &filetype,
-            \   l:selection,
-            \   '```',
-            \ ])
-    endif
+  if len(a:prefix_input)
+    let l:selection = [a:prefix_input, ''] + l:selection
   endif
 
   let l:value = join(l:selection, "\n")
