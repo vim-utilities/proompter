@@ -60,6 +60,21 @@ function! proompter#SendPromptToChat(value, configurations = g:proompter, state 
   let l:model = deepcopy(a:configurations.models[l:model_name])
   let l:model.data.model = l:model_name
 
+  let l:callbacks = proompter#lib#DictMerge(
+        \   get(get(get(a:configurations, 'api', {}), 'prompt_callbacks', {}), 'chat', {}),
+        \   get(get(l:model, 'prompt_callbacks', {}), 'chat', {}),
+        \ )
+
+  let l:entry = {
+        \   'model': a:configurations.select.model_name,
+        \   'created_at': strftime('%FT%T.') . reltime()[1] . 'Z',
+        \   'message': {
+        \     'role': 'user',
+        \     'content': a:value,
+        \     'image': v:null,
+        \   },
+        \ }
+
   let l:messages = get(l:model.data, 'messages', [])
   if type(get(l:model, 'prompt_callbacks')) == v:t_dict
     let l:callbacks_results = {
@@ -68,20 +83,25 @@ function! proompter#SendPromptToChat(value, configurations = g:proompter, state 
           \   'input': [],
           \ }
 
-    if type(get(l:model.prompt_callbacks, 'preamble')) == v:t_func
-      call extend(l:callbacks_results.preamble, l:model.prompt_callbacks.preamble(a:configurations, a:state))
+    if type(get(l:callbacks, 'preamble')) == v:t_func
+      call extend(l:callbacks_results.preamble, l:callbacks.preamble(a:configurations, a:state))
     endif
 
-    if type(get(l:model.prompt_callbacks, 'context')) == v:t_func
-      call extend(l:callbacks_results.context, l:model.context_callbacks.context(a:configurations, a:state))
+    if type(get(l:callbacks, 'context')) == v:t_func
+      call extend(l:callbacks_results.context, l:callbacks.context(a:configurations, a:state))
     endif
 
-    if type(get(l:model.prompt_callbacks, 'input')) == v:t_func
-      call extend(l:callbacks_results.input, l:model.prompt_callbacks.input(a:value, a:configurations, a:state))
+    if type(get(l:callbacks, 'input')) == v:t_func
+      let l:input_result = l:callbacks.input(a:value, a:configurations, a:state)
+      call extend(l:callbacks_results.input, l:input_result)
+
+      let l:entry.message = join(map(l:input_result, { _index, message ->
+            \   message.content
+            \ }), "\n\n")
     endif
 
-    if type(get(l:model.prompt_callbacks, 'post')) == v:t_func
-      call extend(l:messages, l:model.prompt_callbacks.post(l:callbacks_results, a:configurations, a:state))
+    if type(get(l:callbacks, 'post')) == v:t_func
+      call extend(l:messages, l:callbacks.post(l:callbacks_results, a:configurations, a:state))
     else
       call extend(l:messages, l:callbacks_results.preamble)
       call extend(l:messages, l:callbacks_results.context)
@@ -136,6 +156,11 @@ function! proompter#SendPromptToGenerate(value, configurations = g:proompter, st
 
   let l:prompt = get(l:model.data, 'prompt', '')
 
+  let l:callbacks = proompter#lib#DictMerge(
+        \   get(get(get(a:configurations, 'api', {}), 'prompt_callbacks', {}), 'generate', {}),
+        \   get(get(l:model, 'prompt_callbacks', {}), 'generate', {}),
+        \ )
+
   ""
   " Next is all about setting `l:model.data.prompt`
   if type(get(l:model, 'prompt_callbacks')) == v:t_dict
@@ -145,20 +170,20 @@ function! proompter#SendPromptToGenerate(value, configurations = g:proompter, st
           \   'input': '',
           \ }
 
-    if type(get(l:model.prompt_callbacks, 'preamble')) == v:t_func
-      let l:callbacks_results.preamble .= l:model.prompt_callbacks.preamble(a:configurations, a:state)
+    if type(get(l:callbacks, 'preamble')) == v:t_func
+      let l:callbacks_results.preamble .= l:callbacks.preamble(a:configurations, a:state)
     endif
 
-    if type(get(l:model.prompt_callbacks, 'context')) == v:t_func
-      let l:callbacks_results.context .= l:model.context_callbacks.context(a:configurations, a:state)
+    if type(get(l:callbacks, 'context')) == v:t_func
+      let l:callbacks_results.context .= l:callbacks.context(a:configurations, a:state)
     endif
 
-    if type(get(l:model.prompt_callbacks, 'input')) == v:t_func
-      let l:callbacks_results.input .= l:model.prompt_callbacks.input(a:value, a:configurations, a:state)
+    if type(get(l:callbacks, 'input')) == v:t_func
+      let l:callbacks_results.input .= l:callbacks.input(a:value, a:configurations, a:state)
     endif
 
-    if type(get(l:model.prompt_callbacks, 'post')) == v:t_func
-      let l:prompt .= l:model.prompt_callbacks.post(l:callbacks_results, a:configurations, a:state)
+    if type(get(l:callbacks, 'post')) == v:t_func
+      let l:prompt .= l:callbacks.post(l:callbacks_results, a:configurations, a:state)
     else
       let l:prompt .= l:callbacks_results.preamble
       let l:prompt .= l:callbacks_results.context
