@@ -16,7 +16,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install Vim
-        run: sudo apt-get install gvim
+        run: sudo apt-get install vim
 
       - name: Test
         run: |
