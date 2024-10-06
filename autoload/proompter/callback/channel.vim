@@ -33,13 +33,13 @@ function! proompter#callback#channel#CompleteToHistory(api_response, configurati
 
   let l:entry = {
         \   'model': l:http_response.body[-1].model,
-        \   'created_at': '',
+        \   'created_at': l:http_response.body[-1].created_at,
         \   'done': l:http_response.body[-1].done,
         \   'done_reason': l:http_response.body[-1].done_reason,
         \   'message': {
         \     'role': 'assistant',
         \     'content': '',
-        \     'images': v:null,
+        \     'images': [],
         \   },
         \ }
 
@@ -48,18 +48,14 @@ function! proompter#callback#channel#CompleteToHistory(api_response, configurati
 
     let l:entry.message.content .= l:api_data.message.content
 
-    if l:api_data.message.images != v:null
-      if type(l:entry.message.images) != v:t_list
-        let l:entry.message.images = []
-      endif
-
+    if get(l:api_data.message, 'images', v:null) != v:null && type(l:api_data.message.images) == v:t_list
       call extend(l:entry.message.images, l:api_data.message.images)
     endif
-
-    if !len(l:entry.created_at)
-      let l:entry.created_at = l:api_data.created_at
-    endif
   endfor
+
+  if !len(l:entry.message.images)
+    let l:entry.message.images = v:null
+  endif
 
   call add(a:state.messages, l:entry)
 endfunction
@@ -104,7 +100,7 @@ function! proompter#callback#channel#StreamToMessages(api_response, configuratio
         \   'message': {
         \     'role': 'pending',
         \     'content': '',
-        \     'images': v:null,
+        \     'images': [],
         \   },
         \ }
 
@@ -126,14 +122,14 @@ function! proompter#callback#channel#StreamToMessages(api_response, configuratio
 
     let l:entry.message.content .= l:api_data.message.content
 
-    if l:api_data.message.images != v:null
-      if type(l:entry.message.images) != v:t_list
-        let l:entry.message.images = []
-      endif
-
+    if get(l:api_data.message, 'images', v:null) != v:null && type(l:api_data.message.images) == v:t_list
       call extend(l:entry.message.images, l:api_data.message.images)
     endif
   endfor
+
+  if !len(l:entry.message.images)
+    let l:entry.message.images = v:null
+  endif
 
   if l:http_response.body[-1].done
     let l:entry.created_at = l:http_response.body[-1].created_at
