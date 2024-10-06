@@ -17,7 +17,7 @@ function! proompter#channel#CreateOptions(configurations = g:proompter, state = 
     let l:stream = a:configurations.models[a:configurations.select.model_name].data.stream
     if l:stream
       let l:channel_options.callback = { _channel, api_response ->
-            \   proompter#callback#channel#StreamToHistory(api_response, a:configurations, a:state)
+            \   proompter#callback#channel#StreamToMessages(api_response, a:configurations, a:state)
             \ }
     else
       let l:channel_options.callback = { _channel, api_response ->
