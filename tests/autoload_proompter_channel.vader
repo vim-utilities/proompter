@@ -93,6 +93,7 @@ Execute (proompter#channel#CreateOptions -- Attaches custom channel callback whe
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
   AssertEqual state, expected_state, 'Unexpected mutation of state'
 " }}}
+""
 
 ""
 " {{{
@@ -129,4 +130,5 @@ Execute (proompter#channel#GetOrSetOpen -- Creates a new channel when state is v
   AssertEqual state.messages, expected_state.messages, 'Unexpected mutation of state.messages'
   AssertEqual type(state.channel), v:t_channel
 " }}}
+""
 

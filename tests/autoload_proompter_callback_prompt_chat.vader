@@ -4,26 +4,10 @@
 Execute (proompter#callback#prompt#chat#Preamble -- Formats output as expected):
   let configurations = {}
 
-  let state = {
-        \   'messages': [
-        \     {
-        \       'model': 'codellama',
-        \       'created_at': '2024-09-20T23:25:06.675058548Z',
-        \       'done': v:true,
-        \       'done_reason': 'stop',
-        \       'message': {
-        \         'role': 'assistant',
-        \         'content': 'Vim is the best',
-        \         'images': v:null,
-        \       },
-        \     },
-        \   ],
-        \ }
+  let state = { 'messages': [] }
 
   let expected_configurations = deepcopy(configurations)
   let expected_state = deepcopy(state)
-
-  let input = 'Tell me in one sentence why Vim is the best editor for programming.'
 
   let result = proompter#callback#prompt#chat#Preamble({
         \   'configurations': configurations,
@@ -113,27 +97,8 @@ Execute (proompter#callback#prompt#chat#Context -- Formats output as expected):
 ""
 " {{{
 Execute (proompter#callback#prompt#chat#Input -- Formats input as expected):
-  let configurations = {
-        \   'select': {
-        \     'model_name': 'codellama',
-        \   },
-        \ }
-
-  let state = {
-        \   'messages': [
-        \     {
-        \       'model': 'codellama',
-        \       'created_at': '2024-09-20T23:25:06.675058548Z',
-        \       'done': v:true,
-        \       'done_reason': 'stop',
-        \       'message': {
-        \         'role': 'assistant',
-        \         'content': 'Vim is the best',
-        \         'images': v:null,
-        \       },
-        \     },
-        \   ],
-        \ }
+  let configurations = {}
+  let state = {}
 
   let expected_configurations = deepcopy(configurations)
   let expected_state = deepcopy(state)
@@ -218,7 +183,6 @@ Execute (proompter#callback#prompt#chat#Post -- Collects inputs and preforms onl
         \   configurations,
         \   state
         \ )
-
 
   let result = proompter#callback#prompt#chat#Post({
         \   'data': data,
