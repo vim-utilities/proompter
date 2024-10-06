@@ -3,12 +3,36 @@
 ""
 " {{{
 Execute (proompter#SendPromptToChat -- Uses default channel callback when streaming):
-  let response_data = {
-        \   'model': 'codellama',
-        \   'created_at': '2024-09-28T23:29:00.299380014Z',
-        \   'response': 'This is a mock chat streaming response from the proxy!',
-        \   'done': v:true,
-        \ }
+  let response_data = [
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-28T23:29:04.299380014Z',
+        \     'message': {
+        \       'role': 'assistant',
+        \       'content': 'This is a mock chat streaming response from the proxy',
+        \       'images': v:null,
+        \     },
+        \     'done': v:false,
+        \   },
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-28T23:29:04.299380014Z',
+        \     'message': {
+        \       'role': 'assistant',
+        \       'content': '!',
+        \       'images': v:null,
+        \     },
+        \     'done': v:true,
+        \     'done_reason': 'stop',
+        \     'total_duration': 8113331500,
+        \     'load_duration': 6396458,
+        \     'prompt_eval_count': 61,
+        \     'prompt_eval_duration': 398801000,
+        \     'eval_count': 468,
+        \     'eval_duration': 7701267000
+        \   },
+        \ ]
+
 
   let base64_encoded_response = proompter#base64#encode(join([
         \   'HTTP/1.1 200 OK',
@@ -16,7 +40,7 @@ Execute (proompter#SendPromptToChat -- Uses default channel callback when stream
         \   'Date: ' . strftime('%a, %d %b %Y %T GMT'),
         \   'Content-Type: application/json',
         \   '',
-        \   json_encode(response_data),
+        \   join(mapnew(response_data, { _index, entry -> json_encode(entry) }), "\r\n"),
         \ ], "\r\n"))
 
   let configurations = {
@@ -44,55 +68,48 @@ Execute (proompter#SendPromptToChat -- Uses default channel callback when stream
         \ }
 
   let state = {
-        \   'messages': [
-        \     {
-        \       'model': 'codellama',
-        \       'created_at': '2024-09-20T23:25:06.675058548Z',
-        \       'done': v:true,
-        \       'done_reason': 'stop',
-        \       'message': {
-        \         'role': 'assistant',
-        \         'content': 'Vim is the best',
-        \         'images': v:null,
-        \       },
-        \     },
-        \   ],
+        \   'messages': [],
         \   'channel': v:null,
         \ }
 
   let expected_configurations = deepcopy(configurations)
 
   let expected_state = deepcopy(state)
+
   let expected_entry = {
         \   'model': configurations.select.model_name,
-        \   'created_at': response_data.created_at,
-        \   'done': response_data.done,
-        \   'done_reason': v:null,
+        \   'created_at': response_data[-1].created_at,
+        \   'done': response_data[-1].done,
+        \   'done_reason': response_data[-1].done_reason,
         \   'message': {
-        \     'role': 'assistant',
-        \     'content': response_data.response,
+        \     'role': response_data[-1].message.role,
+        \     'content': join(mapnew(response_data, { _index, entry ->
+        \       entry.message.content
+        \     }), ''),
         \     'images': v:null,
         \   },
         \ }
   call add(expected_state.messages, expected_entry)
 
-  let value = 'This is a streaming request from Vim!'
-
   try
+    let value = 'This is a streaming request from Vim!'
+
     call proompter#SendPromptToChat(
           \   value,
           \   configurations,
           \   state,
           \ )
-    sleep 1m
-
-    AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
-    AssertEqual state.messages[-1], expected_state.messages[-1]
+    sleep 100m
   finally
     if ch_info(state.channel).status != 'closed'
       call ch_close(state.channel)
     endif
   endtry
+
+  AssertEqual state.messages[-1], expected_state.messages[-1]
+
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+
 
 Execute (proompter#SendPromptToChat -- Uses default channel callback when non-streaming):
   let response_data = {
@@ -137,19 +154,7 @@ Execute (proompter#SendPromptToChat -- Uses default channel callback when non-st
         \ }
 
   let state = {
-        \   'messages': [
-        \     {
-        \       'model': 'codellama',
-        \       'created_at': '2024-09-20T23:25:06.675058548Z',
-        \       'done': v:true,
-        \       'done_reason': 'stop',
-        \       'message': {
-        \         'role': 'assistant',
-        \         'content': 'Vim is the best',
-        \         'images': v:null,
-        \       },
-        \     },
-        \   ],
+        \   'messages': [],
         \   'channel': v:null,
         \ }
 
@@ -179,13 +184,14 @@ Execute (proompter#SendPromptToChat -- Uses default channel callback when non-st
           \ )
     sleep 1m
 
-    AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
-    AssertEqual state.messages[-1], expected_state.messages[-1]
   finally
     if ch_info(state.channel).status != 'closed'
       call ch_close(state.channel)
     endif
   endtry
+
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+  AssertEqual state.messages[-1], expected_state.messages[-1]
 
 " }}}
 ""
