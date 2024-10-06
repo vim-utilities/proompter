@@ -233,6 +233,7 @@ endfunction
 "      single-quotes which ain't gonna be good within a larger JSON object
 function! proompter#SendPrompt(value, configurations = g:proompter, state = g:proompter_state) abort
   let l:api_endpoint = split(a:configurations.api.url, '/')[-1]
+  let l:api_endpoint = split(l:api_endpoint, '?')[0]
   if l:api_endpoint == 'chat'
     return proompter#SendPromptToChat(a:value, a:configurations, a:state)
   elseif l:api_endpoint == 'generate'
