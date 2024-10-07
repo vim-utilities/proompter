@@ -350,7 +350,7 @@ function! proompter#callback#prompt#generate#Post(kwargs) abort
         \ ], a:kwargs.data.input)
 
   if getbufinfo(l:out_bufnr)[0].linecount > 1
-    call l:prompt_heading_lines = extend([''], l:prompt_heading_lines)
+    let l:prompt_heading_lines = extend([''], l:prompt_heading_lines)
   endif
   call extend(l:prompt_heading_lines, ['', ''])
 
