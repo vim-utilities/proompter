@@ -57,20 +57,31 @@ def modify_template_file(path, **kwargs):
         print(f"Cannot read file at: {file_path}")
         return None
 
+class CustomTCPServer(socketserver.TCPServer):
+    """
+    Store extra data, such as `verbose` setting, for the `RequestHandlerClass` to access.
+
+    ## Attributions
+
+    - https://stackoverflow.com/questions/12233940/passing-extra-metadata-to-a-requesthandler-using-pythons-socketserver-and-child
+    """
+    verbose = False
+
+    def __init__(self, *args, verbose=False, **kwargs):
+        """Constructor.  May be extended, do not override."""
+        self.verbose = verbose
+        super().__init__(*args, **kwargs)
+
 
 class ChannelProxy(http.server.SimpleHTTPRequestHandler):
     """
     Proxy connections from Vim `ch_sendraw` channel to API defined in HTTP request path
     """
 
-    verbose = False
-
-    def init(self, *args, verbose=False, **kwargs):
+    def init(self, *args, **kwargs):
         """
         Add verbose option
         """
-        self.verbose = verbose
-
         super().__init__(*args, **kwargs)
 
     def do_POST(self):
@@ -116,23 +127,23 @@ class ChannelProxy(http.server.SimpleHTTPRequestHandler):
 
         - https://stackoverflow.com/questions/17822342/understanding-python-http-streaming
         """
-        if self.verbose:
+        if self.server.verbose:
             print(f"Sending request to {self.path} with data ->", post_data)
 
         response = requests.post(self.path, data=post_data, headers=self.headers, stream=True)
         if response.status_code == 200:
-            if self.verbose:
+            if self.server.verbose:
                 print("Streaming response ->", response)
 
             for line in response.iter_lines():
-                if self.verbose:
+                if self.server.verbose:
                     print("  line ->", line)
                 self.send_response(response.status_code)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
                 self.wfile.write(line)
         else:
-            if self.verbose:
+            if self.server.verbose:
                 print("Error", response.status_code, response.reason)
             self.send_error(response.status_code, response.reason)
             return
@@ -155,7 +166,7 @@ class ChannelProxy(http.server.SimpleHTTPRequestHandler):
         try:
             with urllib.request.urlopen(request) as response:
                 response_data = response.read()
-                if self.verbose:
+                if self.server.verbose:
                     print("Retuning response_data ->", response_data)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
@@ -163,15 +174,15 @@ class ChannelProxy(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(response_data)
         except urllib.error.HTTPError as error:
             error_message = error.read().decode()
-            if self.verbose:
+            if self.server.verbose:
                 print("HTTP Error:", error.code, error_message)
             self.send_error(error.code, error_message, 'API no wants to talk to you like that?!')
         except urllib.error.URLError as error:
-            if self.verbose:
+            if self.server.verbose:
                 print("URL Error:", str(error))
             self.send_error(502, 'Bad Gateway: unable to reach the API')
         except Exception as error:
-            if self.verbose:
+            if self.server.verbose:
                 print('Unexpected error:', str(error))
             self.send_error(500, 'Internal Server Error')
 
@@ -411,7 +422,7 @@ if __name__ == '__main__':
                 print(f"SystemD file written to -> {args.install_systemd}")
 
     elif args.mock is True:
-        with socketserver.TCPServer((args.host, args.port), ChannelProxy_Mock) as httpd:
+        with CustomTCPServer((args.host, args.port), ChannelProxy_Mock, verbose=args.verbose) as httpd:
             if args.verbose:
                 print(f"Mocking API at -> {args.host}:{args.port}")
 
@@ -423,7 +434,7 @@ if __name__ == '__main__':
                 sys.exit(0)
 
     elif args.mock is False:
-        with socketserver.TCPServer((args.host, args.port), ChannelProxy) as httpd:
+        with CustomTCPServer((args.host, args.port), ChannelProxy, verbose=args.verbose) as httpd:
             if args.verbose:
                 print(f"Serving proxy at -> {args.host}:{args.port}")
 
