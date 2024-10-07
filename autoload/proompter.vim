@@ -95,7 +95,7 @@ function! proompter#SendPromptToChat(value, configurations = g:proompter, state 
       let l:input_result = l:callbacks.input(a:value, a:configurations, a:state)
       call extend(l:callbacks_results.input, l:input_result)
 
-      let l:entry.message = join(map(l:input_result, { _index, message ->
+      let l:entry.message.content = join(map(l:input_result, { _index, message ->
             \   message.content
             \ }), "\n\n")
     endif
