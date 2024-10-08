@@ -93,7 +93,6 @@ let g:proompter = {
       \         'generate': {},
       \       },
       \       'data': {
-      \         'prompt': '',
       \         'raw': v:false,
       \         'stream': v:true,
       \       },

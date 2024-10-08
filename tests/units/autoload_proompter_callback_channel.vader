@@ -227,4 +227,5 @@ Execute (proompter#callback#channel#StreamToBuffer -- Handles JSON stream with o
   AssertEqual state, expected_state
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
 " }}}
+""
 
