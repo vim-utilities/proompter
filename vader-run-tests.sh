@@ -32,7 +32,7 @@ _proxy_log="$(mktemp --quiet)"
 
 _proxy_exec="${__DIR__}/scripts/proompter-channel-proxy.py"
 _proxy_args=(--host "${_proxy_host}" --port "${_proxy_port}" --mock --verbose)
-_proxy_search="$(pgrep --full "${_proxy_exec} ${_proxy_args[*]}")"
+_proxy_search="$(pgrep --full "${_proxy_exec##*/} (--mock|--port ${_proxy_port}).*(--port ${_proxy_port}|--mock)")"
 
 usage() {
 	local _messages=("${@}")
@@ -44,6 +44,10 @@ usage() {
 
 --cicd
 	Run tests as if in non-interactive terminal session
+
+
+--kill    --kill-proxy
+	Attempt to stop proxy after tests
 
 
 --host <STRING>
@@ -98,6 +102,9 @@ while (("${#1}")); do
 			CICD=1
 			shift 1
 		;;
+		--kill|--kill-proxy)
+			_kill_proxy=1
+		;;
 		--help)
 			usage ''
 			exit 0
@@ -144,13 +151,17 @@ VIMRC
 	_tests_exit_status="${?}"
 fi
 
-
-printf 'Attempting to kill proxy process -> %s\n' "$(ps -q "${_proxy_pid}" -o comm=,args=)"
-
-## TODO: figure out why `-SIGINT` works when interactive proxy was started, but
-##       no works when scripted and backgrounded
-# kill -SIGTERM "${_proxy_pid}"
-kill -SIGINT "${_proxy_pid}"
+if ((_kill_proxy)); then
+	if ((${#_proxy_pid})) && [[ "${_proxy_pid}" -gt 1 ]]; then
+		printf 'Attempting to kill proxy PID %i process -> %s\n' "${_proxy_pid}" "$(ps -q "${_proxy_pid}" -o comm=,args=)"
+		## TODO: figure out why `-SIGINT` works when interactive proxy was started, but
+		##       no works when scripted and backgrounded
+		# kill -SIGTERM "${_proxy_pid}"
+		kill -SIGINT "${_proxy_pid}"
+	else
+		printf >&2 'Failed to find a PID for proxy\n'
+	fi
+fi
 
 printf 'Mocked Proxy Logs\n'
 cat "${_proxy_log}"
