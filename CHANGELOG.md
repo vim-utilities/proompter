@@ -15,11 +15,49 @@ The format is based on [Keep a Changelog][] and this project adheres to
 - [ ] `doc/proompter.txt` is correct and up-to-date?
 - [ ] Proxy traffic between Vim `channel` and Ollama API
   - [ ] releases listening port
+   > Note; `kill -SIGINT <PID>` works for interactive sessions, but doesn't
+   > when backgrounded within Vader test runner script?!
   - [ ] tested with system-level SystemD
-   > Note; the `Wants`, `Requires`, and other bindings to `ollama.service` may need additional testing
+   > Note; the `Wants`, `Requires`, and other bindings to `ollama.service` may
+   > need additional testing
 - [ ] Parse image input/outputs
   - [ ] Client can send images for encoding as Base64 by file/directory path
   - [ ] LLM can reply with Base64 images for configured callback to handle
+- [ ] Allow [python-hot-reload][] of `scripts/proompter-channel-proxy.py`?
+- [ ] Passing mock tests?!
+  - [ ] `autoload/proompter.vim` needs mock tests for; `proompter#SendPromptToGenerate`, `proompter#SendPrompt`, `proompter#SendHighlightedText`, `proompter#cancel`, `proompter#load`, `proompter#unload`
+
+[python-hot-reload]: https://stackoverflow.com/questions/29960634/reload-the-currently-running-python-script
+
+
+______
+
+
+## [0.0.3] - 2024-10-07
+
+
+- [X] Enable prompt callbacks defaults, and per-model per-endpoint overrides!
+  - `g:proompter.api.prompt_callbacks.chat`
+  - _`g:proompter.models.<model_name>.prompt_callbacks.chat`_
+  - `g:proompter.api.prompt_callbacks.generate`
+  - _`g:proompter.models.<model_name>.prompt_callbacks.generate`_
+   > :warning: This means anyone upgrading from tagged versions prior to
+   > `v0.0.3` will need to nest preexisting callback configurations!
+   >
+   > If using the default `api.url` endpoint path of `/api/generate`, then
+   > encapsulate your `prompt_callbacks` key/value pares within a;
+   > `'generate': {}` dictionary.
+   >
+   > Note; this may not be the last time such changes are made!  If for example
+   > this plugin eventually supports more than Ollama API, then additional
+   > name-space alterations will probably be required.
+- [X] Passing unit tests!
+  - [X] `autoload/proompter/callback/channel.vim`
+  - [X] `autoload/proompter/callback/prompt/chat.vim`
+  - [X] `autoload/proompter/callback/prompt/generate.vim`
+  - [X] `autoload/proompter/channel.vim`
+  - [X] `autoload/proompter/format.vim`
+  - [X] `autoload/proompter/parse.vim`
 
 
 ______
