@@ -1,18 +1,475 @@
-*proompter.txt*      For Vim version 9.1       Last change: 2024 Sep 22
+*proompter.txt*      For Vim version 9.1       Last change: 2024 Oct 02
 
 
                             Proompter    by S0AndS0
 
 
-Proompter                                              *proompter*
+Proompter                                                          *proompter*
 
-1. Functions                                       |proompter-functions|
-2. Configuration                               |proompter-configuration|
-3. Notes                                               |proompter-notes|
-4. Common Errors                                      |proompter-errors|
+1. Usage                                                     |proompter-usage|
+2. Configuration                                     |proompter-configuration|
+2.0. Configuration examples                 |proompter-configuration-examples|
+2.1. Configuration explanations         |proompter-configuration-explanations|
+3. Functions                                             |proompter-functions|
+4. Notes                                                     |proompter-notes|
+5. Common Errors                                            |proompter-errors|
 
 ==============================================================================
-1. Functions                                       *proompter-functions*
+1. Usage                                                     *proompter-usage*
+
+==============================================================================
+2.0. Configuration examples                 *proompter-configuration-examples*
+
+                Default configurations currently are; >
+  let s:defaults = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \   'api': {
+        \     'url': 'http://127.0.0.1:11434/api/chat',
+        \     'prompt_callbacks': {
+        \       'chat': {},
+        \       'generate': {},
+        \     },
+        \   },
+        \   'channel': {
+        \     'address': '127.0.0.1:11435',
+        \     'options': {
+        \       'mode': 'raw',
+        \       'callback': v:null,
+        \     },
+        \   },
+        \   'models': {
+        \     'codellama': {
+        \       'prompt_callbacks': {
+        \         'chat': {},
+        \         'generate': {},
+        \       },
+        \       'data': {
+        \         'raw': v:false,
+        \         'stream': v:true,
+        \       },
+        \     },
+        \   },
+        \ }
+<
+                ...  Please define your customizations to load before this
+                script to have defaults defaulted and customization correctly
+                overwrite configurations.
+
+                Example of defining default callback functions for all models; >
+  let g:proompter = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \   'api': {
+        \     'url': 'http://127.0.0.1:11434/api/chat',
+        \     'prompt_callbacks': {
+        \       'chat': {
+        \         'preamble': { configurations, state ->
+        \           proompter#callback#prompt#chat#Preamble({
+        \             'configurations': configurations,
+        \             'state': state,
+        \           })
+        \         },
+        \         'context': { configurations, state ->
+        \           proompter#callback#prompt#chat#Context({
+        \             'configurations': configurations,
+        \             'state': state,
+        \             'context_size': 5,
+        \           })
+        \         },
+        \         'input': function('proompter#callback#prompt#chat#Input'),
+        \         'post': { prompt_callbacks_data, configurations, state ->
+        \           proompter#callback#prompt#chat#Post({
+        \             'data': prompt_callbacks_data,
+        \             'configurations': configurations,
+        \             'state': state,
+        \             'out_bufnr': v:null,
+        \           })
+        \         },
+        \       },
+        \       'generate': {
+        \         'preamble': { configurations, state ->
+        \           proompter#callback#prompt#generate#Preamble({
+        \             'configurations': configurations,
+        \             'state': state,
+        \             'filetype': 'javascript',
+        \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
+        \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
+        \             'response_tags': { 'start': '<RESPONSE>', 'end': '</RESPONSE>'},
+        \           })
+        \         },
+        \         'context': { configurations, state ->
+        \           proompter#callback#prompt#generate#Context({
+        \             'configurations': configurations,
+        \             'state': state,
+        \             'context_size': 5,
+        \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
+        \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
+        \             'response_tags': { 'start': '<RESPONSE>', 'end': '</RESPONSE>'},
+        \           })
+        \         },
+        \         'input': { value, configurations, _state ->
+        \           proompter#callback#prompt#generate#Input({
+        \             'value': value,
+        \             'configurations': configurations,
+        \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
+        \           })
+        \         },
+        \         'post': { prompt_callbacks_data, configurations, _state ->
+        \           proompter#callback#prompt#generate#Post({
+        \             'data': prompt_callbacks_data,
+        \             'configurations': configurations,
+        \             'out_bufnr': v:null,
+        \           })
+        \         },
+        \       },
+        \     },
+        \   },
+        \   'channel': {
+        \     'address': '127.0.0.1:11435',
+        \     'options': {
+        \       'mode': 'raw',
+        \       'callback': { _channel_response, api_response ->
+        \         proompter#callback#channel#StreamToBuffer(
+        \           api_response,
+        \           g:proompter,
+        \           g:proompter_state,
+        \           v:null,
+        \         )
+        \       },
+        \     },
+        \   },
+        \   'models': {
+        \     'codellama': {
+        \       'prompt_callbacks': {
+        \         'chat': {},
+        \         'generate': {},
+        \       },
+        \       'data': {
+        \         'prompt': '',
+        \         'raw': v:false,
+        \         'stream': v:true,
+        \       },
+        \     },
+        \   },
+        \ }
+<
+2.1. Configuration explanations         *proompter-configuration-explanations*
+
+                                              *proompter-configuration-select*
+{dictionary} with `model_name` {string} defined that points into the
+`g:proompter.models` dictionary.  Example: >
+  let g:proompter = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \   'models': {
+        \     'codellama': {
+        \       '...': '...'
+        \     },
+        \   },
+        \ }
+
+<
+                                                 *proompter-configuration-api*
+{dictionary} with `url` {string} defined that Ollama API is expected to listen
+on for `/generate` or `/chat` endpoint requests.  Examples: >
+  let g:proompter = {
+        \   'api': {
+        \     'url': 'http://127.0.0.1:11434/api/chat',
+        \   },
+        \ }
+
+  let g:proompter = {
+        \   'api': {
+        \     'url': 'http://127.0.0.1:11434/api/generate',
+        \   },
+        \ }
+<
+You may also define default callbacks under `g:proompter.api` name-space,
+per-endpoint, for parsing prompts into an expected format, ex. >
+  let g:proompter = {
+        \   'api': {
+        \     'url': 'http://127.0.0.1:11434/api/generate',
+        \     'prompt_callbacks': {
+        \       'chat': { '...': '...' },
+        \       'generate': { '...': '...' },
+        \     },
+        \   },
+        \ }
+<
+...  These may later be overridden on a per-model basis within the
+`g:proompter.models[model_name].prompt_callbacks` data-structure.  Review the
+|proompter-configuration-models-callbacks| sections for more details.
+
+                                             *proompter-configuration-channel*
+{dictionary} with `address` {string} defined that `proompter-channel-proxy.py`
+is expected to listen for Vim channel requests, as well as `options`
+dictionary that are passed to |ch_open()|. >
+  {
+    'channel': {
+      'address': '127.0.0.1:11435',
+      'options': {
+        'mode': '<json|js|nl|raw|lsp>',
+        'callback': <Funcref>,
+      },
+    },
+  }
+
+Note: this plugin is only tested with `channel.options.mode == 'raw'`, because
+this allows for crafting completely custom HTTP POST request content.
+
+Example: >
+  let g:proompter = {
+        \   'channel': {
+        \     'address': '127.0.0.1:11435',
+        \     'options': {
+        \       'mode': 'raw',
+        \       'callback': { _channel_response, api_response ->
+        \         proompter#callback#channel#StreamToBuffer(
+        \           api_response,
+        \           g:proompter,
+        \           g:proompter_state,
+        \           v:null,
+        \         )
+        \       },
+        \     },
+        \   },
+        \ }
+<
+Note: to simulate asynchronous behaviors this plugin requires a |channel|
+proxy because |channel-address| does not allow for defining a path, and Ollama
+API currently requires targeting a URL path to invoke various features.
+
+                                              *proompter-configuration-models*
+{dictionary} of dictionaries, with a structure similar to; >
+  {
+    '<g:proompter.select.model_name>': {
+      'prompt_callbacks': {
+        'preamble': <Funcref>,
+        'context': <Funcref>,
+        'input': <Funcref>,
+        'post': <Funcref>,
+      },
+      'data': {
+        'prompt': '<string>',
+        'raw': <v:false|v:true>,
+        'stream': <v:false|v:true>,
+      },
+    },
+  }
+<
+Note: provided you use functions provided this plugin is _mostly_ compatible
+with `data.stream` set to either `v:true` or `v:false`.  And setting
+`data.raw` to `v:true` is currently untested.
+
+                                    *proompter-configuration-models-callbacks*
+Each callback should return a {string} when `g:proompter.api.url` endpoint is
+`/generate`, or a {list} of dictionaries with `role` and `content` keys
+defined with strings when endpoint is `/chat`.  Review the following links for
+Ollama API expectations;
+
+  - https://github.com/ollama/ollama/blob/main/docs/api.md#parameters
+  - https://github.com/ollama/ollama/blob/main/docs/api.md#parameters-1
+
+TLDR
+  - `/api/chat` >
+  [
+    {
+      'role': 'system',
+      'content': 'Pretend I am your pirate captain, you are my crew, say "Aye Aye" instead of "yes"!',
+    },
+    {
+      'role': 'user',
+      'content': 'You must write a swash-buckling haiku about Vim being the best text editor, or walk the plank!',
+    },
+  ]
+<
+  - `/api/generate` >
+  <PRE> def compute_gcd(x, y): <SUF>return result <MID>
+<
+                    *proompter-configuration-models-prompt-callbacks-preamble*
+Default `preamble` callback is provided {dictionary} references to
+`g:proompter`, and `g:proompter_state`, as first two parameters.  And should
+return a {string} or dictionary {list}, depending on API endpoint, as
+described in |proompter-configuration-models-callbacks| section.
+
+Intended use-case is to _prime_ LLM with behavior constraints, context about
+file and/or topic.  Example: >
+  function! Preamble(configurations, _state) abort
+    let l:endpoint = split(a:configurations.api.url, '/')[-1]
+    let l:endpoint = split(l:endpoint, '?')[0]
+    if l:endpoint == 'chat'
+      return [
+            \   {
+            \     'role': 'system',
+            \     'content': 'You are an expert with ' . &filetype
+            \   },
+            \ ]
+    elseif l:endpoint == 'generate'
+      return 'You are an expert with ' . &filetype
+    else
+      throw 'Unknown endpoint ->' . a:configurations.api.url
+    endif
+  endfunction
+<
+                     *proompter-configuration-models-prompt-callbacks-context*
+Default `context` callback is provided {dictionary} references to
+`g:proompter`, and `g:proompter_state`, as first two parameters.  And should
+return a {string} or dictionary {list}, depending on API endpoint, as
+described in |proompter-configuration-models-callbacks| section.
+
+Intended use-case it to resubmit past prompts, and responses, so LLM can
+continue a longer train of thought.  Example: >
+  function! Context(configurations, state) abort
+    let l:endpoint = split(a:configurations.api.url, '/')[-1]
+    let l:endpoint = split(l:endpoint, '?')[0]
+
+    let l:context_size = 5
+    let l:messages = a:state.messages[max([len(a:state.messages) - l:context_size, 0]):]
+
+    if !len(l:messages)
+      if l:endpoint == 'chat'
+        return []
+      elseif l:endpoint == 'generate'
+        return ''
+      else
+        throw 'Unknown endpoint ->' . a:configurations.api.url
+      endif
+    endif
+
+    if l:endpoint == 'chat'
+      return mapnew(l:messages, { _index, entry ->
+            \   { 'role': entry.message.role, 'content': entry.message.content }
+            \ })
+    elseif l:endpoint == 'generate'
+      return join(mapnew(l:messages, { _index, entry ->
+            \   entry.message.role . ': ' . entry.message.content
+            \ }), '\n\n')
+    else
+      throw 'Unknown endpoint ->' . a:configurations.api.url
+    endif
+  endfunction
+<
+                       *proompter-configuration-models-prompt-callbacks-input*
+Default `context` callback is provided {string} as the first parameter, and
+{dictionary} references to `g:proompter`, and `g:proompter_state`, as second
+and third parameters.  And should return a {string} or dictionary {list},
+depending on API endpoint, as described in
+|proompter-configuration-models-callbacks| section.
+
+Intended use-case is adding formatting, and/or additional information, based
+on input.  Example: >
+  ""
+  " WARNING: this is a naive, and dangerous, method for obtaining doc-comments
+  function! Input(value, _configurations, _state) abort
+    let l:endpoint = split(a:configurations.api.url, '/')[-1]
+    let l:endpoint = split(l:endpoint, '?')[0]
+
+    if &filetype != 'python'
+      if l:endpoint == 'chat'
+        return [{ 'role': 'user', 'content': a:value }]
+      elseif l:endpoint == 'generate'
+        return a:value
+      else
+        throw 'Unknown endpoint ->' . a:configurations.api.url
+      endif
+    endif
+
+    let l:docs_found = {}
+    let l:pattern = '\v<\w+(\()@='
+    for l:line in split(a:value, '\n')
+      let [l:key, l:index_start, l:index_end] = matchstrpos(l:line, l:pattern, 0)
+      while l:index_start > -1 && l:index_end > -1
+        if !len(get(l:docs_found, l:key, ''))
+          let l:python_help = [
+                \   'pythonx << EOF',
+                \   'try:',
+                \   '  help(' . l:key . ')',
+                \   'except NameError:',
+                \   '  import ' . split(l:key, '\.')[0],
+                \   '  help(' . l:key . ')',
+                \   'EOF',
+                \ ]
+
+          let l:docs_entry = execute join(l:python_help_lines, "\n")
+
+          let l:docs_found[l:key] = l:docs_entry
+        endif
+        let [l:key, l:index_start, l:index_end] = matchstrpos(l:line, l:pattern, l:index_end)
+      endwhile
+    endfor
+
+    if l:endpoint == 'chat'
+      if !len(l:docs_found)
+        return [{ 'role': 'user', 'content': a:value }]
+      endif
+
+      return extend(
+            \   [{ 'role': 'user', 'content': 'Here are all relevant Python documentation I can find' }]
+            \   mapnew(l:docs_found, { _key, doc_value ->
+            \     { 'role': 'user', 'content': doc_value }
+            \   }),
+            \   [{ 'role': 'user', 'content': a:value }]
+            \ )
+    elseif l:endpoint == 'generate'
+      return a:value
+    else
+      throw 'Unknown endpoint ->' . a:configurations.api.url
+    endif
+  endfunction
+<
+                        *proompter-configuration-models-prompt-callbacks-post*
+Default `context` callback is provided {dictionary} as the first parameter
+with results of previous callbacks, and {dictionary} references to
+`g:proompter`, and `g:proompter_state`, as second and third parameters.  And
+should return a {string} or dictionary {list}, depending on API endpoint, as
+described in |proompter-configuration-models-callbacks| section.
+
+Intended use-case is merging results from previous callbacks, preforming any
+sanity checks, prior to returning result for consumption by either;
+  - |proompter#SendPrompt|
+  - |proompter#SendHighlightedText|
+
+Example: >
+  function! Post(prompt_callbacks_data, configurations, _state) abort
+    let l:endpoint = split(a:configurations.api.url, '/')[-1]
+    let l:endpoint = split(l:endpoint, '?')[0]
+
+    let l:keys = [ 'preamble', 'context', 'input' ]
+    if l:endpoint == 'chat'
+      let l:results = []
+      for l:key in l:keys
+        let l:messages = get(a:prompt_callbacks_data, l:key, [])
+        if len(l:line)
+          call extend(l:results, l:messages)
+        endif
+      endfor
+      return l:results
+    elseif l:endpoint == 'generate'
+      let l:results = []
+      for l:key in l:keys
+        let l:line = get(a:prompt_callbacks_data, l:key, '')
+        if len(l:line)
+          call add(l:results, l:line)
+        endif
+      endfor
+      return join(l:results, "\n")
+    else
+      throw 'Unknown endpoint ->' . a:configurations.api.url
+    endif
+  endfunction
+<
+Note: in the future the |proompter#SendPrompt| function, and those that call
+it automatically detect state of `g:proompter.api.url` endpoint, and call
+either |proompter#SendPromptToGenerate| or |proompter#SendPromptToChat| as
+necessary.  This means you may choose to instead focus on a particular API
+endpoint, instead of preforming checks at every callback X-D
+
+==============================================================================
+3. Functions                                             *proompter-functions*
 
 There are many functions provided by this plugin most, if not all, organized
 under name-spaces provided by `autoload/` directory and file paths.
@@ -22,6 +479,7 @@ Development details about auto loading maybe found via; |autoload-functions|,
 proompter#SendPrompt({string}, {dictionary}, {dictionary})  *proompter#SendPrompt*
                 Detects API endpoint in `configurations.api.url` and forward
                 call to one of the following functions;
+                  - |proompter#SendPromptToChat|
                   - |proompter#SendPromptToGenerate|
 
                 Parameters:
@@ -37,17 +495,39 @@ proompter#SendHighlightedText({dictionary})    *proompter#SendHighlightedText*
                   - {string} prefix_input Optional text prefixed to line range
                   - {dictionary} |proompter-configuration| passed un-mutated
 
-proompter#SendPromptToGenerate({string}, {dictionary}, {dictionary})  *proompter#SendPromptToGenerate*
+proompter#SendPromptToChat({string}, {dictionary}, {dictionary}) *proompter#SendPromptToChat*
                 Using options read from {dictionary} try to format {string} as
-                value for encoding into JSON value sent to LLM.  For many
-                use-cases this function is your entry point for this plugin.
+                value for encoding into JSON value sent to LLM.
 
                 Saves the `value` to `g:proompter_state.messages` >
   {
-    'message': {
-      'role': 'user',
-      'content': 'Tell me in one sentence why Vim is the best text editor.',
-    },
+    "model": "codellama",
+    "created_at": "2024-09-20T23:25:06.675058548Z",
+    "message": {
+      "role": "user",
+      "content": "Tell me Vim is the best text editor.",
+      "image": v:null,
+    }
+  }
+<
+                Parameters:
+                  - {string} `value` What to send to LLM
+                  - {dictionary} `configurations` Defaults to `g:proompter`
+                  - {dictionary} `state` Defaults to `g:proompter_state`
+
+proompter#SendPromptToGenerate({string}, {dictionary}, {dictionary})  *proompter#SendPromptToGenerate*
+                Using options read from {dictionary} try to format {string} as
+                value for encoding into JSON value sent to LLM.
+
+                Saves the `value` to `g:proompter_state.messages` >
+  {
+    "model": "codellama",
+    "created_at": "2024-09-20T23:25:06.675058548Z",
+    "message": {
+      "role": "user",
+      "content": "Tell me Vim is the best text editor.",
+      "image": v:null,
+    }
   }
 <
                 Parameters:
@@ -493,109 +973,7 @@ proompter#parse#HTTPResponse({string})          *proompter#parse#HTTPResponse*
                 sub-values to be present on top-level keys.
 
 ==============================================================================
-2. Configuration                               *proompter-configuration*
-
-                Default configurations currently are; >
-  let g:proompter = {
-        \   'select': {
-        \     'model_name': 'codellama',
-        \   },
-        \   'api': {
-        \     'url': 'http://127.0.0.1:11434/api/generate',
-        \   },
-        \   'channel': {
-        \     'address': '127.0.0.1:11435',
-        \     'options': {
-        \       'mode': 'raw',
-        \       'callback': v:null,
-        \     },
-        \   },
-        \   'models': {
-        \     'codellama': {
-        \       'prompt_callbacks': {
-        \         'pre': v:null,
-        \         'prompt': v:null,
-        \         'input': v:null,
-        \         'post': v:null,
-        \       },
-        \       'data': {
-        \         'prompt': '',
-        \         'raw': v:false,
-        \         'stream': v:true,
-        \       },
-        \     },
-        \   },
-        \ }
-<
-                ...  Please define your customizations to load before this
-                script to have defaults defaulted and customization correctly
-                overwrite configurations.
-
-                Example of defining custom callback functions; >
-  let g:proompter = {
-        \   'select': {
-        \     'model_name': 'codellama',
-        \   },
-        \   'api': {
-        \     'url': 'http://127.0.0.1:11434/api/generate',
-        \   },
-        \   'channel': {
-        \     'address': '127.0.0.1:11435',
-        \     'options': {
-        \       'mode': 'raw',
-        \       'callback': { _channel_response, api_response ->
-        \         proompter#callback#channel#StreamToBuffer(
-        \           api_response,
-        \           g:proompter,
-        \           g:proompter_state,
-        \           v:null,
-        \         )
-        \       },
-        \     },
-        \   },
-        \   'models': {
-        \     'codellama': {
-        \       'prompt_callbacks': {
-        \         'pre': { configurations, state ->
-        \           proompter#callback#prompt#Generate_Pre({
-        \             'configurations': configurations,
-        \             'state': state,
-        \             'context_size': 5,
-        \             'filetype': 'javascript',
-        \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
-        \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
-        \           })
-        \         },
-        \         'input': { value, configurations, state ->
-        \           proompter#callback#prompt#Generate_Input({
-        \             'value': value,
-        \             'configurations': configurations,
-        \             'state': state,
-        \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
-        \           })
-        \         },
-        \         'post': { prompt_callbacks_data, configurations, state ->
-        \           proompter#callback#prompt#Generate_Post({
-        \             'data': prompt_callbacks_data,
-        \             'configurations': configurations,
-        \             'state': state,
-        \             'context_size': 5,
-        \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
-        \             'out_bufnr': v:null,
-        \           })
-        \         },
-        \       },
-        \       'data': {
-        \         'prompt': '',
-        \         'raw': v:false,
-        \         'stream': v:true,
-        \       },
-        \     },
-        \   },
-        \ }
-<
-==============================================================================
-3. Notes                                               *proompter-notes*
+4. Notes                                                     *proompter-notes*
 
 During development and testing you may wish to modify configurations while
 preserving defaults, here's an Ex mode one-liner to help with that; >
@@ -606,7 +984,7 @@ preserving defaults, here's an Ex mode one-liner to help with that; >
 <
 
 ==============================================================================
-4. Common Errors                                      *proompter-errors*
+5. Common Errors                                            *proompter-errors*
 
                 When attempting to prompt;  >
   E906: Not an open channel
