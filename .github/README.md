@@ -6,7 +6,7 @@
 
 Leverage local LLM via Vim to boost bug breading within your code
 
-## [![Byte size of Proompter][badge__main__proompter__source_code]][proompter__main__source_code] [![Open Issues][badge__issues__proompter]][issues__proompter] [![Open Pull Requests][badge__pull_requests__proompter]][pull_requests__proompter] [![Latest commits][badge__commits__proompter__main]][commits__proompter__main]    [![License][badge__license]][branch__current__license]
+## [![Byte size of Proompter][badge__main__proompter__source_code]][proompter__main__source_code] [![Open Issues][badge__issues__proompter]][issues__proompter] [![Open Pull Requests][badge__pull_requests__proompter]][pull_requests__proompter] [![Latest commits][badge__commits__proompter__main]][commits__proompter__main][![GitHub Actions Build Status][badge__github_actions]][activity_log__github_actions][![License][badge__license]][branch__current__license]
 
 
 ---
@@ -435,4 +435,10 @@ For further details review full length version of
   https://liberapay.com/vim-utilities
   "&#x1F4B1; Sponsor developments and projects that vim-utilities maintains via Liberapay"
 
+
+[badge__github_actions]:
+  https://github.com/vim-utilities/proompter/actions/workflows/test.yaml/badge.svg?branch=main
+
+[activity_log__github_actions]:
+  https://github.com/vim-utilities/proompter/actions/workflows/test.yaml
 
