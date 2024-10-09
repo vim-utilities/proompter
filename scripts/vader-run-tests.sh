@@ -30,7 +30,7 @@ _proxy_host='127.0.0.1'
 _proxy_port=41968
 _proxy_log="$(mktemp --quiet)"
 
-_proxy_exec="${__DIR__}/scripts/proompter-channel-proxy.py"
+_proxy_exec="${__DIR__}/proompter-channel-proxy.py"
 _proxy_args=(--host "${_proxy_host}" --port "${_proxy_port}" --mock --verbose)
 _proxy_search="$(pgrep --full "${_proxy_exec##*/} (--mock|--port ${_proxy_port}).*(--port ${_proxy_port}|--mock)")"
 
