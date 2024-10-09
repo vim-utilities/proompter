@@ -3,8 +3,24 @@ name: Test
 on:
   push:
     branches: [main]
+    paths:
+      - ./github/workflows/**/*.yaml
+      - autoload/**/*.vim
+      - plugin/**/*.vim
+      - scripts/**/*.py
+      - scripts/**/*.sh
+      - tests/**/*.vader
+
   pull_request:
     branches: [main]
+    paths:
+      - ./github/workflows/**/*.yaml
+      - autoload/**/*.vim
+      - plugin/**/*.vim
+      - scripts/**/*.py
+      - scripts/**/*.sh
+      - tests/**/*.vader
+
   workflow_dispatch:
 
 jobs:
@@ -18,13 +34,20 @@ jobs:
       - name: Install Vim
         run: sudo apt-get install vim
 
-      - name: Test
+      - name: Install Vader
         run: |
+          mkdir -vp ~/.vim/plugged
+          pushd ~/.vim/plugged
           git clone https://github.com/junegunn/vader.vim.git
-          vim -Nu <(cat << VIMRC
-          set rtp+=vader.vim
-          set rtp+=.
-          VIMRC) -c 'silent Vader! tests/units/**/*.vader' > /dev/null
+          popd
+
+      - name: Test units
+        run: |
+          scripts/vader-run-tests.sh --test units --cicd > /dev/null
+
+      - name: Test mocks
+        run: |
+          scripts/vader-run-tests.sh --test mocks --cicd > /dev/null
 
 
 ##
