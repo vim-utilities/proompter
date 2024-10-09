@@ -67,7 +67,7 @@ function! proompter#lib#MessagesJSONRead(file_path, configurations = g:proompter
     throw 'Cannot read file at -> ' . a:file_path
   endif
 
-  return json_decode(readfile(l:file_path))
+  return json_decode(join(readfile(l:file_path, ''), '\n'))
 endfunction
 
 ""
@@ -89,7 +89,7 @@ function! proompter#lib#MessagesJSONWrite(file_path, configurations = g:proompte
     throw 'No messages to write'
   endif
 
-  writefile(json_encode(l:messages), a:file_path, 's')
+  call writefile([json_encode(l:messages)], a:file_path, 's')
 endfunction
 
 ""
