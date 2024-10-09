@@ -140,7 +140,7 @@ if ((CICD)); then
 	set rtp+=~/.vim/plugged/vader.vim
 	set rtp+=.
 VIMRC
-) -c "Vader! ${_path_glob}"
+) -c "silent Vader! ${_path_glob}"
 	_tests_exit_status="${?}"
 else
 	vim -Nu <(cat <<VIMRC
