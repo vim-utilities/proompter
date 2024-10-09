@@ -102,12 +102,15 @@ function! proompter#parse#JSONLinesFromHTTPResponse(data) abort
     if l:inside_string
       if l:character == '\'
         let l:escape_count += 1
-      elseif l:character == '"'
-        if l:escape_count % 2 == 0
-          let l:inside_string = v:false
-        else
-          let l:inside_string = v:true
+      else
+        if l:character == '"'
+          if l:escape_count % 2 == 0
+            let l:inside_string = v:false
+          else
+            let l:inside_string = v:true
+          endif
         endif
+
         let l:escape_count = 0
       endif
     elseif l:character == '"'

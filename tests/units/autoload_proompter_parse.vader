@@ -276,6 +276,20 @@ Execute (proompter#parse#JSONLinesFromHTTPResponse -- Handles escaped backslashe
 
   AssertEqual dictionary_list[0].key, '\'
   AssertEqual dictionary_list[1].key, '\\'
+
+Execute (proompter#parse#JSONLinesFromHTTPResponse -- Handles literal and escaped newlines correctly):
+  let separator = ""
+
+  let data_lines = [
+        \   '{"key":"\n"}',
+        \   '{"key":"\\n\\n"}',
+        \ ]
+
+  let dictionary_list = proompter#parse#JSONLinesFromHTTPResponse(join(data_lines, separator))
+  AssertEqual len(dictionary_list), len(data_lines)
+
+  AssertEqual dictionary_list[0].key, "\n"
+  AssertEqual dictionary_list[1].key, "\\n\\n"
 " }}}
 ""
 
