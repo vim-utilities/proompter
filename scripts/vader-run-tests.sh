@@ -163,9 +163,12 @@ if ((_kill_proxy)); then
 	fi
 fi
 
-printf 'Mocked Proxy Logs\n'
-cat "${_proxy_log}"
+if grep -qE '\<mocks\>' <<<"${_test}"; then
+	printf 'Mocked Proxy Logs\n'
+	cat "${_proxy_log}"
 
-rm "${_proxy_log:?No tmp file to remove}"
+	rm "${_proxy_log:?No tmp file to remove}"
+fi
+
 exit "${_tests_exit_status}"
 
