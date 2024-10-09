@@ -33,6 +33,16 @@ The format is based on [Keep a Changelog][] and this project adheres to
 ______
 
 
+## [0.0.4] - 2024-10-08
+
+
+- [X] Fix JSON parser!!!
+- [X] Optimize and normalize proxy streaming behavior for real and mock classes
+
+
+______
+
+
 ## [0.0.3] - 2024-10-07
 
 

@@ -135,12 +135,18 @@ class ChannelProxy(http.server.SimpleHTTPRequestHandler):
             if self.server.verbose:
                 print("Streaming response ->", response)
 
+            self.send_response(response.status_code)
+            for (keyword, value) in response.headers.items():
+                if self.server.verbose:
+                    print("Header -- keyword | value ->", keyword, '|', value)
+                self.send_header(keyword, value)
+
+            if len(response.headers):
+                self.end_headers()
+
             for line in response.iter_lines():
                 if self.server.verbose:
                     print("  line ->", line)
-                self.send_response(response.status_code)
-                self.send_header('Content-Type', 'application/json')
-                self.end_headers()
                 self.wfile.write(line)
         else:
             if self.server.verbose:
@@ -294,19 +300,20 @@ class ChannelProxy_Mock(ChannelProxy):
 
         ## Attempt to pare-out headers before reading lines of response body
         mock_response.begin()
+        self.send_response(mock_response.code)
+        print('  mock_response.code ->', mock_response.code)
+
+        for header in mock_response.getheaders():
+            print('  header ->', header)
+            self.send_header(*header)
+
+        if len(mock_response.headers):
+            self.end_headers()
+
         while True:
             line = mock_response.readline()
             if len(line) <= 0:
                 break
-
-            self.send_response(mock_response.code)
-            print('  mock_response.code ->', mock_response.code)
-            for header in mock_response.getheaders():
-                print('  header ->', header)
-                self.send_header(*header)
-
-            if len(mock_response.headers):
-                self.end_headers()
 
             print('  line ->', line)
             self.wfile.write(line)
