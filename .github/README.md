@@ -42,7 +42,7 @@ Leverage local LLM via Vim to boost bug breading within your code
   "&#x1F3D7; Prerequisites and/or dependencies that this project needs to function properly"
 
 
-This repository requires the [Vim][vim_home] text editor to be installed the
+This repository requires the [Vim][vim__home] text editor to be installed the
 source code is available on [GitHub -- `vim/vim`][vim__github], and most GNU
 Linux package managers are able to install Vim directly, eg...
 
