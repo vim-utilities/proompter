@@ -34,7 +34,7 @@ Execute (proompter#SendPromptToChat -- Uses default channel callback when stream
         \ ]
 
 
-  let base64_encoded_response = proompter#base64#encode(join([
+  let base64_encoded_response = proompter#base64#EncodeString(join([
         \   'HTTP/1.1 200 OK',
         \   'Server: SimpleHTTP/0.6 Python/3.12.6',
         \   'Date: ' . strftime('%a, %d %b %Y %T GMT'),
@@ -120,7 +120,7 @@ Execute (proompter#SendPromptToChat -- Uses default channel callback when non-st
         \   'done': v:true,
         \ }
 
-  let base64_encoded_response = proompter#base64#encode(join([
+  let base64_encoded_response = proompter#base64#EncodeString(join([
         \   'HTTP/1.1 200 OK',
         \   'Server: SimpleHTTP/0.6 Python/3.12.6',
         \   'Date: ' . strftime('%a, %d %b %Y %T GMT'),
@@ -220,7 +220,7 @@ Execute (proompter#SendPromptToChat -- Appends to buffer via example channel cal
         \ ]
 
 
-  let base64_encoded_response = proompter#base64#encode(join([
+  let base64_encoded_response = proompter#base64#EncodeString(join([
         \   'HTTP/1.1 200 OK',
         \   'Server: SimpleHTTP/0.6 Python/3.12.6',
         \   'Date: ' . strftime('%a, %d %b %Y %T GMT'),
