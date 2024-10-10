@@ -71,7 +71,7 @@ function! proompter#SendPromptToChat(value, configurations = g:proompter, state 
         \   'message': {
         \     'role': 'user',
         \     'content': a:value,
-        \     'image': v:null,
+        \     'images': v:null,
         \   },
         \ }
 
