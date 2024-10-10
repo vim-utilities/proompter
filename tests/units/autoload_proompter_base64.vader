@@ -1,0 +1,34 @@
+
+""
+" {{{
+Execute (proompter#base64#EncodeString and proompter#base64#DecodeString -- Play nice with one another):
+  let value = "Hello world\n"
+  let encoded = proompter#base64#EncodeString(value)
+  let decoded = proompter#base64#DecodeString(encoded)
+  AssertEqual decoded, value
+" }}}
+""
+
+""
+" {{{
+Execute (proompter#base64#EncodeFile and proompter#base64#DecodeToFile -- Play nice with one another):
+  let path_in = '/tmp/proompter-file-to-encode.txt'
+  let path_out = '/tmp/proompter-file-to-decoded.txt'
+
+  let value = "Hello world\n"
+
+  call writefile([value], path_in, 's')
+
+  let encoded = proompter#base64#EncodeFile(path_in)
+
+  call proompter#base64#DecodeToFile(encoded, path_out)
+
+  let path_in_content = readfile(path_in, '')
+  let path_out_content = readfile(path_out, '')
+
+  call delete(path_in)
+  call delete(path_out)
+
+  AssertEqual path_in_content, path_out_content
+" }}}
+""

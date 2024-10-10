@@ -226,6 +226,109 @@ Execute (proompter#callback#channel#StreamToBuffer -- Handles JSON stream with o
 
   AssertEqual state, expected_state
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+
+Execute(proompter#callback#channel#StreamToBuffer -- Handles JSON with newlines):
+  let separator = "\r\n"
+
+  let api_response = join([
+        \   'Server: SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date: Fri, 20 Sep 2024 23:25:06 GMT',
+        \   'Content-Type: application/json',
+        \   '',
+        \   json_encode({
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-20T23:25:01.01645329Z',
+        \     'response': 'Vim is the best!',
+        \     'done': v:false,
+        \   }),
+        \   json_encode({
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-20T23:25:06.675058548Z',
+        \     'response': "\nAnd there is no\ndoubt about it",
+        \     'done': v:true,
+        \     'done_reason': 'stop',
+        \     'total_duration': 7833808817,
+        \     'load_duration': 10021098,
+        \     'prompt_eval_count': 31,
+        \     'prompt_eval_duration': 2122796000,
+        \     'eval_count': 35,
+        \     'eval_duration': 5658536000,
+        \   }),
+        \ ], separator)
+
+
+  let configurations = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+
+  let state = { 'messages': [] }
+
+  let expected_state = {
+        \   'messages': [
+        \     {
+        \       'model': 'codellama',
+        \       'created_at': '2024-09-20T23:25:06.675058548Z',
+        \       'done': v:true,
+        \       'done_reason': 'stop',
+        \       'message': {
+        \         'role': 'assistant',
+        \         'content': "Vim is the best!\nAnd there is no\ndoubt about it",
+        \         'images': v:null,
+        \       },
+        \     },
+        \   ],
+        \ }
+
+  call proompter#callback#channel#StreamToBuffer(
+        \   api_response,
+        \   configurations,
+        \   state,
+        \   '[Vader-workbench]',
+        \ )
+
+  AssertEqual state, expected_state
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+  AssertEqual getbufline(bufnr('[Vader-workbench]'), 0, '$')[-5:-3], split(expected_state.messages[-1].message.content, "\n")
 " }}}
 ""
 
+""
+" {{{
+Execute(proompter#callback#channel#SaveImages -- Saves base64 encoded imagee):
+  " Bash: magick -size 1x1 'xc:rgb(0,0,0)' '/tmp/one-pixel.png'
+  " Vim: read! base64 --wrap=0 /tmp/one-pixel.png
+  let image_encoded = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAACYktHRAAB3YoTpAAAAAd0SU1FB+gKChMpAqfmKGQAAAAKSURBVAjXY2AAAAACAAHiIbwzAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDI0LTEwLTEwVDE5OjQxOjAxKzAwOjAwUQr9YQAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyNC0xMC0xMFQxOTo0MTowMSswMDowMCBXRd0AAAAodEVYdGRhdGU6dGltZXN0YW1wADIwMjQtMTAtMTBUMTk6NDE6MDErMDA6MDB3QmQCAAAAAElFTkSuQmCC'
+
+  let configurations = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+
+  let state = {
+        \   'messages': [
+        \     {
+        \       'images': [ image_encoded ],
+        \     }
+        \   ],
+        \ }
+
+  let expected_state = deepcopy(state)
+
+  let paths = proompter#callback#channel#SaveImages(0, configurations, state)
+
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+  AssertEqual state, expected_state, 'Unexpected mutation of state'
+
+  let re_encoded = system('base64 --wrap=0 ' . paths[0])
+  AssertEqual image_encoded, re_encoded
+  call delete(paths[0])
+
+" }}}
+""
