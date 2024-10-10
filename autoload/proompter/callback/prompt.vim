@@ -13,7 +13,7 @@
 " TODO: thoroughly test that bad paths cannot be injected to traverse above
 " current working directory
 function! proompter#callback#prompt#EncodeImagesFromInput(input, configurations = g:proompter, state = g:proompter_state) abort
-  let l:paths = map(matchstrlist([input], '\v\./(\w+(/\w+)?)\.(jpg|png)>'), { _index, matched ->
+  let l:paths = map(matchstrlist([a:input], '\v\./(\w+(/\w+)?)\.(jpg|png)>'), { _index, matched ->
         \   matched.text
         \ })
 

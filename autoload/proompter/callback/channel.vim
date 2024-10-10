@@ -255,7 +255,7 @@ function! proompter#callback#channel#StreamToBuffer(api_response, configurations
 
     call proompter#lib#ConcatenateWithLastLineOfBuffer(l:out_bufnr, "\n\n")
 
-    if type(l:entry.message.images) != v:t_null && len(l:entry.message.images)
+    if type(l:entry.message.images) != v:t_none && len(l:entry.message.images)
       call proompter#callback#channel#SaveImages(-1, a:configurations, a:state)
     endif
   endif
