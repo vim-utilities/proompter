@@ -25,6 +25,7 @@ let g:proompter = {
       \           })
       \         },
       \         'input': function('proompter#callback#prompt#chat#Input'),
+      \         'images': function('proompter#callback#prompt#EncodeImagesFromInput'),
       \         'post': { prompt_callbacks_data, configurations, state ->
       \           proompter#callback#prompt#chat#Post({
       \             'data': prompt_callbacks_data,
@@ -62,6 +63,7 @@ let g:proompter = {
       \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
       \           })
       \         },
+      \         'images': function('proompter#callback#prompt#EncodeImagesFromInput'),
       \         'post': { prompt_callbacks_data, configurations, _state ->
       \           proompter#callback#prompt#generate#Post({
       \             'data': prompt_callbacks_data,
