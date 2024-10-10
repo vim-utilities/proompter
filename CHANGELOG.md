@@ -20,14 +20,30 @@ The format is based on [Keep a Changelog][] and this project adheres to
   - [ ] tested with system-level SystemD
    > Note; the `Wants`, `Requires`, and other bindings to `ollama.service` may
    > need additional testing
-- [ ] Parse image input/outputs
-  - [ ] Client can send images for encoding as Base64 by file/directory path
-  - [ ] LLM can reply with Base64 images for configured callback to handle
 - [ ] Allow [python-hot-reload][] of `scripts/proompter-channel-proxy.py`?
 - [ ] Passing mock tests?!
   - [ ] `autoload/proompter.vim` needs mock tests for; `proompter#SendPromptToGenerate`, `proompter#SendPrompt`, `proompter#SendHighlightedText`, `proompter#cancel`, `proompter#load`, `proompter#unload`
 
 [python-hot-reload]: https://stackoverflow.com/questions/29960634/reload-the-currently-running-python-script
+
+
+______
+
+
+## [0.0.5] - 2024-10-10
+
+
+- [X] Fix `g:proompter_state.messages` save/load to/from JSON file
+- [X] Add and fix `base64` wrappers, plus track related unit tests
+- [X] Parse image input/outputs
+  - [X] Client can send images for encoding as Base64 by file/directory path
+  - [X] LLM can reply with Base64 images for configured callback to handle
+  - [X] Experimental support for saving generated images to `/tmp` directory
+   > Note; due to limited support for image generation this by default is only
+   > active when using `proompter#callback#channel#StreamToBuffer` function.
+   >
+   > Additionally, the `/api/chat` end-point context callback will re-submit
+   > past images, but for now the `/api/generate` context callback does not.
 
 
 ______
