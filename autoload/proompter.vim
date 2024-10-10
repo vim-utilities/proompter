@@ -110,16 +110,21 @@ function! proompter#SendPromptToChat(value, configurations = g:proompter, state 
             \ }), "\n\n")
     endif
 
-    if type(get(l:callbacks, 'images')) == v:t_func
-      let l:entry.images = l:callbacks.images(a:value, a:configurations, a:state)
-    endif
-
     if type(get(l:callbacks, 'post')) == v:t_func
       call extend(l:messages, l:callbacks.post(l:callbacks_results, a:configurations, a:state))
     else
       call extend(l:messages, l:callbacks_results.preamble)
       call extend(l:messages, l:callbacks_results.context)
       call extend(l:messages, l:callbacks_results.input)
+    endif
+
+    if type(get(l:callbacks, 'images')) == v:t_func
+      let l:entry.message.images = l:callbacks.images(a:value, a:configurations, a:state)
+
+      let l:last_message = l:messages[-1]
+      if type(get(l:last_message, 'images', v:null)) == v:t_none
+        let l:last_message.images = l:entry.message.images
+      endif
     endif
   else
     call add(l:messages, { 'role': 'user', 'content': a:value })
@@ -217,7 +222,8 @@ function! proompter#SendPromptToGenerate(value, configurations = g:proompter, st
     endif
 
     if type(get(l:callbacks, 'images')) == v:t_func
-      let l:entry.images = l:callbacks.images(a:value, a:configurations, a:state)
+      let l:entry.messages.images = l:callbacks.images(a:value, a:configurations, a:state)
+      let l:model.data.images = l:entry.messages.images
     endif
 
     if type(get(l:callbacks, 'post')) == v:t_func
