@@ -130,7 +130,11 @@ function! proompter#callback#prompt#chat#Context(kwargs) abort
   endif
 
   return mapnew(l:messages, { _index, entry ->
-        \   { 'role': entry.message.role, 'content': entry.message.content }
+        \   {
+        \     'role': entry.message.role,
+        \     'content': entry.message.content,
+        \     'images': get(entry.message, 'images', v:null),
+        \   }
         \ })
 endfunction
 
