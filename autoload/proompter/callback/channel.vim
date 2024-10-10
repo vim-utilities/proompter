@@ -252,10 +252,70 @@ function! proompter#callback#channel#StreamToBuffer(api_response, configurations
     let l:entry.model = l:http_response.body[-1].model
     let l:entry.done = l:http_response.body[-1].done
     let l:entry.done_reason = get(l:http_response.body[-1], 'done_reason', v:null)
+
     call proompter#lib#ConcatenateWithLastLineOfBuffer(l:out_bufnr, "\n\n")
+
+    if type(l:entry.message.images) != v:t_null && len(l:entry.message.images)
+      call proompter#callback#channel#SaveImages(-1, a:configurations, a:state)
+    endif
   endif
 
   let l:entry.message.role = 'assistant'
+endfunction
+
+""
+" Saves base64 encoded listed at `message_index` from `state.messages` and
+" returns list of created file paths
+"
+" Parameter: {number} message_index - What message to parse images from
+" Parameter: {define__configurations} configurations - Dictionary
+" Parameter: {define__proompter_state} state - Dictionary
+"
+" Throws: 'Failed to write image -> [path]' when file creation failed and not
+" other paths were written
+" Warns: 'Failed to write image -> [path]'  when file creation failed, but
+" other paths were written
+"
+" TODO: add configurations to `g:proompter` for defining directory
+" TODO: maybe find out file extensions some how for output images
+" TODO: maybe add OS detection for MS-Dos style path separators
+function! proompter#callback#channel#SaveImages(message_index = -1, configurations = g:proompter, state = g:proompter_state) abort
+  let l:entry = get(get(a:state, 'messages', []), a:message_index, {})
+  let l:images = get(l:entry, 'images', v:null)
+  if l:images == v:null
+    throw 'No images at message index ->' . a:message_index
+  endif
+
+  let l:paths = []
+  for l:image in l:images
+    let l:path = join([
+          \   '/tmp/',
+          \   a:configurations.select.model_name,
+          \   '_',
+          \   strftime("%Y-%m-%d_%H%M%S"),
+          \   '.png',
+          \ ], '')
+
+    if filereadable(l:path) || filewritable(l:path)
+      echow 'Image already exists at ->' l:path
+      continue
+    endif
+
+    call proompter#base64#DecodeToFile(l:image, l:path)
+
+    if filereadable(l:path) && filewritable(l:path)
+      call add(l:paths, path)
+    else
+      if len(l:paths)
+        echow 'Failed to write image ->' l:path
+        return l:paths
+      else
+        throw 'Failed to write image -> ' . l:path
+      endif
+    endif
+  endfor
+
+  return l:paths
 endfunction
 
 " vim: expandtab
