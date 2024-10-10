@@ -57,7 +57,17 @@ function! proompter#SendPromptToChat(value, configurations = g:proompter, state 
   endif
 
   let l:model_name = a:configurations.select.model_name
-  let l:model = deepcopy(a:configurations.models[l:model_name])
+  let l:model = deepcopy(get(a:configurations.models, l:model_name, {
+        \   'prompt_callbacks': {
+        \     'chat': {},
+        \     'generate': {},
+        \   },
+        \   'data': {
+        \     'raw': v:false,
+        \     'stream': v:true,
+        \   },
+        \ }))
+
   let l:model.data.model = l:model_name
 
   let l:callbacks = proompter#lib#DictMerge(
@@ -155,7 +165,17 @@ function! proompter#SendPromptToGenerate(value, configurations = g:proompter, st
   endif
 
   let l:model_name = a:configurations.select.model_name
-  let l:model = deepcopy(a:configurations.models[l:model_name])
+  let l:model = deepcopy(get(a:configurations.models, l:model_name, {
+        \   'prompt_callbacks': {
+        \     'chat': {},
+        \     'generate': {},
+        \   },
+        \   'data': {
+        \     'raw': v:false,
+        \     'stream': v:true,
+        \   },
+        \ }))
+
   let l:model.data.model = l:model_name
 
   let l:prompt = get(l:model.data, 'prompt', '')
