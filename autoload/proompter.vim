@@ -100,6 +100,10 @@ function! proompter#SendPromptToChat(value, configurations = g:proompter, state 
             \ }), "\n\n")
     endif
 
+    if type(get(l:callbacks, 'images')) == v:t_func
+      let l:entry.images = l:callbacks.images(a:value, a:configurations, a:state)
+    endif
+
     if type(get(l:callbacks, 'post')) == v:t_func
       call extend(l:messages, l:callbacks.post(l:callbacks_results, a:configurations, a:state))
     else
@@ -161,6 +165,16 @@ function! proompter#SendPromptToGenerate(value, configurations = g:proompter, st
         \   get(get(l:model, 'prompt_callbacks', {}), 'generate', {}),
         \ )
 
+  let l:entry = {
+        \   'model': a:configurations.select.model_name,
+        \   'created_at': strftime('%FT%T.') . reltime()[1] . 'Z',
+        \   'message': {
+        \     'role': 'user',
+        \     'content': a:value,
+        \     'images': v:null,
+        \   },
+        \ }
+
   ""
   " Next is all about setting `l:model.data.prompt`
   if type(get(l:model, 'prompt_callbacks')) == v:t_dict
@@ -182,6 +196,10 @@ function! proompter#SendPromptToGenerate(value, configurations = g:proompter, st
       let l:callbacks_results.input .= l:callbacks.input(a:value, a:configurations, a:state)
     endif
 
+    if type(get(l:callbacks, 'images')) == v:t_func
+      let l:entry.images = l:callbacks.images(a:value, a:configurations, a:state)
+    endif
+
     if type(get(l:callbacks, 'post')) == v:t_func
       let l:prompt .= l:callbacks.post(l:callbacks_results, a:configurations, a:state)
     else
@@ -194,12 +212,7 @@ function! proompter#SendPromptToGenerate(value, configurations = g:proompter, st
   endif
   let l:model.data.prompt = l:prompt
 
-  call add(a:state.messages, {
-        \   'message': {
-        \     'role': 'user',
-        \     'content':  a:value
-        \   },
-        \ })
+  call add(a:state.messages, l:endtry)
 
   let l:post_payload = proompter#format#HTTPPost(l:model.data, a:configurations)
 
