@@ -34,9 +34,6 @@ jobs:
       - name: Install Vim
         run: sudo apt-get install vim
 
-      - name: Install Python
-        run: sudo apt-get install python
-
       - name: Install Vader
         run: |
           mkdir -vp ~/.vim/plugged
