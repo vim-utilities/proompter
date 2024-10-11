@@ -4,7 +4,12 @@
 Execute (proompter#callback#prompt#EncodeImagesFromFilePaths -- Reads and encodes a file):
   let file_path = '/tmp/checkerboard.png'
 
-  call system("magick -size 1x1 'xc:rgb(0,0,0)' " . file_path)
+  " TODO: Maybe also inspect `/etc/os-release`
+  if system('echo $GITHUB_ACTIONS') == 'true'
+    call system("convert -size 1x1 'xc:rgb(0,0,0)' " . file_path)
+  else
+    call system("magick -size 1x1 'xc:rgb(0,0,0)' " . file_path)
+  endif
 
   let images = proompter#callback#prompt#EncodeImagesFromFilePaths([
         \   file_path,
