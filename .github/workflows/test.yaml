@@ -27,47 +27,37 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies for tests
+        run: sudo apt-get install imagemagick
+
       - uses: rhysd/action-setup-vim@v1.3.5
         with:
           version: v9.1.0774
           configure-args: |
             --with-features=huge --enable-fail-if-missing --disable-nls
 
-      - name: Test Vim `system()` function
-        run: vim -u NONE -i NONE -N --cmd 'echo system("printf foo | base64 --wrap=0")' -e +qall
-        # run: vim -u NONE -i NONE -N --cmd 'echo system("base64 --wrap=0 < <(printf foo)")' -e +qall
+      - name: Install Vader
+        run: |
+          mkdir -vp ~/.vim/plugged
+          pushd ~/.vim/plugged
+          git clone https://github.com/junegunn/vader.vim.git
+          popd
 
-      # - uses: actions/checkout@v2
-      #   with:
-      #     fetch-depth: 0
+      - name: Test units
+        run: |
+          scripts/vader-run-tests.sh --test units --cicd > /dev/null
 
-      # - uses: actions/setup-python@v5
-      #   with:
-      #     python-version: '3.12' 
-
-      # - name: Install dependencies for tests
-      #   run: sudo apt-get install imagemagick
-
-      # - uses: rhysd/action-setup-vim@v1.3.5
-      #   with:
-      #     version: v9.1.0774
-      #     configure-args: |
-      #       --with-features=huge --enable-fail-if-missing --disable-nls
-
-      # - name: Install Vader
-      #   run: |
-      #     mkdir -vp ~/.vim/plugged
-      #     pushd ~/.vim/plugged
-      #     git clone https://github.com/junegunn/vader.vim.git
-      #     popd
-
-      # - name: Test units
-      #   run: |
-      #     scripts/vader-run-tests.sh --test units --cicd > /dev/null
-
-      # - name: Test mocks
-      #   run: |
-      #     scripts/vader-run-tests.sh --test mocks --cicd > /dev/null
+      - name: Test mocks
+        run: |
+          scripts/vader-run-tests.sh --test mocks --cicd > /dev/null
 
 
 ##
