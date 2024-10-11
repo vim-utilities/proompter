@@ -38,6 +38,9 @@ jobs:
       - name: Install dependencies for tests
         run: sudo apt-get install imagemagick
 
+      - name: Install dependencies for plugin
+        run: sudo apt-get install coreutils
+
       - uses: rhysd/action-setup-vim@v1.3.5
         with:
           version: v9.1.0774
