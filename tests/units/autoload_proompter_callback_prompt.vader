@@ -12,7 +12,7 @@ Execute (proompter#callback#prompt#EncodeImagesFromFilePaths -- Reads and encode
 
   " TODO: maybe figure out why hard-coded Base 64 string always fails
   let expected_entry = system('base64 --wrap=0 ' . file_path)
-  delete(file_path)
+  call delete(file_path)
 
   AssertEqual images[0], expected_entry
 " }}}

@@ -85,7 +85,11 @@ Execute (proompter#callback#prompt#chat#Context -- Formats output as expected):
   " WARNING: magic `1` only works due to size of `state.messages` and
   " `kwargs.context_size` value differences
   let expected_result = map(state.messages[1:], { _index, entry ->
-        \   { 'role': entry.message.role, 'content': entry.message.content }
+        \   {
+        \     'role': entry.message.role,
+        \     'content': entry.message.content,
+        \     'images': v:null,
+        \   }
         \ })
 
   AssertEqual result, expected_result
