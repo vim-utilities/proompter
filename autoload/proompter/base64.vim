@@ -49,8 +49,8 @@ function! proompter#base64#DecodeToFile(string, path, flags = '') abort
     throw 'No path value'
   endif
 
-  if !filereadable(a:path)
-    throw 'Cannot read file -> ' . a:path
+  if filereadable(a:path)
+    throw 'File already exists -> ' . a:path
   endif
 
   let l:path = shellescape(a:path)
