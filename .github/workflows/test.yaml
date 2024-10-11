@@ -54,6 +54,11 @@ jobs:
           git clone https://github.com/junegunn/vader.vim.git
           popd
 
+      - name: Check image magick can write file
+        run: |
+          magick -size 1x1 'xc:rgb(0,0,0)' /tmp/checkerboard.png
+          ls -ahl /tmp/checkerboard.png
+
       - name: Test units
         run: |
           scripts/vader-run-tests.sh --test units --cicd > /dev/null
