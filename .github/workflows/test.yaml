@@ -40,7 +40,7 @@ jobs:
 
       - uses: rhysd/action-setup-vim@v1.3.5
         with:
-          version: v9.1
+          version: v9.1.0774
           configure-args: |
             --with-features=huge --enable-fail-if-missing --disable-nls
 
