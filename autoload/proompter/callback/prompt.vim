@@ -30,15 +30,20 @@ endfunction
 " See: {docs} :help readfile()
 function! proompter#callback#prompt#EncodeImagesFromFilePaths(paths, _configurations = g:proompter, _state = g:proompter_state) abort
   let l:encoded_images = []
+  let l:skipped_paths = []
 
   for l:path in a:paths
     if !filereadable(l:path)
-      echow 'Cannot read image ->' l:path
+      call add(l:skipped_paths, l:path)
       continue
     endif
 
     call add(l:encoded_images, proompter#base64#EncodeFile(l:path))
   endfor
+
+  if len(l:skipped_paths)
+    echoe 'l:skipped_paths ->' l:skipped_paths
+  endif
 
   return l:encoded_images
 endfunction
