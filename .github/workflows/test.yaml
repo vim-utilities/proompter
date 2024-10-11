@@ -38,8 +38,14 @@ jobs:
       - name: Install dependencies for tests
         run: sudo apt-get install imagemagick
 
-      - name: Install Vim
-        run: sudo apt-get install vim
+      - uses: rhysd/action-setup-vim@v1.3.5
+        with:
+          version: v9.1
+          configure-args: |
+            --with-features=huge --enable-fail-if-missing --disable-nls
+
+      # - name: Install Vim
+      #   run: sudo apt-get install vim
 
       - name: Install Vader
         run: |
