@@ -52,17 +52,18 @@ jobs:
           configure-args: |
             --with-features=huge --enable-fail-if-missing --disable-nls
 
+      - name: Update PATH with cached dependencies
+        if: steps.cache-test-dependencies.outputs.cache-hit == 'true'
+        run: |
+          export PATH="/home/runner/vim-v9.1.0774/bin:$PATH"
+
       - name: Install Vader
+        if: steps.cache-test-dependencies.outputs.cache-hit != 'true'
         run: |
           mkdir -vp ~/.vim/plugged
           pushd ~/.vim/plugged
           git clone https://github.com/junegunn/vader.vim.git
           popd
-
-      - name: Check image magick/convert can write file
-        run: |
-          convert -size 1x1 'xc:rgb(0,0,0)' /tmp/checkerboard.png
-          ls -ahl /tmp/checkerboard.png
 
       - name: Test units
         run: |
