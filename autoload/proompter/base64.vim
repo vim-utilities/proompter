@@ -35,7 +35,7 @@ function! proompter#base64#EncodeFile(path) abort
   endif
 
   if !filereadable(a:path)
-    throw 'Cannot read file -> ' . a:path.
+    throw 'Cannot read file -> ' . a:path
   endif
 
   let l:path = shellescape(a:path)
@@ -50,7 +50,7 @@ function! proompter#base64#DecodeToFile(string, path, flags = '') abort
   endif
 
   if !filereadable(a:path)
-    throw 'Cannot read file -> ' . a:path.
+    throw 'Cannot read file -> ' . a:path
   endif
 
   let l:path = shellescape(a:path)
