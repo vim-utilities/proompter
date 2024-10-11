@@ -27,6 +27,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: rhysd/action-setup-vim@v1.3.5
+        with:
+          version: v9.1.0774
+          configure-args: |
+            --with-features=huge --enable-fail-if-missing --disable-nls
+
       - name: Test Vim `system()` function
         run: vim -u NONE -i NONE -N --cmd 'echo system("base64 --wrap=0 < <(printf foo)")' -e +qall
 
