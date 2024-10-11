@@ -19,6 +19,7 @@ Execute (proompter#base64#EncodeFile and proompter#base64#DecodeToFile -- Play n
   let value = "Hello world\n"
 
   call writefile([value], path_in, 's')
+  sleep 100m
 
   let encoded = proompter#base64#EncodeFile(path_in)
   sleep 100m

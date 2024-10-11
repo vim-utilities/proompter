@@ -34,7 +34,11 @@ jobs:
       - uses: actions/cache@v4
         id: cache-test-dependencies
         with:
-          path: /tmp/vim
+          path: |
+            /tmp/vim
+            /home/runner/vim-v9.1.0774
+            /home/runner/.vim
+            /home/runner/vim
           key: ubuntu-latest_v9.1.0774
 
       - uses: actions/setup-python@v5
@@ -42,7 +46,7 @@ jobs:
           python-version: '3.12'
 
       - uses: rhysd/action-setup-vim@v1.3.5
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache-test-dependencies.outputs.cache-hit != 'true'
         with:
           version: v9.1.0774
           configure-args: |
