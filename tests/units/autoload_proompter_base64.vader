@@ -4,6 +4,7 @@
 Execute (proompter#base64#EncodeString and proompter#base64#DecodeString -- Play nice with one another):
   let value = "Hello world\n"
   let encoded = proompter#base64#EncodeString(value)
+  sleep 100m
   let decoded = proompter#base64#DecodeString(encoded)
   AssertEqual decoded, value
 " }}}
@@ -20,7 +21,7 @@ Execute (proompter#base64#EncodeFile and proompter#base64#DecodeToFile -- Play n
   call writefile([value], path_in, 's')
 
   let encoded = proompter#base64#EncodeFile(path_in)
-
+  sleep 100m
   call proompter#base64#DecodeToFile(encoded, path_out)
 
   let path_in_content = readfile(path_in, '')

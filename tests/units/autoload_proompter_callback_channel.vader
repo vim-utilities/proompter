@@ -322,6 +322,7 @@ Execute(proompter#callback#channel#SaveImages -- Saves base64 encoded imagee):
   let expected_state = deepcopy(state)
 
   let paths = proompter#callback#channel#SaveImages(0, configurations, state)
+  sleep 100m
 
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
   AssertEqual state, expected_state, 'Unexpected mutation of state'
