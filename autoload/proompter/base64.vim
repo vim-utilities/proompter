@@ -10,7 +10,7 @@ function! proompter#base64#EncodeString(string) abort
     throw 'No string value'
   endif
   let l:string = shellescape(a:string)
-  return system('base64 --wrap=0 < <(printf "%s" ' . l:string . ')')
+  return system('printf "%s" ' . l:string . ' | base64 --wrap=0')
 endfunction
 
 ""
@@ -20,7 +20,7 @@ function! proompter#base64#DecodeString(string) abort
     throw 'No string value'
   endif
   let l:string = shellescape(a:string)
-  return system('base64 --decode < <(printf "%s" ' . l:string . ')')
+  return system('printf "%s" ' . l:string . ' | base64 --decode')
 endfunction
 
 ""
@@ -41,7 +41,7 @@ function! proompter#base64#DecodeToFile(string, path, flags = '') abort
   endif
   let l:path = shellescape(a:path)
   let l:string = shellescape(a:string)
-  return system('base64 --decode < <(printf "%s" ' . l:string . ') > ' . l:path)
+  return system('printf "%s" ' . l:string . ' | base64 --decode > ' . l:path)
 endfunction
 
 " vim: expandtab
