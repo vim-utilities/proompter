@@ -198,10 +198,18 @@ Execute (proompter#callback#prompt#chat#Post -- Collects inputs and preforms onl
   let expected_result = extend(
         \   [{ 'role': 'system', 'content': 'You are an expert with vim' }],
         \   mapnew(expected_state.messages, { _index, entry ->
-        \     { 'role': entry.message.role, 'content': entry.message.content }
+        \     {
+        \       'role': entry.message.role,
+        \       'content': entry.message.content,
+        \       'images': v:null,
+        \     }
         \   }),
         \ )
-  call add(expected_result, { 'role': 'user', 'content': input })
+  " TODO: double-check this following entry is what we want
+  call add(expected_result, {
+        \   'role': 'user',
+        \   'content': input,
+        \ })
 
   ""
   " Vim 8.2 may not like the following
