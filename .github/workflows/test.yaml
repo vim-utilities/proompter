@@ -34,7 +34,8 @@ jobs:
             --with-features=huge --enable-fail-if-missing --disable-nls
 
       - name: Test Vim `system()` function
-        run: vim -u NONE -i NONE -N --cmd 'echo system("base64 --wrap=0 < <(printf foo)")' -e +qall
+        run: vim -u NONE -i NONE -N --cmd 'echo system("printf foo | base64 --wrap=0")' -e +qall
+        # run: vim -u NONE -i NONE -N --cmd 'echo system("base64 --wrap=0 < <(printf foo)")' -e +qall
 
       # - uses: actions/checkout@v2
       #   with:
