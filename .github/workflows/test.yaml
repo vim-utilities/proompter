@@ -78,3 +78,4 @@ jobs:
 # Attribution:
 #
 # - https://github.com/junegunn/vader.vim/?tab=readme-ov-file#github-actions
+# - https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables
