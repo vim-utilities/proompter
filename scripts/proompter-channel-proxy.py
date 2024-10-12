@@ -110,11 +110,12 @@ class ChannelProxy(http.server.SimpleHTTPRequestHandler):
         post_data = self.rfile.read(content_length)
         json_data = json.loads(post_data)
 
-        if json_data['stream'] is True:
+        is_stream = json_data.get('stream', False)
+        if is_stream is True:
             return self._POST_Response_StreamLines(post_data)
-        elif json_data['stream'] is False:
+        elif is_stream is False:
             return self._POST_Response_Complete(post_data)
-        elif json_data['stream'] is not True:
+        else:
             return self.send_error(400, 'Bad Request', 'Body data "stream" is neither true or false')
 
     def _POST_Response_StreamLines(self, post_data):
