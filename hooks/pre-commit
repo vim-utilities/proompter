@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+
+## Find true directory this script resides in
+__SOURCE__="${BASH_SOURCE[0]}"
+while [[ -h "${__SOURCE__}" ]]; do
+	__SOURCE__="$(find "${__SOURCE__}" -type l -ls | sed -n 's@^.* -> \(.*\)@\1@p')"
+done
+__NAME__="${__SOURCE__##*/}"
+__DIR__="$(cd -P "$(dirname "${__SOURCE__}")" && pwd)"
+__G_DIR__="$(dirname "${__DIR__}")"
+__GG_DIR__="$(dirname "${__G_DIR__}")"
+__AUTHOR__='S0AndS0'
+__DESCRIPTION__='Git Hook to mitigate committing broken code via Vader unit tests'
+
+readarray -t _files_to_be_commited < <(git diff --name-only --cached -- '*.vim' '*.vader' | grep -vE '^\s*$')
+
+if [[ "${_files_to_be_commited[*]}" == '' ]]; then
+	printf >&2 '%s: Skipping unit tests\n' "${__NAME__}"
+	exit 0
+else
+	printf >&2 '%s: Running unit tests because you are committing:\n' "${__NAME__}"
+	printf >&2 '  %s\n' "${_files_to_be_commited[@]}"
+fi
+
+_args=(
+	--test 'units'
+	--cicd
+)
+
+if [[ -x "${__G_DIR__}/scripts/vader-run-tests.sh" ]]; then
+	_exec_path="${__G_DIR__}/scripts/vader-run-tests.sh"
+elif [[ -x "${__GG_DIR__}/scripts/vader-run-tests.sh" ]]; then
+	_exec_path="${__GG_DIR__}/scripts/vader-run-tests.sh"
+else
+	printf >&2 'Cannot find executable path for -> scripts/vader-run-tests.sh\n'
+	exit 127
+fi
+
+##
+# Warning: doing `command 2>&1 | parser` causes spaces to be injected outside
+# of what `parser` can capture?!
+"${_exec_path}" "${_args[@]}" 2> >(
+		awk 'BEGIN {
+			delete _buffered_lines;
+			_current_vader_file = "";
+		}
+
+		{
+			if (!_started) {
+				if ($0 ~ "^\\s+Starting Vader:") {
+					_started = 1;
+					delete _started_parts;
+					delete _buffered_lines;
+					split($0, _started_parts, "^\\s+Starting Vader:\\s+");
+					_current_vader_file = _started_parts[2];
+				}
+			} else {
+				if ($0 ~ "^\\s+Success/Total:") {
+					_started = 0;
+					delete _success_parts;
+					split($0, _success_parts, "^\\s+Success/Total:\\s+");
+					split(_success_parts[2], _success_parts, "/");
+					if (_success_parts[1] != _success_parts[2]) {
+						print _success_parts[2] - _success_parts[1],  "failures in:", _current_vader_file;
+						for (_index in _buffered_lines) {
+							print _buffered_lines[_index];
+						}
+						print $0;
+					}
+				} else {
+					_buffered_lines[length(_buffered_lines)] = $0;
+				}
+			}
+		}'
+	)
+
+_tests_exit_status="$?"
+if ! ((_tests_exit_status)); then
+	printf >&2 '%s: thinks you are good to go?!\n' "${__NAME__}"
+else
+	printf >&2 'tests exit status -> %i\n' "${_tests_exit_status}"
+	exit "${_tests_exit_status}"
+fi
+
