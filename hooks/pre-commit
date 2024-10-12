@@ -15,7 +15,7 @@ __DESCRIPTION__='Git Hook to mitigate committing broken code via Vader unit test
 
 readarray -t _files_to_be_commited < <(git diff --name-only --cached -- '*.vim' '*.vader' | grep -vE '^\s*$')
 
-if [[ "${_files_to_be_commited[*]}" == '' ]]; then
+if ! ((${#_files_to_be_commited[@]})); then
 	printf >&2 '%s: Skipping unit tests\n' "${__NAME__}"
 	exit 0
 else
