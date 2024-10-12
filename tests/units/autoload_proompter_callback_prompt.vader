@@ -5,7 +5,7 @@ Execute (proompter#callback#prompt#EncodeImagesFromFilePaths -- Reads and encode
   let file_path = '/tmp/checkerboard.png'
 
   " TODO: Maybe also inspect `/etc/os-release`
-  if system('echo $GITHUB_ACTIONS') == 'true'
+  if system('echo $GITHUB_ACTIONS') =~ 'true'
     echoe "system('echo $GITHUB_ACTIONS') ->" system('echo $GITHUB_ACTIONS')
     call system("convert -size 1x1 'xc:rgb(0,0,0)' " . file_path)
   else
