@@ -135,7 +135,15 @@ function! proompter#callback#channel#StreamToMessages(api_response, configuratio
     let l:entry.created_at = l:http_response.body[-1].created_at
     let l:entry.model = l:http_response.body[-1].model
     let l:entry.done = l:http_response.body[-1].done
+
+    ""
+    " From `/api/generate` when stream is `false`
+    " From `/api/chat`
     let l:entry.done_reason = get(l:http_response.body[-1], 'done_reason', v:null)
+
+    ""
+    " From `/api/generate` to keep short memory via encodings
+    let l:entry.context = get(l:http_response.body[-1], 'context', v:null)
   endif
 
   let l:entry.message.role = 'assistant'
@@ -252,6 +260,7 @@ function! proompter#callback#channel#StreamToBuffer(api_response, configurations
     let l:entry.model = l:http_response.body[-1].model
     let l:entry.done = l:http_response.body[-1].done
     let l:entry.done_reason = get(l:http_response.body[-1], 'done_reason', v:null)
+    let l:entry.context = get(l:http_response.body[-1], 'context', v:null)
 
     call proompter#lib#ConcatenateWithLastLineOfBuffer(l:out_bufnr, "\n\n")
 
