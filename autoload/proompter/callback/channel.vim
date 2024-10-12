@@ -36,6 +36,7 @@ function! proompter#callback#channel#CompleteToHistory(api_response, configurati
         \   'created_at': l:http_response.body[-1].created_at,
         \   'done': l:http_response.body[-1].done,
         \   'done_reason': get(l:http_response.body[-1], 'done_reason', v:null),
+        \   'context': get(l:http_response.body[-1], 'context', v:null),
         \   'message': {
         \     'role': 'assistant',
         \     'content': '',

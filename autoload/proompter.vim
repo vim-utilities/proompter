@@ -238,7 +238,7 @@ function! proompter#SendPromptToGenerate(value, configurations = g:proompter, st
   endif
   let l:model.data.prompt = l:prompt
 
-  call add(a:state.messages, l:endtry)
+  call add(a:state.messages, l:entry)
 
   let l:post_payload = proompter#format#HTTPPost(l:model.data, a:configurations)
 
