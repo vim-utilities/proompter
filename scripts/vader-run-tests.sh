@@ -32,7 +32,6 @@ _proxy_log="$(mktemp --quiet)"
 
 _proxy_exec="${__DIR__}/proompter-channel-proxy.py"
 _proxy_args=(--host "${_proxy_host}" --port "${_proxy_port}" --mock --verbose)
-_proxy_search="$(pgrep --full "${_proxy_exec##*/} (--mock|--port ${_proxy_port}).*(--port ${_proxy_port}|--mock)")"
 
 usage() {
 	local _messages=("${@}")
@@ -120,19 +119,23 @@ else
 	_path_glob="tests/${_test}/**/*.vader"
 fi
 
-if ((${#_proxy_search})); then
-	printf >&2 'Proxy with similar arguments already started with PID -> %s\n' "${_proxy_search}"
-	_proxy_pid="${_proxy_search}"
-else
-	"${_proxy_exec}" "${_proxy_args[@]}" >"${_proxy_log}" 2>&1 &
-	# disown
-	_proxy_pid="$!"
-fi
-if ! ((_proxy_pid)); then
-	printf >&2 'Failed to get PID for proxy!\n'
-	exit 1
-else
-	printf >&2 'Proxy started with PID %i named %s\n' "${_proxy_pid}" "$(ps -q "${_proxy_pid}" -o comm=,args=)"
+if grep -qE '\<mocks\>' <<<"${_test}"; then
+	_proxy_search="$(pgrep --full "${_proxy_exec##*/} (--mock|--port ${_proxy_port}).*(--port ${_proxy_port}|--mock)")"
+
+	if ((${#_proxy_search})); then
+		printf >&2 'Proxy with similar arguments already started with PID -> %s\n' "${_proxy_search}"
+		_proxy_pid="${_proxy_search}"
+	else
+		"${_proxy_exec}" "${_proxy_args[@]}" >"${_proxy_log}" 2>&1 &
+		# disown
+		_proxy_pid="$!"
+	fi
+	if ! ((_proxy_pid)); then
+		printf >&2 'Failed to get PID for proxy!\n'
+		exit 1
+	else
+		printf >&2 'Proxy started with PID %i named %s\n' "${_proxy_pid}" "$(ps -q "${_proxy_pid}" -o comm=,args=)"
+	fi
 fi
 
 if ((CICD)); then
@@ -151,7 +154,7 @@ VIMRC
 	_tests_exit_status="${?}"
 fi
 
-if ((_kill_proxy)); then
+if ((_kill_proxy)) && grep -qE '\<mocks\>' <<<"${_test}"; then
 	if ((${#_proxy_pid})) && [[ "${_proxy_pid}" -gt 1 ]]; then
 		printf 'Attempting to kill proxy PID %i process -> %s\n' "${_proxy_pid}" "$(ps -q "${_proxy_pid}" -o comm=,args=)"
 		## TODO: figure out why `-SIGINT` works when interactive proxy was started, but
@@ -161,9 +164,7 @@ if ((_kill_proxy)); then
 	else
 		printf >&2 'Failed to find a PID for proxy\n'
 	fi
-fi
 
-if grep -qE '\<mocks\>' <<<"${_test}"; then
 	printf 'Mocked Proxy Logs\n'
 	cat "${_proxy_log}"
 
