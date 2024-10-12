@@ -14,7 +14,8 @@ function! proompter#channel#CreateOptions(configurations = g:proompter, state = 
   let l:channel_options = deepcopy(a:configurations.channel.options)
   if type(get(l:channel_options, 'callback')) != v:t_func
     let l:bufnr = bufnr('%')
-    let l:stream = a:configurations.models[a:configurations.select.model_name].data.stream
+    let l:model_name = a:configurations.select.model_name
+    let l:stream = get(get(get(get(a:configurations, 'models', {}), model_name, {}), 'data', {}), 'stream', v:false)
     if l:stream
       let l:channel_options.callback = { _channel, api_response ->
             \   proompter#callback#channel#StreamToMessages(api_response, a:configurations, a:state)
