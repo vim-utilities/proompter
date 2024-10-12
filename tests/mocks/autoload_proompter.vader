@@ -102,7 +102,7 @@ Execute (proompter#SendPromptToChat -- Uses default channel callback when stream
 
     sleep 100m
   finally
-    if type(state.channel) != v:t_none && get(ch_info(state.channel), 'status', v:null) != 'closed'
+    if ch_info(state.channel).status != 'closed'
       call ch_close(state.channel)
     endif
   endtry
@@ -186,7 +186,7 @@ Execute (proompter#SendPromptToChat -- Uses default channel callback when non-st
 
     sleep 100m
   finally
-    if type(state.channel) != v:t_none && get(ch_info(state.channel), 'status', v:null) != 'closed'
+    if ch_info(state.channel).status != 'closed'
       call ch_close(state.channel)
     endif
   endtry
@@ -295,7 +295,7 @@ Execute (proompter#SendPromptToChat -- Appends to buffer via example channel cal
 
     sleep 100m
   finally
-    if type(state.channel) != v:t_none && get(ch_info(state.channel), 'status', v:null) != 'closed'
+    if ch_info(state.channel).status != 'closed'
       call ch_close(state.channel)
     endif
   endtry
