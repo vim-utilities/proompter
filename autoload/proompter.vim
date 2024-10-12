@@ -329,13 +329,15 @@ endfunction
 
 ""
 "
+" See: {link} https://github.com/ollama/ollama/blob/main/docs/api.md#load-a-model
 function! proompter#load(configurations = g:proompter, state = g:proompter_state) abort
   let l:model_data = { "model": a:configurations.select.model_name }
 
-  let l:endpoint = split(a:configurations.api.url, '/')[-1]
-  if l:endpoint == 'chat'
+  let l:api_endpoint = split(a:configurations.api.url, '/')[-1]
+  let l:api_endpoint = split(l:api_endpoint, '?')[0]
+  if l:api_endpoint == 'chat'
     let l:model_data.messages = []
-  elseif l:endpoint == 'generate'
+  elseif l:api_endpoint == 'generate'
     let l:model_data.prompt = ''
   else
     throw 'Unknown endpoing in -> a:configurations.api.url'

@@ -1009,3 +1009,82 @@ Execute (proompter#cancel -- Closes any channel saved at 'a:state.channel'):
   AssertEqual ch_info(state.channel).status, 'closed'
 " }}}
 ""
+
+""
+" {{{
+Execute (proompter#load -- Is okay about '/api/generate' endpoint):
+  let response_data = [
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-28T23:29:04.299380014Z',
+        \     'response': '',
+        \     'done': v:true,
+        \   }
+        \ ]
+
+
+  let base64_encoded_response = proompter#base64#EncodeString(join([
+        \   'HTTP/1.1 200 OK',
+        \   'Server: SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date: ' . strftime('%a, %d %b %Y %T GMT'),
+        \   'Content-Type: application/json',
+        \   '',
+        \   join(mapnew(response_data, { _index, entry -> json_encode(entry) }), "\r\n"),
+        \ ], "\r\n"))
+
+  let configurations = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \   'api': {
+        \     'url': 'http://127.0.0.1:11434/api/chat?chat=' . base64_encoded_response,
+        \   },
+        \   'channel': {
+        \     'address': '127.0.0.1:41968',
+        \     'options': {
+        \       'mode': 'raw',
+        \       'callback': v:null,
+        \     },
+        \   },
+        \   'models': {
+        \     'codellama': {
+        \       'data': {
+        \         'raw': v:false,
+        \         'stream': v:true,
+        \       },
+        \     },
+        \   },
+        \ }
+
+  let state = {
+        \   'messages': [],
+        \   'channel': v:null,
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+
+  let expected_state = deepcopy(state)
+
+  try
+    let value = 'This is a streaming request from Vim!'
+
+    call proompter#load(
+          \   configurations,
+          \   state,
+          \ )
+
+    sleep 100m
+  catch
+    echow 'v:exception ->' v:exception
+  finally
+    if ch_info(state.channel).status != 'closed'
+      call ch_close(state.channel)
+    endif
+  endtry
+
+  AssertEqual state.messages, expected_state.messages
+
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+
+" }}}
+""
