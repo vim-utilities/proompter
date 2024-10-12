@@ -302,7 +302,7 @@ endfunction
 "
 " See: {docs} :help optional-function-argument
 " See: {docs} :help g:markdown_fenced_languages
-function! proompter#SendHighlightedText(prefix_input = '', configurations = g:proompter) abort range
+function! proompter#SendHighlightedText(prefix_input = '', configurations = g:proompter, state = g:proompter_state) abort range
   let l:selection = getline(a:firstline, a:lastline)
   if len(&filetype)
         \ && exists('g:markdown_fenced_languages')
@@ -318,7 +318,7 @@ function! proompter#SendHighlightedText(prefix_input = '', configurations = g:pr
   endif
 
   let l:value = join(l:selection, "\n")
-  call proompter#SendPrompt(l:value, a:configurations)
+  call proompter#SendPrompt(l:value, a:configurations, a:state)
 endfunction
 
 ""
