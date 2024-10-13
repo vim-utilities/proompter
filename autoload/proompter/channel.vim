@@ -15,6 +15,8 @@ function! proompter#channel#CreateOptions(configurations = g:proompter, state = 
   if type(get(l:channel_options, 'callback')) != v:t_func
     let l:bufnr = bufnr('%')
     let l:model_name = a:configurations.select.model_name
+    ""
+    " Access `a:configurations.models[l:model_name].data.stream` or assume `v:false`
     let l:stream = get(get(get(get(a:configurations, 'models', {}), model_name, {}), 'data', {}), 'stream', v:false)
     if l:stream
       let l:channel_options.callback = { _channel, api_response ->
