@@ -69,7 +69,7 @@ jobs:
           git clone https://github.com/junegunn/vader.vim.git
           popd
 
-      - uses: Pre-pend custom Vim install location to `PATH` environment variable
+      - name: Pre-pend custom Vim install location to `PATH` environment variable
         if: steps.cache-test-dependencies.outputs.cache-hit == 'true'
         run: |
           echo "$HOME/vim-${{ matrix.vim.version }}/bin:${{ env.PATH }}" >> $GITHUB_ENV
