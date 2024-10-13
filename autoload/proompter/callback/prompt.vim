@@ -28,6 +28,7 @@ endfunction
 " Parameter: {define__proompter_state} state - Dictionary
 "
 " See: {docs} :help readfile()
+" See: {tests} tests/units/autoload_proompter_callback_prompt.vader
 function! proompter#callback#prompt#EncodeImagesFromFilePaths(paths, _configurations = g:proompter, _state = g:proompter_state) abort
   let l:encoded_images = []
   let l:skipped_paths = []

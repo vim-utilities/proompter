@@ -1,0 +1,40 @@
+
+""
+" {{{
+Execute (proompter#callback#prompt#generate#Preamble -- Returns prompt prefix when state messages could cause loss of primer):
+  let configurations = {}
+
+  let state = {
+        \   'messages': [
+        \     {
+        \       'model': 'codellama',
+        \       'created_at': '2024-09-20T23:25:06.675058548Z',
+        \       'done': v:true,
+        \       'done_reason': 'stop',
+        \       'message': {
+        \         'role': 'assistant',
+        \         'content': 'Vim is the best',
+        \         'images': v:null,
+        \       },
+        \     },
+        \   ],
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+  let expected_state = deepcopy(state)
+
+  let result = proompter#callback#prompt#generate#Preamble({
+        \   'configurations': configurations,
+        \   'state': state,
+        \   'context_size': 0,
+        \   'filetype': 'javascript',
+        \   'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
+        \   'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
+        \ })
+
+  Assert len(result) > 0, 'Expected a lengthy result'
+  AssertEqual state, expected_state, 'Unexpected mutation of state'
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+" }}}
+""
+

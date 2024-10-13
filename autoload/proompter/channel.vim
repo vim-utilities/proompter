@@ -10,6 +10,7 @@
 " Parameter: {define__proompter_state} state
 "
 " See: {docs} :help closure
+" See: {tests} tests/units/autoload_proompter_channel_CreateOptions.vader
 function! proompter#channel#CreateOptions(configurations = g:proompter, state = g:proompter_state) abort
   let l:channel_options = deepcopy(a:configurations.channel.options)
   if type(get(l:channel_options, 'callback')) != v:t_func
@@ -44,6 +45,8 @@ endfunction
 "
 " - Will attempt to re-open channel if state is "closed"
 " - We must use a closure to capture bufnr and pass it into callback
+"
+" See: {tests} tests/units/autoload_proompter_channel_GetOrSetOpen.vader
 function! proompter#channel#GetOrSetOpen(configurations = g:proompter, state = g:proompter_state) abort
   if get(a:state, 'channel', v:null) == v:null
     let l:channel_options = proompter#channel#CreateOptions(a:configurations, a:state)

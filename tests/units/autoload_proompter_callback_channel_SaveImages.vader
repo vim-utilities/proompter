@@ -1,0 +1,39 @@
+
+""
+" {{{
+Execute(proompter#callback#channel#SaveImages -- Saves base64 encoded image):
+  " Bash: magick -size 1x1 'xc:rgb(0,0,0)' '/tmp/one-pixel.png'
+  " Vim: read! base64 --wrap=0 /tmp/one-pixel.png
+  let image_encoded = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAACYktHRAAB3YoTpAAAAAd0SU1FB+gKChMpAqfmKGQAAAAKSURBVAjXY2AAAAACAAHiIbwzAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDI0LTEwLTEwVDE5OjQxOjAxKzAwOjAwUQr9YQAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyNC0xMC0xMFQxOTo0MTowMSswMDowMCBXRd0AAAAodEVYdGRhdGU6dGltZXN0YW1wADIwMjQtMTAtMTBUMTk6NDE6MDErMDA6MDB3QmQCAAAAAElFTkSuQmCC'
+
+  let configurations = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+
+  let state = {
+        \   'messages': [
+        \     {
+        \       'images': [ image_encoded ],
+        \     }
+        \   ],
+        \ }
+
+  let expected_state = deepcopy(state)
+
+  let paths = proompter#callback#channel#SaveImages(-1, configurations, state)
+  sleep 100m
+
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+  AssertEqual state, expected_state, 'Unexpected mutation of state'
+
+  let re_encoded = system('base64 --wrap=0 ' . paths[0])
+  AssertEqual image_encoded, re_encoded
+  call delete(paths[0])
+
+" }}}
+""
+

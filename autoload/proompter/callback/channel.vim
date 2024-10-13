@@ -28,6 +28,8 @@
 " ...
 " {"model":"codellama","created_at":"2024-09-20T23:25:06.675058548Z","response":"","done":true,"done_reason":"stop","context":[...],"total_duration":7833808817,"load_duration":10021098,"prompt_eval_count":31,"prompt_eval_duration":2122796000,"eval_count":35,"eval_duration":5658536000}
 " ```
+"
+" See: {tests} tests/units/autoload_proompter_callback_channel_CompleteToHistory.vader
 function! proompter#callback#channel#CompleteToHistory(api_response, configurations = g:proompter, state = g:proompter_state, ...) abort
   let l:http_response = proompter#http#parse#Response(a:api_response)
   if l:http_response.status.code < 200 || l:http_response.status.code >= 300
@@ -68,7 +70,6 @@ function! proompter#callback#channel#CompleteToHistory(api_response, configurati
   call add(a:state.messages, l:entry)
 endfunction
 
-
 ""
 " Handle stream of HTTP responses from channel proxied API by appending to
 " `state.messages` list, if the last message is not from an assistant, and in
@@ -97,6 +98,8 @@ endfunction
 "
 " {"model":"codellama","created_at":"2024-09-20T23:25:01.177902785Z","response":"im","done":false}
 " ```
+"
+" See: {tests} tests/units/autoload_proompter_callback_channel_StreamToMessages.vader
 function! proompter#callback#channel#StreamToMessages(api_response, configurations = g:proompter, state = g:proompter_state, ...) abort
   ""
   " We may use the "role" == "pending" check until the end of this function
@@ -213,6 +216,8 @@ endfunction
 "       \   },
 "       \ }
 " ```
+"
+" See: {tests} tests/units/autoload_proompter_callback_channel_StreamToBuffer.vader
 function! proompter#callback#channel#StreamToBuffer(api_response, configurations, state, out_bufnr, ...) abort
   if a:out_bufnr == v:null || type(a:out_bufnr) == v:t_string
     let l:out_bufnr = proompter#buffer#MakeProomptLog(a:out_bufnr)
@@ -312,6 +317,8 @@ endfunction
 " TODO: add configurations to `g:proompter` for defining directory
 " TODO: maybe find out file extensions some how for output images
 " TODO: maybe add OS detection for MS-Dos style path separators
+"
+" See: {tests} tests/units/autoload_proompter_callback_channel_SaveImages.vader
 function! proompter#callback#channel#SaveImages(message_index = -1, configurations = g:proompter, state = g:proompter_state) abort
   let l:entry = get(get(a:state, 'messages', []), a:message_index, {})
   let l:images = get(l:entry, 'images', v:null)

@@ -9,6 +9,7 @@
 
 ""
 "
+" See: {tests} tests/units/autoload_proompter_base64.vader
 function! proompter#base64#EncodeString(string) abort
   if !len(a:string)
     throw 'No string value'
@@ -19,6 +20,7 @@ endfunction
 
 ""
 "
+" See: {tests} tests/units/autoload_proompter_base64.vader
 function! proompter#base64#DecodeString(string) abort
   if !len(a:string)
     throw 'No string value'
@@ -29,6 +31,7 @@ endfunction
 
 ""
 "
+" See: {tests} tests/units/autoload_proompter_base64.vader
 function! proompter#base64#EncodeFile(path) abort
   if !len(a:path)
     throw 'No path value'
@@ -44,6 +47,8 @@ endfunction
 
 ""
 " TODO: implement `flags` parser to have similar behavior to `writefile`
+"
+" See: {tests} tests/units/autoload_proompter_base64.vader
 function! proompter#base64#DecodeToFile(string, path, flags = '') abort
   if !len(a:path)
     throw 'No path value'

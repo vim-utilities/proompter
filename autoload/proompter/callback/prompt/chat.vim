@@ -45,6 +45,8 @@
 "       \   },
 "       \ }
 " ```
+"
+" See: {tests} tests/units/autoload_proompter_callback_prompt_chat_Preamble.vader
 function! proompter#callback#prompt#chat#Preamble(kwargs) abort
   let l:messages = []
 
@@ -121,6 +123,8 @@ endfunction
 "       \   },
 "       \ }
 " ```
+"
+" See: {tests} tests/units/autoload_proompter_callback_prompt_chat_Context.vader
 function! proompter#callback#prompt#chat#Context(kwargs) abort
   let l:context_size = get(a:kwargs, 'context_size', 0)
   let l:index_start = max([len(a:kwargs.state.messages) - l:context_size, 0])
@@ -168,6 +172,8 @@ endfunction
 "       \   },
 "       \ }
 " ```
+"
+" See: {tests} tests/units/autoload_proompter_callback_prompt_chat_Input.vader
 function! proompter#callback#prompt#chat#Input(input, _configurations, _state, ...) abort
   return [{ 'role': 'user', 'content': a:input }]
 endfunction
@@ -236,6 +242,8 @@ endfunction
 "   },
 " ]
 " ```
+"
+" See: {tests} tests/units/autoload_proompter_callback_prompt_chat_Post.vader
 function! proompter#callback#prompt#chat#Post(kwargs) abort
   let l:out_bufnr = get(a:kwargs, 'out_bufnr', v:null)
   if l:out_bufnr == v:null || type(l:out_bufnr) == v:t_string

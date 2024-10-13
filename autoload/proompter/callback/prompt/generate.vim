@@ -52,6 +52,8 @@
 "       \   },
 "       \ }
 " ```
+"
+" See: {tests} tests/units/autoload_proompter_callback_prompt_generate_Preamble.vader
 function! proompter#callback#prompt#generate#Preamble(kwargs) abort
   let l:lines = []
 
@@ -185,6 +187,8 @@ endfunction
 " ```vim
 " echo substitute(_input_, '</\?PROOMPT>', '', 'g')
 " ```
+"
+" See: {tests} tests/units/autoload_proompter_callback_prompt_generate_Context.vader
 function! proompter#callback#prompt#generate#Context(kwargs) abort
   let l:lines = []
 
@@ -271,6 +275,8 @@ endfunction
 " ```vim
 " echo substitute(_input_, '</\?PROOMPT>', '', 'g')
 " ```
+"
+" See: {tests} tests/units/autoload_proompter_callback_prompt_generate_Input.vader
 function! proompter#callback#prompt#generate#Input(kwargs) abort
   let l:lines = []
 
@@ -323,6 +329,8 @@ endfunction
 "       \   },
 "       \ }
 " ```
+"
+" See: {tests} tests/units/autoload_proompter_callback_prompt_generate_Post.vader
 function! proompter#callback#prompt#generate#Post(kwargs) abort
   let l:lines = []
 

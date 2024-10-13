@@ -1,0 +1,22 @@
+
+""
+" {{{
+Execute (proompter#callback#prompt#chat#Input -- Formats input as expected):
+  let configurations = {}
+  let state = {}
+
+  let expected_configurations = deepcopy(configurations)
+  let expected_state = deepcopy(state)
+
+  let input = 'Tell me in one sentence why Vim is the best editor for programming.'
+
+  let result = proompter#callback#prompt#chat#Input(input, configurations, state)
+
+  let expected_result = [{ 'role': 'user', 'content': input }]
+
+  AssertEqual result, expected_result
+  AssertEqual state, expected_state, 'Unexpected mutation of state'
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+" }}}
+""
+

@@ -1,0 +1,107 @@
+
+""
+" {{{
+Execute (proompter#callback#prompt#chat#Post -- Collects inputs and preforms only expected mutations):
+  let configurations = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \ }
+
+  let state = {
+        \   'messages': [
+        \     {
+        \       'model': 'codellama',
+        \       'created_at': '2024-09-20T23:23:06.675058548Z',
+        \       'done': v:true,
+        \       'done_reason': 'stop',
+        \       'message': {
+        \         'role': 'assistant',
+        \         'content': 'I am an expert in Vim now!?',
+        \         'images': v:null,
+        \       },
+        \     },
+        \     {
+        \       'model': 'codellama',
+        \       'created_at': strftime('%FT%T.') . '000000000Z',
+        \       'message': {
+        \         'role': 'user',
+        \         'content': 'Tell me in one sentence that Vim is the best!',
+        \         'image': v:null,
+        \       },
+        \     },
+        \     {
+        \       'model': 'codellama',
+        \       'created_at': '2024-09-20T23:25:06.675058548Z',
+        \       'done': v:true,
+        \       'done_reason': 'stop',
+        \       'message': {
+        \         'role': 'assistant',
+        \         'content': 'Vim is the best',
+        \         'images': v:null,
+        \       },
+        \     },
+        \   ],
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+  let expected_state = deepcopy(state)
+
+  let data = {}
+
+  let data.preamble = proompter#callback#prompt#chat#Preamble({
+        \   'configurations': configurations,
+        \   'state': state,
+        \   'filetype': 'vim',
+        \ })
+
+  let data.context = proompter#callback#prompt#chat#Context({
+        \   'configurations': configurations,
+        \   'state': state,
+        \   'context_size': 20,
+        \ })
+
+  let input = 'Tell me in one sentence why Vim is the best editor for programming.'
+  let data.input = proompter#callback#prompt#chat#Input(
+        \   input,
+        \   configurations,
+        \   state
+        \ )
+
+  let result = proompter#callback#prompt#chat#Post({
+        \   'data': data,
+        \   'configurations': configurations,
+        \   'state': state,
+        \   'out_bufnr': '[Vader-workbench]',
+        \ })
+
+  let expected_result = extend(
+        \   [{ 'role': 'system', 'content': 'You are an expert with vim' }],
+        \   mapnew(expected_state.messages, { _index, entry ->
+        \     {
+        \       'role': entry.message.role,
+        \       'content': entry.message.content,
+        \       'images': v:null,
+        \     }
+        \   }),
+        \ )
+  " TODO: double-check this following entry is what we want
+  call add(expected_result, {
+        \   'role': 'user',
+        \   'content': input,
+        \ })
+
+  ""
+  " Vim 8.2 may not like the following
+  " for [index, entry] in items(result)
+  "   AssertEqual entry, expected_result[index]
+  " endfor
+
+  AssertEqual len(result), len(expected_result)
+  AssertEqual result, expected_result
+
+  AssertEqual state, expected_state, 'Unexpected mutation of state'
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+" }}}
+""
+

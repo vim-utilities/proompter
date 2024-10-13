@@ -52,6 +52,7 @@ endfunction
 " See: {doc} :help getbufline()
 " See: {doc} :help split()
 " See: {doc} :help setbufline()
+" See: {tests} tests/units/autoload_proompter_buffer_ConcatinateWithLastLine.vader
 function! proompter#buffer#ConcatenateWithLastLine(bufnr, content) abort
   let l:buffer_last_line = get(getbufline(a:bufnr, '$'), 0, '')
   let l:buffer_last_line .= a:content
