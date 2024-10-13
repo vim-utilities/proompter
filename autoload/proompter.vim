@@ -323,14 +323,14 @@ endfunction
 
 ""
 " Wrapper for `ch_close` for whatever channel is in `a:state.channel`
-function! proompter#cancel(state = g:proompter_state, configurations = g:proompter) abort
+function! proompter#Cancel(state = g:proompter_state, configurations = g:proompter) abort
   call ch_close(a:state.channel)
 endfunction
 
 ""
 "
 " See: {link} https://github.com/ollama/ollama/blob/main/docs/api.md#load-a-model
-function! proompter#load(configurations = g:proompter, state = g:proompter_state) abort
+function! proompter#Load(configurations = g:proompter, state = g:proompter_state) abort
   let l:model_data = { "model": a:configurations.select.model_name }
 
   let l:api_endpoint = split(a:configurations.api.url, '/')[-1]
@@ -353,7 +353,7 @@ endfunction
 ""
 "
 " See: {link} https://github.com/ollama/ollama/blob/main/docs/api.md#load-a-model
-function! proompter#unload(configurations = g:proompter, state = g:proompter_state) abort
+function! proompter#Unload(configurations = g:proompter, state = g:proompter_state) abort
   let l:model_data = {
         \   "model": a:configurations.select.model_name,
         \   "keep_alive": 0,

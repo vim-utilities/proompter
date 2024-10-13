@@ -38,7 +38,7 @@ endfunction
 "
 " :1337ProompterSelection
 " ```
-command! -range -nargs=? ProompterSelection <line1>,<line2>call s:DefaultSelectionArgs(function('proompter#SendHighlightedText'), { 'input': '', 'configuration': g:proompter }, <f-args>)
+command! -range -nargs=? ProompterSendSelection <line1>,<line2>call s:DefaultSelectionArgs(function('proompter#SendHighlightedText'), { 'input': '', 'configuration': g:proompter }, <f-args>)
 
 ""
 " Send arguments as a string to API, note quotes _should_ be honored
@@ -48,7 +48,7 @@ command! -range -nargs=? ProompterSelection <line1>,<line2>call s:DefaultSelecti
 " ```vim
 " :ProompterSend Write a haiku about why Vim is the best text editor
 " ```
-command! -nargs=? ProompterSend call s:DefaultSelectionArgs(function('proompter#SendPrompt'), { 'input': '', 'configuration': g:proompter }, <f-args>)
+command! -nargs=? ProompterSendPrompt call s:DefaultSelectionArgs(function('proompter#SendPrompt'), { 'input': '', 'configuration': g:proompter }, <f-args>)
 
 ""
 " Quality of life commands to clear `g:proompter_state.messages`
@@ -64,11 +64,11 @@ command! -nargs=1 -complete=file ProompterMessagesLoad call extend(g:proompter_s
 
 ""
 " Quality of life commands to load/unload currently configured model
-command! ProompterLoad call proompter#load(g:proompter, g:proompter_state)
-command! ProompterUnload call proompter#unload(g:proompter, g:proompter_state)
+command! ProompterLoad call proompter#Load(g:proompter, g:proompter_state)
+command! ProompterUnload call proompter#Unload(g:proompter, g:proompter_state)
 
 ""
 " Turns out closing a channel on Vim side propagates through proxy to API?!
-command! ProompterCancel call proompter#cancel(g:proompter_state, g:proompter)
+command! ProompterCancel call proompter#Cancel(g:proompter_state, g:proompter)
 
 " vim: expandtab

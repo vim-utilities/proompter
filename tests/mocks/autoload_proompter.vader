@@ -991,7 +991,7 @@ Execute (proompter#SendHighlightedText -- Correctly detects and uses /api/chat e
 
 ""
 " {{{
-Execute (proompter#cancel -- Closes any channel saved at 'a:state.channel'):
+Execute (proompter#Cancel -- Closes any channel saved at 'a:state.channel'):
   function! MockChannelCallback(channel, response) abort
     throw "Don't call me Shirley"
   endfunction
@@ -1016,7 +1016,7 @@ Execute (proompter#cancel -- Closes any channel saved at 'a:state.channel'):
 
   let expected_state = deepcopy(state)
 
-  call proompter#cancel(state, configurations)
+  call proompter#Cancel(state, configurations)
 
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
   AssertEqual state.messages, expected_state.messages, 'Unexpected mutation of state.messages'
@@ -1026,7 +1026,7 @@ Execute (proompter#cancel -- Closes any channel saved at 'a:state.channel'):
 
 ""
 " {{{
-Execute (proompter#load -- Is okay about '/api/chat' endpoint):
+Execute (proompter#Load -- Is okay about '/api/chat' endpoint):
   let response_data = [
         \   {
         \     'model': 'codellama',
@@ -1080,7 +1080,7 @@ Execute (proompter#load -- Is okay about '/api/chat' endpoint):
   call extend(expected_state.messages, deepcopy(expected_entries))
 
   try
-    call proompter#load(
+    call proompter#Load(
           \   configurations,
           \   state,
           \ )
@@ -1098,7 +1098,7 @@ Execute (proompter#load -- Is okay about '/api/chat' endpoint):
 
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
 
-Execute (proompter#load -- Is okay about '/api/generate' endpoint):
+Execute (proompter#Load -- Is okay about '/api/generate' endpoint):
   let response_data = [
         \   {
         \     'model': 'codellama',
@@ -1159,7 +1159,7 @@ Execute (proompter#load -- Is okay about '/api/generate' endpoint):
   call add(expected_state.messages, deepcopy(expected_entry))
 
   try
-    call proompter#load(
+    call proompter#Load(
           \   configurations,
           \   state,
           \ )
@@ -1181,7 +1181,7 @@ Execute (proompter#load -- Is okay about '/api/generate' endpoint):
 
 ""
 " {{{
-Execute (proompter#unload -- Is okay about '/api/chat' endpoint):
+Execute (proompter#Unload -- Is okay about '/api/chat' endpoint):
   let response_data = [
         \   {
         \     'model': 'codellama',
@@ -1235,7 +1235,7 @@ Execute (proompter#unload -- Is okay about '/api/chat' endpoint):
   call extend(expected_state.messages, deepcopy(expected_entries))
 
   try
-    call proompter#unload(
+    call proompter#Unload(
           \   configurations,
           \   state,
           \ )
@@ -1253,7 +1253,7 @@ Execute (proompter#unload -- Is okay about '/api/chat' endpoint):
 
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
 
-Execute (proompter#unload -- Is okay about '/api/generate' endpoint):
+Execute (proompter#Unload -- Is okay about '/api/generate' endpoint):
   let response_data = [
         \   {
         \     'model': 'codellama',
@@ -1314,7 +1314,7 @@ Execute (proompter#unload -- Is okay about '/api/generate' endpoint):
   call add(expected_state.messages, deepcopy(expected_entry))
 
   try
-    call proompter#unload(
+    call proompter#Unload(
           \   configurations,
           \   state,
           \ )
