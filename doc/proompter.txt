@@ -487,7 +487,7 @@ proompter#SendPrompt({string}, {dictionary}, {dictionary})  *proompter#SendPromp
                   - {dictionary} `configurations` Defaults to `g:proompter`
                   - {dictionary} `state` Defaults to `g:proompter_state`
 
-proompter#SendHighlightedText({dictionary})    *proompter#SendHighlightedText*
+proompter#SendHighlightedText({dictionary})      *proompter#SendHighlightedText*
                 Send range or visually selected text to LLM as newline
                 separated {string} by way of |proompter#SendPrompt|
 
@@ -550,7 +550,7 @@ proompter#SendPromptToGenerate({string}, {dictionary}, {dictionary})  *proompter
 
                 Check following internal references for additional details;
                   - |proompter-configuration| -- {dictionary} read for reasons
-                  - |proompter#format#HTTPPost| -- Builds HTTP request
+                  - |proompter#http#encode#Post| -- Builds HTTP request
                   - |proompter#channel#GetOrSetOpen| -- Prepares |channel-raw|
 
                 Example `g:proompter.models['model_name'].prompt_callbacks`;
@@ -856,35 +856,7 @@ proompter#callback#prompt#generate#Post({dictionary})  *proompter#callback#promp
         \   },
         \ }
 <
-proompter#channel#CreateOptions({dictionary}, {dictionary})  *proompter#channel#CreateOptions*
-                Creates and, if necessary, defaults options for a Vim channel
-                object based on the configurations provided.  If configuration
-                does not contain a 'callback' option, it will add one based on
-                the type of data stream.
-
-                Parameters:
-                  - {dictionary} `configurations` (|proompter-configuration|)
-                    that contains properties to pass to |ch_open()|
-                  - {dictionary} `state` (|proompter-state|) that contains
-                    state shared between calls
-
-                Returns: {dictionary} containing options for Vim channel.
-
-proompter#channel#GetOrSetOpen({dictionary}, {dictionary})  *proompter#channel#GetOrSetOpen*
-                Attempts to open, or re-open, a channel from given
-                configurations.  Warns when previously stored channel has a
-                "fail" state, and throws error when previously stored channel
-                has a "buffered" state.
-
-                Parameters:
-                  - {dictionary} `configurations` (|proompter-configuration|)
-                    that contains properties to pass to |ch_open()|
-                  - {dictionary} `state` (|proompter-state|) that contains
-                    state shared between calls
-
-                Returns: Vim {channel} - A reference to an open Vim channel.
-
-proompter#format#HTTPPost({string}, {dictionary})  *proompter#format#HTTPPost*
+proompter#http#encode#Post({string}, {dictionary})  *proompter#http#encode#Post*
                 Formats an HTTP POST request from data and configurations,
                 returning a formatted string for further use.
 
@@ -896,19 +868,45 @@ proompter#format#HTTPPost({string}, {dictionary})  *proompter#format#HTTPPost*
 
                 Returns: {string} Formatted HTTP POST request as a string.
 
-proompter#buffer#MakeProomptLog({string})  *proompter#buffer#MakeProomptLog*
-                Return bufnr of new buffer after setting it up for logging proompts
+proompter#http#parse#Response({string})          *proompter#http#parse#Response*
+                Parses HTTP response data into `headers` {dictionary} and
+                `body` {dictionary} list.  The 'headers' are anything before
+                two consecutive carriage-return newline characters
+                (`\r\n\r\n`), or any number of characters before the first
+                opening curly brace (`{`) of the response, and the body
+                is everything after that.
 
-                Parameter:
-                  - {string} or {v:null} `buffer_name` Name output buffer
-                    should use, or pass `v:null` to have default `proompt-log.md`
+                Check the following functions for type details and examples;
+                  - |proompter#http#parse#response#ExtractStatus|
+                  - |proompter#http#parse#response#ExtractHeaders|
+                  - |proompter#http#parse#response#ExtractJSONDicts|
 
-                Note: this function is used internally by;
-                  - |proompter#callback#channel#StreamToBuffer|
-                  - |proompter#callback#prompt#generate#Post|
-                ...  Nether of which are used by default.
+                Returns: {dictionary} with keys; `status`, `headers`, and
+                `body` defined.
 
-proompter#parse#HeadersFromHTTPResponse({string})  *proompter#parse#HeadersFromHTTPResponse*
+                Note: callers _should_ check the length before assuming any
+                sub-values to be present on top-level keys.
+
+proompter#http#parse#response#ExtractStatus({string})  *proompter#http#parse#response#ExtractStatus*
+                Convert HTTP status into Vim dictionary, or returns empty
+                dictionary if no status data are parsed from input.
+
+                Example: HTTP response data >
+  HTTP/1.1 200 OK
+  Server: SimpleHTTP/0.6 Python/3.12.6
+  Date: Sat, 28 Sep 2024 23:29:00 GMT
+  Content-Type: application/json
+
+  { "model": "codellama", "created_at": "2024-09-28T23:29:00.299380014Z", "response": " V", "done": false }
+<
+Example: resulting Vim dictionary >
+  {
+    'version': '1.1',
+    'code': '200',
+    'text': 'OK',
+  }
+<
+proompter#http#parse#response#ExtractHeaders({string})  *proompter#http#parse#response#ExtractHeaders*
                 Convert HTTP headers into Vim dictionary, or returns empty
                 dictionary if no headers are parsed from input data.
 
@@ -926,7 +924,7 @@ proompter#parse#HeadersFromHTTPResponse({string})  *proompter#parse#HeadersFromH
     'Server': 'SimpleHTTP/0.6 Python/3.12.6'
   }
 <
-proompter#parse#JSONLinesFromHTTPResponse({string})  *proompter#parse#JSONLinesFromHTTPResponse*
+proompter#http#parse#response#ExtractJSONDicts({string})  *proompter#http#parse#response#ExtractJSONDicts*
                 Returns {dictionary} {list} built by parsing body as JSON
                 dictionaries, separated by any number of space,
                 carriage-return, and/or newline characters.
@@ -955,22 +953,201 @@ proompter#parse#JSONLinesFromHTTPResponse({string})  *proompter#parse#JSONLinesF
     }
   ]
 <
-proompter#parse#HTTPResponse({string})          *proompter#parse#HTTPResponse*
-                Parses HTTP response data into `headers` {dictionary} and
-                `body` {dictionary} list.  The 'headers' are anything before
-                two consecutive carriage-return newline characters
-                (`\r\n\r\n`), or any number of characters before the first
-                opening curly brace (`{`) of the response, and the body
-                is everything after that.
+proompter#base64#EncodeString({string})         *proompter#base64#EncodeString*
+                Encode string to Base64 via `system` call
 
-                Check the following functions for type details and examples;
-                  - |proompter#parse#HeadersFromHTTPResponse|
-                  - |proompter#parse#JSONLinesFromHTTPResponse|
+                Parameter: {string} `string` Input to pipe to `base64` command
 
-                Returns: {dictionary} with keys `headers` and `body` defined.
+                Throws: 'No string value' if input is zero length
+                Throws: following format string when `v:shell_error` is
+                non-zero >
+  Failed command: printf "%s" '<string>' | base64 --wrap=0
+    Exit status: <number>
+<
+                Example: input >
+  echo proompter#base64#EncodeString('Howdy reader!')
+<
+                Example: result >
+  SG93ZHkgcmVhZGVyIQ==
+<
+                See following Vim builtins for additional details;
+                  - |system()|
+                  - |shellescape()|
+                  - |v:shell_error|
 
-                Note: callers _should_ check the length before assuming any
-                sub-values to be present on top-level keys.
+proompter#base64#DecodeString({string})         *proompter#base64#DecodeString*
+                Decode string from Base64 via `system` call
+
+                Parameter: {string} `string` Input to pipe to `base64` command
+
+                Throws: 'No string value' if input is zero length
+                Throws: following format string when `v:shell_error` is
+                non-zero >
+  Failed command: printf "%s" '<string>' | base64 --decode
+    Exit status: <number>
+<
+                Example: input >
+  echo proompter#base64#EncodeString('SG93ZHkgcmVhZGVyIQ==')
+<
+                Example: result >
+  Howdy reader!
+<
+                See following Vim builtins for additional details;
+                  - |system()|
+                  - |shellescape()|
+                  - |v:shell_error|
+
+proompter#base64#EncodeFile({string})             *proompter#base64#EncodeFile*
+                Encode file at `path` via `system` call to `base64`
+
+                Parameter: {string} `path` Input to file for `base64` to encode
+
+                Throws: 'No path value' if input is zero length
+                Throws: 'Cannot read file -> <path>' when file cannot be read
+                Throws: following format string when `v:shell_error` is
+                non-zero >
+  Failed command: base64 --wrap=0 <path>
+    Exit status: <number>
+<
+                Example: create and pass input file >
+  let path = '/tmp/test.txt'
+  call writefile(['Howdy reader!'], path)
+  echo proompter#base64#EncodeFile(path)
+<
+                Example: result >
+  SG93ZHkgcmVhZGVyIQo=
+<
+                See following Vim builtins for additional details;
+                  - |filereadable()|
+                  - |system()|
+                  - |shellescape()|
+                  - |v:shell_error|
+
+proompter#base64#DecodeToFile({string}, {string}, {string})  *proompter#base64#DecodeToFile*
+                Decode `string` to file at `path` via `system` call to `base64`
+
+                Parameter: {string} `string` Encoded string to pipe to `base64`
+                Parameter: {string} `path` File for `base64` to save decoded
+                           results to
+                Parameter: {string} `flags` TODO
+
+                Throws: 'No string value' if input is zero length
+                Throws: 'No path value' if input is zero length
+                Throws: 'No string value' if input is zero length
+                Throws: following format string when `v:shell_error` is
+                non-zero >
+  Failed command: printf "%s" '<string>' | base64 --decode > <path>
+    Exit status: <number>
+<
+                Example: create and pass input file >
+  let path = '/tmp/decode.txt'
+  call proompter#base64#DecodeToFile('SG93ZHkgcmVhZGVyIQo=', path)
+  !cat /tmp/decode.txt
+<
+                Example: result >
+  Howdy reader!
+<
+                See following Vim builtins for additional details;
+                  - |filereadable()|
+                  - |system()|
+                  - |shellescape()|
+                  - |v:shell_error|
+
+proompter#buffer#MakeProomptLog({string})      *proompter#buffer#MakeProomptLog*
+                Return bufnr of new buffer after setting it up for logging proompts
+
+                Parameter:
+                  - {string} or {v:null} `buffer_name` Name output buffer
+                    should use, or pass `v:null` to have default `proompt-log.md`
+
+                Note: this function is used internally by;
+                  - |proompter#callback#channel#StreamToBuffer|
+                  - |proompter#callback#prompt#generate#Post|
+                ...  Nether of which are used by default.
+
+proompter#buffer#ConcatenateWithLastLine({string})   *proompter#buffer#ConcatenateWithLastLine*
+                Unlike `appendbufline` this first attempts to append to
+                preexisting line, and only if new `content` contains a newline
+                character (`\n`) will a newline be inserted into target
+                buffer.
+
+                Parameter: {number} `bufnr` Any available buffer to write to
+                Parameter: {string} `content` Line, or lines separated by
+                           `\n`, to write
+
+                See following Vim builtins for additional details;
+                  - |getbufline()|
+                  - |split()|
+                  - |setbufline()|
+
+proompter#channel#CreateOptions({dictionary}, {dictionary})  *proompter#channel#CreateOptions*
+                Creates and, if necessary, defaults options for a Vim channel
+                object based on the configurations provided.  If configuration
+                does not contain a 'callback' option, it will add one based on
+                the type of data stream.
+
+                Parameters:
+                  - {dictionary} `configurations` (|proompter-configuration|)
+                    that contains properties to pass to |ch_open()|
+                  - {dictionary} `state` (|proompter-state|) that contains
+                    state shared between calls
+
+                Returns: {dictionary} containing options for Vim channel.
+
+proompter#channel#GetOrSetOpen({dictionary}, {dictionary})  *proompter#channel#GetOrSetOpen*
+                Attempts to open, or re-open, a channel from given
+                configurations.  Warns when previously stored channel has a
+                "fail" state, and throws error when previously stored channel
+                has a "buffered" state.
+
+                Parameters:
+                  - {dictionary} `configurations` (|proompter-configuration|)
+                    that contains properties to pass to |ch_open()|
+                  - {dictionary} `state` (|proompter-state|) that contains
+                    state shared between calls
+
+                Returns: Vim {channel} - A reference to an open Vim channel.
+
+proompter#lib#MessagesJSONRead({string}, {dictionary}, {dictionary})  *proompter#lib#MessagesJSONRead*
+                Parameters:
+                  - {string} `file_path`
+                  - {dictionary} `configurations` (|proompter-configuration|)
+                  - {dictionary} `state` (|proompter-state|)
+
+proompter#lib#MessagesJSONWrite({string}, {dictionary}, {dictionary})  *proompter#lib#MessagesJSONWrite*
+                Parameters:
+                  - {string} `file_path`
+                  - {dictionary} `configurations` (|proompter-configuration|)
+                  - {dictionary} `state` (|proompter-state|)
+
+proompter#lib#DictMerge({string}, {dictionary}, {dictionary})  *proompter#lib#DictMerge*
+                Merged dictionaries without mutation
+
+                Return: {dictionary}
+
+                Parameters:
+                  - {dictionary} `defaults`that may be added to or modified
+                  - [{dictionary}] overwrite `defaults` with up to 20 other
+                    dictionaries
+
+proompter#parse#MessageOrResponseFromAPI({dictionary})  *proompter#parse#MessageOrResponseFromAPI*
+                Normalize response from Ollama API `/api/chat` and
+                `/api/generate` endpoints
+
+                Returns: dictionary with shape similar to >
+  {
+    "model": "llama3.2",
+    "created_at": "2023-08-04T08:52:19.385406455-07:00",
+    "message": {
+      "role": "assistant",
+      "content": "The",
+      "images": v:null
+    },
+    "context": v:null,
+    "done": v:false,
+    "done_reason": v:null,
+  }
+<
 
 ==============================================================================
 4. Notes                                                     *proompter-notes*

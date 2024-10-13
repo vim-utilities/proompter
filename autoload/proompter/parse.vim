@@ -5,7 +5,7 @@
 
 
 ""
-" Normalize response from Ollama API endpoints
+" Normalize response from Ollama API `/api/chat` and `/api/generate` endpoints 
 "
 " Returns: dictionary with shape similar to
 "
@@ -18,7 +18,9 @@
 "     "content": "The",
 "     "images": v:null
 "   },
-"   "done": v:false
+"   "context": v:null,
+"   "done": v:false,
+"   "done_reason": v:null,
 " }
 " ```
 "
