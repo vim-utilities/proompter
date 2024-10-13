@@ -299,7 +299,7 @@ endfunction
 "   - {dictionary} data - with `preamble`, `context`, `prompt`, and `input`
 "     keys pointing to string values.
 "   - {dictionary} out_bufnr - buffer number used for output, if `v:null` one
-"     will be created automatically via `proompter#lib#GetOrMakeProomptBuffer`
+"     will be created automatically via `proompter#buffer#MakeProomptLog`
 "     with the name "proompt-log.md", or you man set a {string} value to
 "     customize the buffer name.
 "
@@ -340,7 +340,7 @@ function! proompter#callback#prompt#generate#Post(kwargs) abort
 
   let l:out_bufnr = get(a:kwargs, 'out_bufnr', v:null)
   if l:out_bufnr == v:null || type(l:out_bufnr) == v:t_string
-    let l:out_bufnr = proompter#lib#GetOrMakeProomptBuffer(l:out_bufnr)
+    let l:out_bufnr = proompter#buffer#MakeProomptLog(l:out_bufnr)
   endif
 
   let l:prompt_heading_lines = add([
@@ -354,7 +354,7 @@ function! proompter#callback#prompt#generate#Post(kwargs) abort
   endif
   call extend(l:prompt_heading_lines, ['', ''])
 
-  call proompter#lib#ConcatenateWithLastLineOfBuffer(
+  call proompter#buffer#ConcatenateWithLastLine(
         \   l:out_bufnr,
         \   join(l:prompt_heading_lines, "\n")
         \ )

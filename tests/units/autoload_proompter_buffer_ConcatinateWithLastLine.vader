@@ -1,0 +1,49 @@
+
+""
+" proompter#buffer#ConcatenateWithLastLine {{{
+Given(One line already present):
+  Vim is
+Execute(proompter#buffer#ConcatenateWithLastLine -- Complete the sentence):
+  call proompter#buffer#ConcatenateWithLastLine(bufnr('[Vader-workbench]'), ' the best!')
+Expect(One line to be finished):
+  Vim is the best!
+
+Given(Two lines already present):
+  Vim is the best!
+  And
+Execute(proompter#buffer#ConcatenateWithLastLine -- Inserts a new line after appending to existing content):
+  call proompter#buffer#ConcatenateWithLastLine(bufnr('[Vader-workbench]'), " there is no\ndoubt about it")
+Expect(One line to be finished):
+  Vim is the best!
+  And there is no
+  doubt about it
+
+Given(One line with escaped newline already present):
+  Vim is the best!\\nAnd
+Execute(proompter#buffer#ConcatenateWithLastLine -- Does not mess with existing escaped newlines):
+  call proompter#buffer#ConcatenateWithLastLine(bufnr('[Vader-workbench]'), " there is no\ndoubt about it")
+Expect(One line to be finished):
+  Vim is the best!\\nAnd there is no
+  doubt about it
+
+Given(One line with escaped newline already present):
+  Vim is the best!
+  And
+Execute(proompter#buffer#ConcatenateWithLastLine -- Does not mess with escaped newlines from input):
+  call proompter#buffer#ConcatenateWithLastLine(bufnr('[Vader-workbench]'), " there is no\\ndoubt about it")
+Expect(One line to be finished):
+  Vim is the best!
+  And there is no\ndoubt about it
+
+Given(One line with escaped newline already present):
+  Vim is the best!
+  And
+Execute(proompter#buffer#ConcatenateWithLastLine -- Does not mess with escaped newlines from input):
+  call proompter#buffer#ConcatenateWithLastLine(bufnr('[Vader-workbench]'), " there is no\\ndoubt about it")
+  call proompter#buffer#ConcatenateWithLastLine(bufnr('[Vader-workbench]'), "\nBecause doubt leads to the dark-side")
+Expect(One line to be finished and another to be added):
+  Vim is the best!
+  And there is no\ndoubt about it
+  Because doubt leads to the dark-side
+" }}}
+""

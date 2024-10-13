@@ -215,7 +215,7 @@ endfunction
 " ```
 function! proompter#callback#channel#StreamToBuffer(api_response, configurations, state, out_bufnr, ...) abort
   if a:out_bufnr == v:null || type(a:out_bufnr) == v:t_string
-    let l:out_bufnr = proompter#lib#GetOrMakeProomptBuffer(a:out_bufnr)
+    let l:out_bufnr = proompter#buffer#MakeProomptLog(a:out_bufnr)
   endif
 
   ""
@@ -268,7 +268,7 @@ function! proompter#callback#channel#StreamToBuffer(api_response, configurations
 
     let l:entry.message.content .= l:api_data.message.content
 
-    call proompter#lib#ConcatenateWithLastLineOfBuffer(l:out_bufnr, l:api_data.message.content)
+    call proompter#buffer#ConcatenateWithLastLine(l:out_bufnr, l:api_data.message.content)
 
     if l:api_data.message.images != v:null
       if type(l:entry.message.images) != v:t_list
@@ -286,7 +286,7 @@ function! proompter#callback#channel#StreamToBuffer(api_response, configurations
     let l:entry.done_reason = get(l:http_response.body[-1], 'done_reason', v:null)
     let l:entry.context = get(l:http_response.body[-1], 'context', v:null)
 
-    call proompter#lib#ConcatenateWithLastLineOfBuffer(l:out_bufnr, "\n\n")
+    call proompter#buffer#ConcatenateWithLastLine(l:out_bufnr, "\n\n")
 
     if type(l:entry.message.images) != v:t_none && len(l:entry.message.images)
       call proompter#callback#channel#SaveImages(-1, a:configurations, a:state)

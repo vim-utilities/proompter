@@ -5,60 +5,6 @@
 
 
 ""
-" Return bufnr of new buffer after setting it up for logging proompts
-"
-" Parameter: {string|v:null} buffer_name - Name output buffer should use
-"
-" Attribution:
-"
-"   - https://stackoverflow.com/questions/8316139/how-to-set-the-default-to-unfolded-when-you-open-a-file
-function! proompter#lib#GetOrMakeProomptBuffer(buffer_name) abort
-  let l:old_bufnr = bufnr('%')
-
-  let l:new_buffer_name = 'proompt-log.md'
-  if type(a:buffer_name) == v:t_string
-    let l:new_buffer_name = a:buffer_name
-  endif
-
-  let l:new_bufnr = bufnr(l:new_buffer_name)
-  if l:new_bufnr != -1
-    return l:new_bufnr
-  endif
-
-  new
-  let l:new_bufnr = bufnr('%')
-
-  setlocal buftype=nofile
-  setlocal wrap
-  setlocal filetype=markdown
-  " setlocal readonly
-
-  " silent! %foldopen
-
-  execute 'file ' . l:new_buffer_name
-
-  wincmd p
-  return l:new_bufnr
-endfunction
-
-""
-" Unlike `appendbufline` this first attempts to append to preexisting line,
-" and only if new `content` contains a newline character (`\n`) will a newline
-" be inserted into target buffer.
-"
-" Parameter: {number} `bufnr` Any available buffer to write to
-" Parameter: {string} `content` Line, or lines separated by `\n`, to write
-"
-" See: {doc} :help getbufline()
-" See: {doc} :help split()
-" See: {doc} :help setbufline()
-function! proompter#lib#ConcatenateWithLastLineOfBuffer(bufnr, content) abort
-  let l:buffer_last_line = get(getbufline(a:bufnr, '$'), 0, '')
-  let l:buffer_last_line .= a:content
-  call setbufline(a:bufnr, '$', split(l:buffer_last_line, '\n', 1))
-endfunction
-
-""
 "
 function! proompter#lib#MessagesJSONRead(file_path, configurations = g:proompter, state = g:proompter_state) abort
   let l:file_path = expand(a:file_path)

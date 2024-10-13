@@ -807,7 +807,7 @@ proompter#callback#prompt#generate#Post({dictionary})  *proompter#callback#promp
                     `g:proompter_state.messages` to provide LLM context
                   - {number} `out_bufnr` buffer number used for output, if
                     `v:null` one will be created automatically via
-                    `proompter#lib#GetOrMakeProomptBuffer` with the name
+                    `proompter#buffer#MakeProomptLog` with the name
                     "proompt-log.md", or you man set a {string} value to
                     customize the buffer name.
                   - {dictionary} `history_tags` With `start` and `stop` values
@@ -896,7 +896,7 @@ proompter#format#HTTPPost({string}, {dictionary})  *proompter#format#HTTPPost*
 
                 Returns: {string} Formatted HTTP POST request as a string.
 
-proompter#lib#GetOrMakeProomptBuffer({string})  *proompter#lib#GetOrMakeProomptBuffer*
+proompter#buffer#MakeProomptLog({string})  *proompter#buffer#MakeProomptLog*
                 Return bufnr of new buffer after setting it up for logging proompts
 
                 Parameter:
