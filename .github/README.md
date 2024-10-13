@@ -141,14 +141,15 @@ ______
 
 Currently no Motions or Commands are provided, and such customization is an
 exercise for each entity using this plugin.  Instead there are a kit of helper
-functions for creating your own Vim/LLM integration experience!
+functions, and some `examples/`, for creating your own Vim/LLM integration
+experience!
 
 ---
 
 ### Author or select a callback
 [heading__author_or_select_a_callback]: #author-or-select-a-callback
 
-> Tip: find examples within;
+> Tip: find example callback functions within;
 >
 > -  `autoload/proompter/callback/channel.vim`
 > -  `autoload/proompter/callback/prompt.vim`
