@@ -36,9 +36,6 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
-    env:
-      PATH: /home/runner/vim-${{ matrix.vim.version }}/bin:${{ env.PATH }}
-
     steps:
       - uses: actions/checkout@v2
         with:
@@ -72,6 +69,11 @@ jobs:
           git clone https://github.com/junegunn/vader.vim.git
           popd
 
+      - uses: Pre-pend custom Vim install location to `PATH` environment variable
+        if: steps.cache-test-dependencies.outputs.cache-hit == 'true'
+        run: |
+          echo "$HOME/vim-${{ matrix.vim.version }}/bin:${{ env.PATH }}" >> $GITHUB_ENV
+
       - name: Test units
         run: |
           scripts/vader-run-tests.sh --test units --cicd > /dev/null
@@ -87,3 +89,4 @@ jobs:
 # - https://github.com/junegunn/vader.vim/?tab=readme-ov-file#github-actions
 # - https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables
 # - https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/accessing-contextual-information-about-workflow-runs#matrix-context
+# - https://stackoverflow.com/questions/62716758/how-to-extend-environment-variables-in-github-actions-with-existing-ones
