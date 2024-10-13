@@ -37,7 +37,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     env:
-      PATH: /home/runner/vim-${{ matrix.vim.version }}/bin:$PATH
+      PATH: /home/runner/vim-${{ matrix.vim.version }}/bin:${{ env.PATH }}
 
     steps:
       - uses: actions/checkout@v2
