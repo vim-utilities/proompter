@@ -1,7 +1,7 @@
 
 ""
 " {{{
-Before(proompter#parse#http#response#ExtractStatus -- Build HTTP response data):
+Before(proompter#http#parse#response#ExtractStatus -- Build HTTP response data):
   let http_response_line_separator = "\r\n"
 
   ""
@@ -57,8 +57,8 @@ Before(proompter#parse#http#response#ExtractStatus -- Build HTTP response data):
 
 ""
 " {{{
-Execute(proompter#parse#http#response#ExtractStatus -- Handles well formed HTTP data):
-  let status = proompter#parse#http#response#ExtractStatus(g:http_data_from_chat)
+Execute(proompter#http#parse#response#ExtractStatus -- Handles well formed HTTP data):
+  let status = proompter#http#parse#response#ExtractStatus(g:http_data_from_chat)
 Then(Extracted expected status data, nothing more and nothing less):
   AssertEqual len(g:expected_200), len(g:status)
   for [key, value] in items(g:expected_200)
@@ -69,8 +69,8 @@ Then(Extracted expected status data, nothing more and nothing less):
 
 ""
 " {{{
-Execute(proompter#parse#http#response#ExtractStatus -- Ignores missing status):
-  let status = proompter#parse#http#response#ExtractStatus(g:http_data_from_chat[1:])
+Execute(proompter#http#parse#response#ExtractStatus -- Ignores missing status):
+  let status = proompter#http#parse#response#ExtractStatus(g:http_data_from_chat[1:])
 Then(Extracted expected status data, nothing more and nothing less):
   let expected = {}
   AssertEqual len(expected), len(g:status)
@@ -82,11 +82,11 @@ Then(Extracted expected status data, nothing more and nothing less):
 
 ""
 " {{{
-Execute(proompter#parse#http#response#ExtractStatus -- Is not fooled by multiple status lines):
+Execute(proompter#http#parse#response#ExtractStatus -- Is not fooled by multiple status lines):
   let _http_response_lines_list_from_chat = ['HTTP/4.19 568 Wat is happening?!']
   call extend(_http_response_lines_list_from_chat, http_response_lines_list_from_chat)
   let http_data_from_chat = join(_http_response_lines_list_from_chat, http_response_line_separator)
-  let status = proompter#parse#http#response#ExtractStatus(http_data_from_chat)
+  let status = proompter#http#parse#response#ExtractStatus(http_data_from_chat)
 Then(Extracted expected status data, nothing more and nothing less):
   let expected = {
         \   'version': '4.19',

@@ -31,8 +31,8 @@
 " }
 " ```
 "
-" See: {tests} tests/units/autoload_proompter_parse_http-response_ExtractStatus.vader
-function! proompter#parse#http#response#ExtractStatus(data) abort
+" See: {tests} tests/units/autoload_proompter_http_parse_response_ExtractStatus.vader
+function! proompter#http#parse#response#ExtractStatus(data) abort
   let l:status = {}
 
   if a:data[0:4] != 'HTTP/'
@@ -81,8 +81,8 @@ endfunction
 " }
 " ```
 "
-" See: {tests} tests/units/autoload_proompter_parse_http-response_ExtractHeaders.vader
-function! proompter#parse#http#response#ExtractHeaders(data) abort
+" See: {tests} tests/units/autoload_proompter_http_parse_response_ExtractHeaders.vader
+function! proompter#http#parse#response#ExtractHeaders(data) abort
   let l:headers = {}
 
   if a:data[0] !~ '\w'
@@ -153,8 +153,8 @@ endfunction
 " ]
 " ```
 "
-" See: {tests} tests/units/autoload_proompter_parse_http-response_ExtractJSONDicts.vader
-function! proompter#parse#http#response#ExtractJSONDicts(data) abort
+" See: {tests} tests/units/autoload_proompter_http_parse_response_ExtractJSONDicts.vader
+function! proompter#http#parse#response#ExtractJSONDicts(data) abort
   let l:dictionary_list = []
 
   let l:index = 0

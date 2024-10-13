@@ -14,11 +14,11 @@
 " multi-part responses where headers and body trigger streaming callback
 " twice!  First with headers, then second with headless body X-P
 "
-" See: {tests} tests/units/autoload_proompter_parse_http_Response.vader
-function! proompter#parse#http#Response(data) abort
-  let l:status = proompter#parse#http#response#ExtractStatus(a:data)
-  let l:headers = proompter#parse#http#response#ExtractHeaders(a:data)
-  let l:body = proompter#parse#http#response#ExtractJSONDicts(a:data)
+" See: {tests} tests/units/autoload_proompter_http_parse_Response.vader
+function! proompter#http#parse#Response(data) abort
+  let l:status = proompter#http#parse#response#ExtractStatus(a:data)
+  let l:headers = proompter#http#parse#response#ExtractHeaders(a:data)
+  let l:body = proompter#http#parse#response#ExtractJSONDicts(a:data)
   return { 'status': l:status, 'headers': l:headers, 'body': l:body }
 endfunction
 

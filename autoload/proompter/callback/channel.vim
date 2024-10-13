@@ -29,7 +29,7 @@
 " {"model":"codellama","created_at":"2024-09-20T23:25:06.675058548Z","response":"","done":true,"done_reason":"stop","context":[...],"total_duration":7833808817,"load_duration":10021098,"prompt_eval_count":31,"prompt_eval_duration":2122796000,"eval_count":35,"eval_duration":5658536000}
 " ```
 function! proompter#callback#channel#CompleteToHistory(api_response, configurations = g:proompter, state = g:proompter_state, ...) abort
-  let l:http_response = proompter#parse#http#Response(a:api_response)
+  let l:http_response = proompter#http#parse#Response(a:api_response)
   if l:http_response.status.code < 200 || l:http_response.status.code >= 300
     throw join([
           \   'HTTP response not okay ->',
@@ -112,7 +112,7 @@ function! proompter#callback#channel#StreamToMessages(api_response, configuratio
         \   },
         \ }
 
-  let l:http_response = proompter#parse#http#Response(a:api_response)
+  let l:http_response = proompter#http#parse#Response(a:api_response)
   if len(l:http_response.status) && (l:http_response.status.code < 200 || l:http_response.status.code >= 300)
     throw join([
           \   'HTTP response not okay ->',
@@ -232,7 +232,7 @@ function! proompter#callback#channel#StreamToBuffer(api_response, configurations
         \   },
         \ }
 
-  let l:http_response = proompter#parse#http#Response(a:api_response)
+  let l:http_response = proompter#http#parse#Response(a:api_response)
   if len(l:http_response.status) && (l:http_response.status.code < 200 || l:http_response.status.code >= 300)
     throw join([
           \   'HTTP response not okay ->',

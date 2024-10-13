@@ -1,7 +1,7 @@
 
 ""
 " {{{
-Execute (proompter#parse#http#Response -- Well formatted HTTP response):
+Execute (proompter#http#parse#Response -- Well formatted HTTP response):
   let separator = "\r\n"
 
   let data_lines = [
@@ -13,7 +13,7 @@ Execute (proompter#parse#http#Response -- Well formatted HTTP response):
         \ ]
 
 
-  let http_response = proompter#parse#http#Response(join(data_lines, separator))
+  let http_response = proompter#http#parse#Response(join(data_lines, separator))
   AssertEqual http_response.headers.Server, 'SimpleHTTP/0.6 Python/3.12.6'
   AssertEqual http_response.headers.Date, 'Sat, 28 Sep 2024 23:29:00 GMT'
   AssertEqual http_response.headers['Content-Type'], 'application/json'

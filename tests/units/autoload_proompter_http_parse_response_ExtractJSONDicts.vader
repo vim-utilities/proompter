@@ -1,7 +1,7 @@
 
 ""
 " {{{
-Before(proompter#parse#http#response#ExtractJSONDicts -- Build HTTP response data):
+Before(proompter#http#parse#response#ExtractJSONDicts -- Build HTTP response data):
   let http_response_line_separator = "\r\n"
 
   ""
@@ -172,10 +172,10 @@ Before(proompter#parse#http#response#ExtractJSONDicts -- Build HTTP response dat
 ""
 
 ""
-" proompter#parse#http#response#ExtractJSONDicts -- General behavior tests {{{
-Execute(proompter#parse#http#response#ExtractJSONDicts -- Returns empty dict list for empty body):
+" proompter#http#parse#response#ExtractJSONDicts -- General behavior tests {{{
+Execute(proompter#http#parse#response#ExtractJSONDicts -- Returns empty dict list for empty body):
   let _http_response_lines_list_from_generate = http_response_lines_list_from_generate[:4]
-  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(_http_response_lines_list_from_generate)
+  let json_dict_list = proompter#http#parse#response#ExtractJSONDicts(_http_response_lines_list_from_generate)
 Then(Extracted expected dict list, nothing more and nothing less):
   let expected = []
   AssertEqual len(expected), len(g:json_dict_list)
@@ -185,9 +185,9 @@ Then(Extracted expected dict list, nothing more and nothing less):
     endfor
   endfor
 
-Execute(proompter#parse#http#response#ExtractJSONDicts -- Does not care about mssing headers):
+Execute(proompter#http#parse#response#ExtractJSONDicts -- Does not care about mssing headers):
   let _http_response_lines_list_from_generate = http_response_lines_list_from_generate[5:]
-  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(_http_response_lines_list_from_generate)
+  let json_dict_list = proompter#http#parse#response#ExtractJSONDicts(_http_response_lines_list_from_generate)
 Then(Extracted expected dict list, nothing more and nothing less):
   let expected = []
   AssertEqual len(expected), len(g:json_dict_list)
@@ -197,8 +197,8 @@ Then(Extracted expected dict list, nothing more and nothing less):
     endfor
   endfor
 
-Execute(proompter#parse#http#response#ExtractJSONDicts -- Parses escapes and other edge-cases as expected):
-  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(http_data_from_edge_casees)
+Execute(proompter#http#parse#response#ExtractJSONDicts -- Parses escapes and other edge-cases as expected):
+  let json_dict_list = proompter#http#parse#response#ExtractJSONDicts(http_data_from_edge_casees)
 Then(Extracted expected dict list, nothing more and nothing less):
   AssertEqual len(g:data_from_edge_casees), len(g:json_dict_list)
   for [index, dict] in items(g:json_dict_list)
@@ -210,9 +210,9 @@ Then(Extracted expected dict list, nothing more and nothing less):
 ""
 
 ""
-" proompter#parse#http#response#ExtractJSONDicts -- `/api/chat` tests {{{
-Execute(proompter#parse#http#response#ExtractJSONDicts -- Handles well formed HTTP data from '/api/chat'):
-  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(g:http_data_from_chat)
+" proompter#http#parse#response#ExtractJSONDicts -- `/api/chat` tests {{{
+Execute(proompter#http#parse#response#ExtractJSONDicts -- Handles well formed HTTP data from '/api/chat'):
+  let json_dict_list = proompter#http#parse#response#ExtractJSONDicts(g:http_data_from_chat)
 Then(Extracted expected dict list, nothing more and nothing less):
   AssertEqual len(g:data_from_chat), len(g:json_dict_list)
   for [index, dict] in items(g:data_from_chat)
@@ -224,9 +224,9 @@ Then(Extracted expected dict list, nothing more and nothing less):
 ""
 
 ""
-" proompter#parse#http#response#ExtractJSONDicts -- `/api/generate` tests {{{
-Execute(proompter#parse#http#response#ExtractJSONDicts -- Handles well formed HTTP data from '/api/generate'):
-  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(g:http_data_from_generate)
+" proompter#http#parse#response#ExtractJSONDicts -- `/api/generate` tests {{{
+Execute(proompter#http#parse#response#ExtractJSONDicts -- Handles well formed HTTP data from '/api/generate'):
+  let json_dict_list = proompter#http#parse#response#ExtractJSONDicts(g:http_data_from_generate)
 Then(Extracted expected dict list, nothing more and nothing less):
   AssertEqual len(g:data_from_generate), len(g:json_dict_list)
   for [index, dict] in items(g:data_from_generate)
@@ -235,9 +235,9 @@ Then(Extracted expected dict list, nothing more and nothing less):
     endfor
   endfor
 
-Execute(proompter#parse#http#response#ExtractJSONDicts -- Does not care if status line is missing):
+Execute(proompter#http#parse#response#ExtractJSONDicts -- Does not care if status line is missing):
   let http_data_from_generate = join(g:http_response_lines_list_from_generate[1:], g:http_response_line_separator)
-  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(http_data_from_generate)
+  let json_dict_list = proompter#http#parse#response#ExtractJSONDicts(http_data_from_generate)
 Then(Extracted expected dict list, nothing more and nothing less):
   AssertEqual len(g:data_from_generate), len(g:json_dict_list)
   for [index, dict] in items(g:data_from_generate)
@@ -246,9 +246,9 @@ Then(Extracted expected dict list, nothing more and nothing less):
     endfor
   endfor
 
-Execute(proompter#parse#http#response#ExtractJSONDicts -- Does not care if headers are missing):
+Execute(proompter#http#parse#response#ExtractJSONDicts -- Does not care if headers are missing):
   let http_data_from_generate = join(g:http_response_lines_list_from_generate[4:], g:http_response_line_separator)
-  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(http_data_from_generate)
+  let json_dict_list = proompter#http#parse#response#ExtractJSONDicts(http_data_from_generate)
 Then(Extracted expected dict list, nothing more and nothing less):
   AssertEqual len(g:data_from_generate), len(g:json_dict_list)
   for [index, dict] in items(g:data_from_generate)
@@ -257,12 +257,12 @@ Then(Extracted expected dict list, nothing more and nothing less):
     endfor
   endfor
 
-Execute(proompter#parse#http#response#ExtractJSONDicts -- Forgives when headers are not seperated from body):
+Execute(proompter#http#parse#response#ExtractJSONDicts -- Forgives when headers are not seperated from body):
   let http_response_lines_list_from_generate = filter(deepcopy(g:http_response_lines_list_from_generate), { _index, value ->
         \   len(value) > 0
         \ })
   let http_data_from_generate = join(http_response_lines_list_from_generate, g:http_response_line_separator)
-  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(http_data_from_generate)
+  let json_dict_list = proompter#http#parse#response#ExtractJSONDicts(http_data_from_generate)
 Then(Extracted expected dict list, nothing more and nothing less):
   AssertEqual len(g:data_from_generate), len(g:json_dict_list)
   for [index, dict] in items(g:data_from_generate)
@@ -271,12 +271,12 @@ Then(Extracted expected dict list, nothing more and nothing less):
     endfor
   endfor
 
-Execute(proompter#parse#http#response#ExtractJSONDicts -- Forgives when dict touches last header):
+Execute(proompter#http#parse#response#ExtractJSONDicts -- Forgives when dict touches last header):
   let _http_response_lines_list_from_generate = deepcopy(g:http_response_lines_list_from_generate[:3])
   let _http_response_lines_list_from_generate[len(_http_response_lines_list_from_generate)-1] .= g:http_response_lines_list_from_generate[5]
   call extend(_http_response_lines_list_from_generate, g:http_response_lines_list_from_generate[6:])
   let http_data_from_generate = join(http_response_lines_list_from_generate, g:http_response_line_separator)
-  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(http_data_from_generate)
+  let json_dict_list = proompter#http#parse#response#ExtractJSONDicts(http_data_from_generate)
 Then(Extracted expected dict list, nothing more and nothing less):
   AssertEqual len(g:data_from_generate), len(g:json_dict_list)
   for [index, dict] in items(g:data_from_generate)
@@ -285,11 +285,11 @@ Then(Extracted expected dict list, nothing more and nothing less):
     endfor
   endfor
 
-Execute(proompter#parse#http#response#ExtractJSONDicts -- Okay with dicts touching):
+Execute(proompter#http#parse#response#ExtractJSONDicts -- Okay with dicts touching):
   let _http_response_lines_list_from_generate = deepcopy(g:http_response_lines_list_from_generate)[:4]
   call add(_http_response_lines_list_from_generate, join(g:http_response_lines_list_from_generate[5:], ''))
   let http_data_from_generate = join(_http_response_lines_list_from_generate, g:http_response_line_separator)
-  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(http_data_from_generate)
+  let json_dict_list = proompter#http#parse#response#ExtractJSONDicts(http_data_from_generate)
 Then(Extracted expected dict list, nothing more and nothing less):
   AssertEqual len(g:data_from_generate), len(g:json_dict_list)
   for [index, dict] in items(g:data_from_generate)
