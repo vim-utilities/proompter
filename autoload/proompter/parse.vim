@@ -137,6 +137,32 @@ function! proompter#parse#JSONLinesFromHTTPResponse(data) abort
 endfunction
 
 ""
+" Return dictionary with `version`, `code`, and `text` parsed from first line
+" of HTTP response, or an empty dictionary if first few characters do not
+" match expectations.
+function! proompter#parse#StatusFromHTTPResponse(data) abort
+  let l:status = {}
+
+  if a:data[0:4] != 'HTTP/'
+    return l:status
+  endif
+
+  let l:pattern_line_seperator = '\r\n\|\n'
+  let l:match_results = get(matchstrlist([a:data], l:pattern_line_seperator), 0, {})
+  if get(l:match_results, 'idx', -1) == -1 || get(l:match_results, 'byteidx', -1) == -1
+    return l:status
+  endif
+
+  let l:first_line = a:data[:l:match_results.byteidx-1]
+  let l:status_parts = split(l:first_line, ' ')
+  let l:status.version = split(l:status_parts[0], '/')[-1]
+  let l:status.code = l:status_parts[1]
+  let l:status.text = join(l:status_parts[2:], ' ')
+
+  return l:status
+endfunction
+
+""
 " Returns either dictionary with "headers" dictionary and "body" with list of
 " dictionaries parsed from HTTP response.
 "
@@ -146,9 +172,10 @@ endfunction
 " multi-part responses where headers and body trigger streaming callback
 " twice!  First with headers, then second with headless body X-P
 function! proompter#parse#HTTPResponse(data) abort
+  let l:status = proompter#parse#StatusFromHTTPResponse(a:data)
   let l:headers = proompter#parse#HeadersFromHTTPResponse(a:data)
   let l:body = proompter#parse#JSONLinesFromHTTPResponse(a:data)
-  return { 'headers': l:headers, 'body': l:body }
+  return { 'status': l:status, 'headers': l:headers, 'body': l:body }
 endfunction
 
 ""
