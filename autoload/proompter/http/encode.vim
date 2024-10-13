@@ -10,7 +10,7 @@
 " Parameter: {dict} data - Body payload that will be POST-ed
 " Parameter: {define__configurations} configurations - Reads properties to
 "            build POST request for proxy
-function! proompter#format#HTTPPost(data, configurations = g:proompter) abort
+function! proompter#http#encode#Post(data, configurations = g:proompter) abort
   let l:json = json_encode(a:data)
 
   return join([

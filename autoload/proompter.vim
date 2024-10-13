@@ -133,7 +133,7 @@ function! proompter#SendPromptToChat(value, configurations = g:proompter, state 
 
   call add(a:state.messages, l:entry)
 
-  let l:post_payload = proompter#format#HTTPPost(l:model.data, a:configurations)
+  let l:post_payload = proompter#http#encode#Post(l:model.data, a:configurations)
 
   let l:channel = proompter#channel#GetOrSetOpen(a:configurations, a:state)
 
@@ -240,7 +240,7 @@ function! proompter#SendPromptToGenerate(value, configurations = g:proompter, st
 
   call add(a:state.messages, l:entry)
 
-  let l:post_payload = proompter#format#HTTPPost(l:model.data, a:configurations)
+  let l:post_payload = proompter#http#encode#Post(l:model.data, a:configurations)
 
   let l:channel = proompter#channel#GetOrSetOpen(a:configurations, a:state)
 
@@ -343,7 +343,7 @@ function! proompter#load(configurations = g:proompter, state = g:proompter_state
     throw 'Unknown endpoing in -> a:configurations.api.url'
   endif
 
-  let l:post_payload = proompter#format#HTTPPost(l:model_data, a:configurations)
+  let l:post_payload = proompter#http#encode#Post(l:model_data, a:configurations)
 
   let l:channel = proompter#channel#GetOrSetOpen(a:configurations, a:state)
 
@@ -369,7 +369,7 @@ function! proompter#unload(configurations = g:proompter, state = g:proompter_sta
     throw 'Unknown endpoing in -> a:configurations.api.url'
   endif
 
-  let l:post_payload = proompter#format#HTTPPost(l:model_data, a:configurations)
+  let l:post_payload = proompter#http#encode#Post(l:model_data, a:configurations)
 
   let l:channel = proompter#channel#GetOrSetOpen(a:configurations, a:state)
 

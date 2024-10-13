@@ -1,7 +1,7 @@
 
 ""
 " {{{
-Execute (proompter#format#HTTPPost -- Creates HTTP POST request as expected):
+Execute (proompter#http#encode#Post -- Creates HTTP POST request as expected):
   let data = {
         \   'prompt': '',
         \   'raw': v:false,
@@ -19,7 +19,7 @@ Execute (proompter#format#HTTPPost -- Creates HTTP POST request as expected):
 
   let expected_configurations = deepcopy(configurations)
 
-  let post_payload = proompter#format#HTTPPost(data, configurations)
+  let post_payload = proompter#http#encode#Post(data, configurations)
 
   let separator = "\r\n"
   let post_payload_lines = split(post_payload, separator)
