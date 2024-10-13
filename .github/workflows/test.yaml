@@ -72,7 +72,7 @@ jobs:
       - name: Pre-pend custom Vim install location to `PATH` environment variable
         if: steps.cache-test-dependencies.outputs.cache-hit == 'true'
         run: |
-          echo "$HOME/vim-${{ matrix.vim.version }}/bin:${{ env.PATH }}" >> $GITHUB_ENV
+          echo "$HOME/vim-${{ matrix.vim.version }}/bin:$PATH" >> $GITHUB_ENV
 
       - name: Test units
         run: |
