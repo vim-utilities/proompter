@@ -5,6 +5,7 @@ Execute (proompter#callback#channel#CompleteToHistory -- Handles well formated H
   let separator = "\r\n"
 
   let api_response = join([
+        \   'HTTP/1.1 200 OK',
         \   'Server: SimpleHTTP/0.6 Python/3.12.6',
         \   'Date: Sat, 28 Sep 2024 23:29:00 GMT',
         \   'Content-Type: application/json',
@@ -56,6 +57,31 @@ Execute (proompter#callback#channel#CompleteToHistory -- Handles well formated H
   AssertEqual state, expected_state
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
 
+Execute (proompter#callback#channel#CompleteToHistory -- Throws when status code is not in 200 range):
+  let separator = "\r\n"
+
+  let api_response = join([
+        \   'HTTP/1.1 500 Internal Server Error',
+        \   'Server: SimpleHTTP/0.6 Python/3.12.6',
+        \ ], separator)
+
+  let configurations = {
+        \   'select': {
+        \     'model_name': 'mistral',
+        \   },
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+
+  let state = { 'messages': [] }
+
+  let expected_state = { 'messages': [ ] }
+
+  AssertThrows call proompter#callback#channel#CompleteToHistory(g:api_response, g:configurations, g:state)
+
+  AssertEqual g:vader_exception, 'HTTP response not okay -> 500 Internal Server Error'
+  AssertEqual state, expected_state, 'Unexpected mutation of state'
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
 " }}}
 ""
 
@@ -65,6 +91,7 @@ Execute (proompter#callback#channel#StreamToMessages -- Handles JSON stream with
   let separator = "\r\n"
 
   let api_response = join([
+        \   'HTTP/1.1 200 OK',
         \   'Server: SimpleHTTP/0.6 Python/3.12.6',
         \   'Date: Fri, 20 Sep 2024 23:25:06 GMT',
         \   'Content-Type: application/json',
@@ -140,6 +167,32 @@ Execute (proompter#callback#channel#StreamToMessages -- Handles JSON stream with
 
   AssertEqual state, expected_state
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+
+Execute (proompter#callback#channel#StreamToMessages -- Throws when status code is not in 200 range):
+  let separator = "\r\n"
+
+  let api_response = join([
+        \   'HTTP/1.1 500 Internal Server Error',
+        \   'Server: SimpleHTTP/0.6 Python/3.12.6',
+        \ ], separator)
+
+  let configurations = {
+        \   'select': {
+        \     'model_name': 'mistral',
+        \   },
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+
+  let state = { 'messages': [] }
+
+  let expected_state = { 'messages': [ ] }
+
+  AssertThrows call proompter#callback#channel#StreamToMessages(g:api_response, g:configurations, g:state)
+
+  AssertEqual g:vader_exception, 'HTTP response not okay -> 500 Internal Server Error'
+  AssertEqual state, expected_state, 'Unexpected mutation of state'
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
 " }}}
 ""
 
@@ -149,6 +202,7 @@ Execute (proompter#callback#channel#StreamToBuffer -- Handles JSON stream with o
   let separator = "\r\n"
 
   let api_response = join([
+        \   'HTTP/1.1 200 OK',
         \   'Server: SimpleHTTP/0.6 Python/3.12.6',
         \   'Date: Fri, 20 Sep 2024 23:25:06 GMT',
         \   'Content-Type: application/json',
@@ -234,6 +288,7 @@ Execute(proompter#callback#channel#StreamToBuffer -- Handles JSON with newlines)
   let separator = "\r\n"
 
   let api_response = join([
+        \   'HTTP/1.1 200 OK',
         \   'Server: SimpleHTTP/0.6 Python/3.12.6',
         \   'Date: Fri, 20 Sep 2024 23:25:06 GMT',
         \   'Content-Type: application/json',
@@ -297,6 +352,37 @@ Execute(proompter#callback#channel#StreamToBuffer -- Handles JSON with newlines)
   AssertEqual state, expected_state
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
   AssertEqual getbufline(bufnr('[Vader-workbench]'), 0, '$')[-5:-3], split(expected_state.messages[-1].message.content, "\n")
+
+Execute (proompter#callback#channel#StreamToBuffer -- Throws when status code is not in 200 range):
+  let separator = "\r\n"
+
+  let api_response = join([
+        \   'HTTP/1.1 500 Internal Server Error',
+        \   'Server: SimpleHTTP/0.6 Python/3.12.6',
+        \ ], separator)
+
+  let configurations = {
+        \   'select': {
+        \     'model_name': 'mistral',
+        \   },
+        \ }
+
+  let expected_configurations = deepcopy(configurations)
+
+  let state = { 'messages': [] }
+
+  let expected_state = { 'messages': [ ] }
+
+  AssertThrows call proompter#callback#channel#StreamToBuffer(
+        \   g:api_response,
+        \   g:configurations,
+        \   g:state,
+        \   '[Vader-workbench]',
+        \ )
+
+  AssertEqual g:vader_exception, 'HTTP response not okay -> 500 Internal Server Error'
+  AssertEqual state, expected_state, 'Unexpected mutation of state'
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
 " }}}
 ""
 

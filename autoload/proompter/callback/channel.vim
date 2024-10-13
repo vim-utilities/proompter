@@ -30,6 +30,13 @@
 " ```
 function! proompter#callback#channel#CompleteToHistory(api_response, configurations = g:proompter, state = g:proompter_state, ...) abort
   let l:http_response = proompter#parse#HTTPResponse(a:api_response)
+  if l:http_response.status.code < 200 || l:http_response.status.code >= 300
+    throw join([
+          \   'HTTP response not okay ->',
+          \   l:http_response.status.code,
+          \   l:http_response.status.text,
+          \ ], ' ')
+  endif
 
   let l:entry = {
         \   'model': l:http_response.body[-1].model,
@@ -106,6 +113,14 @@ function! proompter#callback#channel#StreamToMessages(api_response, configuratio
         \ }
 
   let l:http_response = proompter#parse#HTTPResponse(a:api_response)
+  if len(l:http_response.status) && (l:http_response.status.code < 200 || l:http_response.status.code >= 300)
+    throw join([
+          \   'HTTP response not okay ->',
+          \   l:http_response.status.code,
+          \   l:http_response.status.text,
+          \ ], ' ')
+  endif
+
   if len(l:http_response.body) <= 0
     " echoe 'Skipping HTTP response with empty body'
     return
@@ -218,6 +233,14 @@ function! proompter#callback#channel#StreamToBuffer(api_response, configurations
         \ }
 
   let l:http_response = proompter#parse#HTTPResponse(a:api_response)
+  if len(l:http_response.status) && (l:http_response.status.code < 200 || l:http_response.status.code >= 300)
+    throw join([
+          \   'HTTP response not okay ->',
+          \   l:http_response.status.code,
+          \   l:http_response.status.text,
+          \ ], ' ')
+  endif
+
   if len(l:http_response.body) <= 0
     " echoe 'Skipping HTTP response with empty body'
     return
