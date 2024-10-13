@@ -12,8 +12,8 @@ The format is based on [Keep a Changelog][] and this project adheres to
 [heading__unreleased]: #unreleased
 
 
-- [ ] `doc/proompter.txt` is correct and up-to-date?
 - [ ] Proxy traffic between Vim `channel` and Ollama API
+  - [ ] HTTP Response parser handles non-`200` status codes
   - [ ] releases listening port
    > Note; `kill -SIGINT <PID>` works for interactive sessions, but doesn't
    > when backgrounded within Vader test runner script?!
@@ -21,10 +21,27 @@ The format is based on [Keep a Changelog][] and this project adheres to
    > Note; the `Wants`, `Requires`, and other bindings to `ollama.service` may
    > need additional testing
 - [ ] Allow [python-hot-reload][] of `scripts/proompter-channel-proxy.py`?
-- [ ] Passing mock tests?!
-  - [ ] `autoload/proompter.vim` needs mock tests for; `proompter#SendPromptToGenerate`, `proompter#SendPrompt`, `proompter#SendHighlightedText`, `proompter#cancel`, `proompter#load`, `proompter#unload`
+- [ ] Refactor code and configurations to allow connections to other LLM APIs?
+  - [vllm][]
 
 [python-hot-reload]: https://stackoverflow.com/questions/29960634/reload-the-currently-running-python-script
+[vllm]: https://docs.vllm.ai/en/latest/getting_started/quickstart.html
+
+______
+
+
+## [0.0.6] - 2024-10-13
+
+
+- [X] Passing mock tests for `autoload/proompter.vim`
+  - [X] `proompter#SendPromptToGenerate`
+  - [X] `proompter#SendPrompt`
+  - [X] `proompter#SendHighlightedText`
+  - [X] `proompter#Cancel`
+  - [X] `proompter#Load`
+  - [X] `proompter#Unload`
+- [X] `doc/proompter.txt` is correct and up-to-date?
+- [X] Add `pre-commit` hook to help mitigate known committing bugs
 
 
 ______
