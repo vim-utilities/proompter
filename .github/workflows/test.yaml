@@ -24,8 +24,21 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  vim-tests:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+
+        vim:
+          - version: v9.1.0774
+            configure_args: --with-features=huge --enable-fail-if-missing --disable-nls
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      PATH: /home/runner/vim-${{ matrix.vim.version }}/bin:$PATH
+
     steps:
       - uses: actions/checkout@v2
         with:
@@ -36,10 +49,10 @@ jobs:
         with:
           path: |
             /tmp/vim
-            /home/runner/vim-v9.1.0774
+            /home/runner/vim-${{ matrix.vim.version }}
             /home/runner/.vim
             /home/runner/vim
-          key: ubuntu-latest_v9.1.0774
+          key: ${{ matrix.os }}_${{ matrix.vim.version }}
 
       - uses: actions/setup-python@v5
         with:
@@ -48,14 +61,8 @@ jobs:
       - uses: rhysd/action-setup-vim@v1.3.5
         if: steps.cache-test-dependencies.outputs.cache-hit != 'true'
         with:
-          version: v9.1.0774
-          configure-args: |
-            --with-features=huge --enable-fail-if-missing --disable-nls
-
-      - name: Update PATH with cached dependencies
-        if: steps.cache-test-dependencies.outputs.cache-hit == 'true'
-        run: |
-          export PATH="/home/runner/vim-v9.1.0774/bin:$PATH"
+          version: ${{ matrix.vim.version }}
+          configure-args: ${{ matrix.vim.configure_args }}
 
       - name: Install Vader
         if: steps.cache-test-dependencies.outputs.cache-hit != 'true'
@@ -79,3 +86,4 @@ jobs:
 #
 # - https://github.com/junegunn/vader.vim/?tab=readme-ov-file#github-actions
 # - https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables
+# - https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/accessing-contextual-information-about-workflow-runs#matrix-context
