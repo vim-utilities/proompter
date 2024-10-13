@@ -1,0 +1,28 @@
+
+""
+" {{{
+Execute (proompter#parse#http#Response -- Well formatted HTTP response):
+  let separator = "\r\n"
+
+  let data_lines = [
+        \   'Server: SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date: Sat, 28 Sep 2024 23:29:00 GMT',
+        \   'Content-Type: application/json',
+        \   '',
+        \   '{"model": "codellama","created_at":"2024-09-28T23:29:00.299380014Z","response":" V","done":false}',
+        \ ]
+
+
+  let http_response = proompter#parse#http#Response(join(data_lines, separator))
+  AssertEqual http_response.headers.Server, 'SimpleHTTP/0.6 Python/3.12.6'
+  AssertEqual http_response.headers.Date, 'Sat, 28 Sep 2024 23:29:00 GMT'
+  AssertEqual http_response.headers['Content-Type'], 'application/json'
+
+  AssertEqual len(http_response.body), 1
+  AssertEqual http_response.body[0].model, 'codellama'
+  AssertEqual http_response.body[0].created_at, '2024-09-28T23:29:00.299380014Z'
+  AssertEqual http_response.body[0].response, ' V'
+  AssertEqual http_response.body[0].done, v:false
+" }}}
+""
+

@@ -1,0 +1,302 @@
+
+""
+" {{{
+Before(proompter#parse#http#response#ExtractJSONDicts -- Build HTTP response data):
+  let http_response_line_separator = "\r\n"
+
+  ""
+  " From: `/api/chat`
+  let data_from_chat = [
+        \   {
+        \     'model': 'llama3.2',
+        \     'created_at': '2023-08-04T08:52:19.385406455-07:00',
+        \     'message': {
+        \       'role': 'assistant',
+        \       'content': 'Vim is',
+        \     },
+        \     'done': v:false,
+        \   },
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-20T23:25:02.670272033Z',
+        \     'message': {
+        \       'role': 'assistant',
+        \       'content':  'the best!',
+        \       'images':  v:null,
+        \     },
+        \     'done': v:true,
+        \     'total_duration': 8113331500,
+        \     'load_duration': 6396458,
+        \     'prompt_eval_count': 61,
+        \     'prompt_eval_duration': 398801000,
+        \     'eval_count': 468,
+        \     'eval_duration': 7701267000
+        \   },
+        \ ]
+
+  let http_response_lines_list_from_chat = [
+        \   'HTTP/1.1 200 OK',
+        \   'Server: SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date: Sat, 28 Sep 2024 23:29:00 GMT',
+        \   'Content-Type: application/json',
+        \   '',
+        \ ]
+  call extend(http_response_lines_list_from_chat, mapnew(data_from_chat, { _index, data ->
+        \   json_encode(data)
+        \ }))
+
+  let http_data_from_chat = join(http_response_lines_list_from_chat, http_response_line_separator)
+
+  ""
+  " From: `/api/generate`
+  let data_from_generate = [
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-28T23:29:00.299380014Z',
+        \     'response': 'Vim is',
+        \     'done': v:false
+        \   },
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-20T23:25:04.670272033Z',
+        \     'response': ' the best!',
+        \     'done': v:true,
+        \     'context': [1, 2, 3],
+        \     'total_duration': 4935886791,
+        \     'load_duration': 534986708,
+        \     'prompt_eval_count': 26,
+        \     'prompt_eval_duration': 107345000,
+        \     'eval_count': 237,
+        \     'eval_duration': 4289432000
+        \   },
+        \ ]
+
+  let http_response_lines_list_from_generate = [
+        \   'HTTP/1.1 200 OK',
+        \   'Server: SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date: Sat, 28 Sep 2024 23:29:00 GMT',
+        \   'Content-Type: application/json',
+        \   '',
+        \ ]
+  call extend(http_response_lines_list_from_generate, mapnew(data_from_generate, { _index, data ->
+        \   json_encode(data)
+        \ }))
+
+  let http_data_from_generate = join(http_response_lines_list_from_generate, http_response_line_separator)
+
+  ""
+  " From: various edge-case conditions
+  let data_from_edge_casees = [
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-28T23:29:00.299380014Z',
+        \     'response': ' {',
+        \     'done': v:false
+        \   },
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-28T23:29:01.299380014Z',
+        \     'response': '\',
+        \     'done': v:false
+        \   },
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-28T23:29:01.299380014Z',
+        \     'response': '\\',
+        \     'done': v:false
+        \   },
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-28T23:29:02.299380014Z',
+        \     'response': '\\\\',
+        \     'done': v:false
+        \   },
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-28T23:29:03.299380014Z',
+        \     'response': '\""\\',
+        \     'done': v:false
+        \   },
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-28T23:29:04.299380014Z',
+        \     'response': "\n",
+        \     'done': v:false
+        \   },
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-28T23:29:04.299380014Z',
+        \     'response': "\\n",
+        \     'done': v:false
+        \   },
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-28T23:29:04.299380014Z',
+        \     'response': '\\n',
+        \     'done': v:false
+        \   },
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-28T23:29:04.299380014Z',
+        \     'response': '\n',
+        \     'done': v:false
+        \   },
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-20T23:25:04.670272033Z',
+        \     'response': ' "foo',
+        \     'done': v:true,
+        \     'context': [1, 2, 3],
+        \     'total_duration': 4935886791,
+        \     'load_duration': 534986708,
+        \     'prompt_eval_count': 26,
+        \     'prompt_eval_duration': 107345000,
+        \     'eval_count': 237,
+        \     'eval_duration': 4289432000
+        \   },
+        \ ]
+
+  let http_response_lines_list_from_edge_casees = [
+        \   'HTTP/1.1 200 OK',
+        \   'Server: SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date: Sat, 28 Sep 2024 23:29:00 GMT',
+        \   'Content-Type: application/json',
+        \   '',
+        \ ]
+  call extend(http_response_lines_list_from_edge_casees, mapnew(data_from_edge_casees, { _index, data ->
+        \   json_encode(data)
+        \ }))
+
+  let http_data_from_edge_casees = join(http_response_lines_list_from_edge_casees, http_response_line_separator)
+" }}}
+""
+
+""
+" proompter#parse#http#response#ExtractJSONDicts -- General behavior tests {{{
+Execute(proompter#parse#http#response#ExtractJSONDicts -- Returns empty dict list for empty body):
+  let _http_response_lines_list_from_generate = http_response_lines_list_from_generate[:4]
+  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(_http_response_lines_list_from_generate)
+Then(Extracted expected dict list, nothing more and nothing less):
+  let expected = []
+  AssertEqual len(expected), len(g:json_dict_list)
+  for [index, dict] in items(g:json_dict_list)
+    for [key, value] in items(dict)
+      AssertEqual value, g:json_dict_list[index][key]
+    endfor
+  endfor
+
+Execute(proompter#parse#http#response#ExtractJSONDicts -- Does not care about mssing headers):
+  let _http_response_lines_list_from_generate = http_response_lines_list_from_generate[5:]
+  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(_http_response_lines_list_from_generate)
+Then(Extracted expected dict list, nothing more and nothing less):
+  let expected = []
+  AssertEqual len(expected), len(g:json_dict_list)
+  for [index, dict] in items(g:json_dict_list)
+    for [key, value] in items(dict)
+      AssertEqual value, g:json_dict_list[index][key]
+    endfor
+  endfor
+
+Execute(proompter#parse#http#response#ExtractJSONDicts -- Parses escapes and other edge-cases as expected):
+  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(http_data_from_edge_casees)
+Then(Extracted expected dict list, nothing more and nothing less):
+  AssertEqual len(g:data_from_edge_casees), len(g:json_dict_list)
+  for [index, dict] in items(g:json_dict_list)
+    for [key, value] in items(dict)
+      AssertEqual value, g:json_dict_list[index][key]
+    endfor
+  endfor
+" }}}
+""
+
+""
+" proompter#parse#http#response#ExtractJSONDicts -- `/api/chat` tests {{{
+Execute(proompter#parse#http#response#ExtractJSONDicts -- Handles well formed HTTP data from '/api/chat'):
+  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(g:http_data_from_chat)
+Then(Extracted expected dict list, nothing more and nothing less):
+  AssertEqual len(g:data_from_chat), len(g:json_dict_list)
+  for [index, dict] in items(g:data_from_chat)
+    for [key, value] in items(dict)
+      AssertEqual value, g:json_dict_list[index][key]
+    endfor
+  endfor
+" }}}
+""
+
+""
+" proompter#parse#http#response#ExtractJSONDicts -- `/api/generate` tests {{{
+Execute(proompter#parse#http#response#ExtractJSONDicts -- Handles well formed HTTP data from '/api/generate'):
+  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(g:http_data_from_generate)
+Then(Extracted expected dict list, nothing more and nothing less):
+  AssertEqual len(g:data_from_generate), len(g:json_dict_list)
+  for [index, dict] in items(g:data_from_generate)
+    for [key, value] in items(dict)
+      AssertEqual value, g:json_dict_list[index][key]
+    endfor
+  endfor
+
+Execute(proompter#parse#http#response#ExtractJSONDicts -- Does not care if status line is missing):
+  let http_data_from_generate = join(g:http_response_lines_list_from_generate[1:], g:http_response_line_separator)
+  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(http_data_from_generate)
+Then(Extracted expected dict list, nothing more and nothing less):
+  AssertEqual len(g:data_from_generate), len(g:json_dict_list)
+  for [index, dict] in items(g:data_from_generate)
+    for [key, value] in items(dict)
+      AssertEqual value, g:json_dict_list[index][key]
+    endfor
+  endfor
+
+Execute(proompter#parse#http#response#ExtractJSONDicts -- Does not care if headers are missing):
+  let http_data_from_generate = join(g:http_response_lines_list_from_generate[4:], g:http_response_line_separator)
+  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(http_data_from_generate)
+Then(Extracted expected dict list, nothing more and nothing less):
+  AssertEqual len(g:data_from_generate), len(g:json_dict_list)
+  for [index, dict] in items(g:data_from_generate)
+    for [key, value] in items(dict)
+      AssertEqual value, g:json_dict_list[index][key]
+    endfor
+  endfor
+
+Execute(proompter#parse#http#response#ExtractJSONDicts -- Forgives when headers are not seperated from body):
+  let http_response_lines_list_from_generate = filter(deepcopy(g:http_response_lines_list_from_generate), { _index, value ->
+        \   len(value) > 0
+        \ })
+  let http_data_from_generate = join(http_response_lines_list_from_generate, g:http_response_line_separator)
+  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(http_data_from_generate)
+Then(Extracted expected dict list, nothing more and nothing less):
+  AssertEqual len(g:data_from_generate), len(g:json_dict_list)
+  for [index, dict] in items(g:data_from_generate)
+    for [key, value] in items(dict)
+      AssertEqual value, g:json_dict_list[index][key]
+    endfor
+  endfor
+
+Execute(proompter#parse#http#response#ExtractJSONDicts -- Forgives when dict touches last header):
+  let _http_response_lines_list_from_generate = deepcopy(g:http_response_lines_list_from_generate[:3])
+  let _http_response_lines_list_from_generate[len(_http_response_lines_list_from_generate)-1] .= g:http_response_lines_list_from_generate[5]
+  call extend(_http_response_lines_list_from_generate, g:http_response_lines_list_from_generate[6:])
+  let http_data_from_generate = join(http_response_lines_list_from_generate, g:http_response_line_separator)
+  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(http_data_from_generate)
+Then(Extracted expected dict list, nothing more and nothing less):
+  AssertEqual len(g:data_from_generate), len(g:json_dict_list)
+  for [index, dict] in items(g:data_from_generate)
+    for [key, value] in items(dict)
+      AssertEqual value, g:json_dict_list[index][key]
+    endfor
+  endfor
+
+Execute(proompter#parse#http#response#ExtractJSONDicts -- Okay with dicts touching):
+  let _http_response_lines_list_from_generate = deepcopy(g:http_response_lines_list_from_generate)[:4]
+  call add(_http_response_lines_list_from_generate, join(g:http_response_lines_list_from_generate[5:], ''))
+  let http_data_from_generate = join(_http_response_lines_list_from_generate, g:http_response_line_separator)
+  let json_dict_list = proompter#parse#http#response#ExtractJSONDicts(http_data_from_generate)
+Then(Extracted expected dict list, nothing more and nothing less):
+  AssertEqual len(g:data_from_generate), len(g:json_dict_list)
+  for [index, dict] in items(g:data_from_generate)
+    for [key, value] in items(dict)
+      AssertEqual value, g:json_dict_list[index][key]
+    endfor
+  endfor
+" }}}
+""
+

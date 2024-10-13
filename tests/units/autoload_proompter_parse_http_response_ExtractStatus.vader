@@ -1,0 +1,102 @@
+
+""
+" {{{
+Before(proompter#parse#http#response#ExtractStatus -- Build HTTP response data):
+  let http_response_line_separator = "\r\n"
+
+  ""
+  " From: `/api/chat`
+  let data_from_chat = [
+        \   {
+        \     'model': 'llama3.2',
+        \     'created_at': '2023-08-04T08:52:19.385406455-07:00',
+        \     'message': {
+        \       'role': 'assistant',
+        \       'content': 'Vim is',
+        \     },
+        \     'done': v:false,
+        \   },
+        \   {
+        \     'model': 'codellama',
+        \     'created_at': '2024-09-20T23:25:02.670272033Z',
+        \     'message': {
+        \       'role': 'assistant',
+        \       'content':  'the best!',
+        \       'images':  v:null,
+        \     },
+        \     'done': v:true,
+        \     'total_duration': 8113331500,
+        \     'load_duration': 6396458,
+        \     'prompt_eval_count': 61,
+        \     'prompt_eval_duration': 398801000,
+        \     'eval_count': 468,
+        \     'eval_duration': 7701267000
+        \   },
+        \ ]
+
+
+  let expected_200 = {
+        \   'version': '1.1',
+        \   'code': '200',
+        \   'text': 'OK',
+        \ }
+  let http_response_lines_list_from_chat = [
+        \   'HTTP/' . join(values(deepcopy(expected_200)), ' '),
+        \   'Server: SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date: Sat, 28 Sep 2024 23:29:00 GMT',
+        \   'Content-Type: application/json',
+        \   '',
+        \ ]
+  call extend(http_response_lines_list_from_chat, mapnew(data_from_chat, { _index, data ->
+        \   json_encode(data)
+        \ }))
+
+  let http_data_from_chat = join(http_response_lines_list_from_chat, http_response_line_separator)
+" }}}
+""
+
+""
+" {{{
+Execute(proompter#parse#http#response#ExtractStatus -- Handles well formed HTTP data):
+  let status = proompter#parse#http#response#ExtractStatus(g:http_data_from_chat)
+Then(Extracted expected status data, nothing more and nothing less):
+  AssertEqual len(g:expected_200), len(g:status)
+  for [key, value] in items(g:expected_200)
+    AssertEqual value, g:status[key]
+  endfor
+" }}}
+""
+
+""
+" {{{
+Execute(proompter#parse#http#response#ExtractStatus -- Ignores missing status):
+  let status = proompter#parse#http#response#ExtractStatus(g:http_data_from_chat[1:])
+Then(Extracted expected status data, nothing more and nothing less):
+  let expected = {}
+  AssertEqual len(expected), len(g:status)
+  for [key, value] in items(expected)
+    AssertEqual value, g:status[key]
+  endfor
+" }}}
+""
+
+""
+" {{{
+Execute(proompter#parse#http#response#ExtractStatus -- Is not fooled by multiple status lines):
+  let _http_response_lines_list_from_chat = ['HTTP/4.19 568 Wat is happening?!']
+  call extend(_http_response_lines_list_from_chat, http_response_lines_list_from_chat)
+  let http_data_from_chat = join(_http_response_lines_list_from_chat, http_response_line_separator)
+  let status = proompter#parse#http#response#ExtractStatus(http_data_from_chat)
+Then(Extracted expected status data, nothing more and nothing less):
+  let expected = {
+        \   'version': '4.19',
+        \   'code': '568',
+        \   'text': 'Wat is happening?!',
+        \ }
+  AssertEqual len(expected), len(g:status)
+  for [key, value] in items(expected)
+    AssertEqual value, g:status[key]
+  endfor
+" }}}
+""
+

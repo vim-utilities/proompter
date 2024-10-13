@@ -1,0 +1,87 @@
+
+""
+" {{{
+Before(proompter#parse#http#response#ExtractHeaders -- Build HTTP response data):
+  let http_response_line_separator = "\r\n"
+  let http_response_lines_list = [
+        \   'HTTP/1.1 200 OK',
+        \   'Server: SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date: Sat, 28 Sep 2024 23:29:00 GMT',
+        \   'Content-Type: application/json',
+        \   '',
+        \   '{ "model": "codellama", "created_at": "2024-09-28T23:29:00.299380014Z", "response": " V", "done": false }',
+        \ ]
+  let http_data = join(http_response_lines_list, http_response_line_separator)
+" }}}
+""
+
+""
+" {{{
+Execute(proompter#parse#http#response#ExtractHeaders -- Handles well formed HTTP data):
+  let headers = proompter#parse#http#response#ExtractHeaders(g:http_data)
+Then(Extracted expected headers, nothing more and nothing less):
+  let expected = {
+        \   'Server': 'SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date': 'Sat, 28 Sep 2024 23:29:00 GMT',
+        \   'Content-Type': 'application/json',
+        \ }
+  AssertEqual len(expected), len(g:headers)
+  for [key, value] in items(expected)
+    AssertEqual value, g:headers[key]
+  endfor
+
+Execute(proompter#parse#http#response#ExtractHeaders -- Does not care if status line is missing):
+  let http_data = join(g:http_response_lines_list[1:], g:http_response_line_separator)
+  let headers = proompter#parse#http#response#ExtractHeaders(http_data)
+Then(Extracted expected headers, nothing more and nothing less):
+  let expected = {
+        \   'Server': 'SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date': 'Sat, 28 Sep 2024 23:29:00 GMT',
+        \   'Content-Type': 'application/json',
+        \ }
+  AssertEqual len(expected), len(g:headers)
+  for [key, value] in items(expected)
+    AssertEqual value, g:headers[key]
+  endfor
+
+Execute(proompter#parse#http#response#ExtractHeaders -- Does not care if body is missing):
+  let http_data = join(g:http_response_lines_list[:-3], g:http_response_line_separator)
+  let headers = proompter#parse#http#response#ExtractHeaders(http_data)
+Then(Extracted expected headers, nothing more and nothing less):
+  let expected = {
+        \   'Server': 'SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date': 'Sat, 28 Sep 2024 23:29:00 GMT',
+        \   'Content-Type': 'application/json',
+        \ }
+  AssertEqual len(expected), len(g:headers)
+  for [key, value] in items(expected)
+    AssertEqual value, g:headers[key]
+  endfor
+
+Execute(proompter#parse#http#response#ExtractHeaders -- Does not care if status line and body are missing):
+  let http_data = join(g:http_response_lines_list[1:-3], g:http_response_line_separator)
+  let headers = proompter#parse#http#response#ExtractHeaders(http_data)
+Then(Extracted expected headers, nothing more and nothing less):
+  let expected = {
+        \   'Server': 'SimpleHTTP/0.6 Python/3.12.6',
+        \   'Date': 'Sat, 28 Sep 2024 23:29:00 GMT',
+        \   'Content-Type': 'application/json',
+        \ }
+  AssertEqual len(expected), len(g:headers)
+  for [key, value] in items(expected)
+    AssertEqual value, g:headers[key]
+  endfor
+
+Execute(proompter#parse#http#response#ExtractHeaders -- Returns empty dict when no headers are given):
+  let http_data = join(g:http_response_lines_list[5:], g:http_response_line_separator)
+  echow 'http_data ->' http_data
+  let headers = proompter#parse#http#response#ExtractHeaders(http_data)
+Then(Extracted expected headers, nothing more and nothing less):
+  let expected = {}
+  AssertEqual len(expected), len(g:headers)
+  for [key, value] in items(expected)
+    AssertEqual value, g:headers[key]
+  endfor
+" }}}
+""
+
