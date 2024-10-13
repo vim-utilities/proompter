@@ -40,7 +40,7 @@ function! proompter#parse#HeadersFromHTTPResponse(data) abort
     return l:headers
   endif
 
-  let l:pattern_headers_line_seperator = '\r\n\|\n\'
+  let l:pattern_headers_line_seperator = '\r\n\|\n'
   let l:lines = split(a:data[:l:index], l:pattern_headers_line_seperator)
   let l:lines = filter(l:lines, 'v:val != ""')
   if len(l:lines) == 0
@@ -49,10 +49,18 @@ function! proompter#parse#HeadersFromHTTPResponse(data) abort
 
   let l:pattern_headers_key_value_seperator = ':\s\?'
   for l:line in l:lines
-    let l:key = l:line[:match(l:line, l:pattern_headers_key_value_seperator)-1]
-    let l:value = l:line[matchend(l:line, l:pattern_headers_key_value_seperator):]
-    let l:headers[l:key] = l:value
+    let l:index = match(l:line, l:pattern_headers_key_value_seperator)
+    if l:index == -1
+      continue
+    endif
+
+    let l:key = l:line[:l:index-1]
+    let l:value = l:line[l:index+2:]
+    if len(l:key) && len(l:value)
+      let l:headers[l:key] = l:value
+    endif
   endfor
+
   return l:headers
 endfunction
 
