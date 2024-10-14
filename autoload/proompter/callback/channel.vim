@@ -20,13 +20,13 @@
 " Date: Fri, 20 Sep 2024 23:25:06 GMT
 " Content-Type: application/json
 "
-" {"model":"codellama","created_at":"2024-09-20T23:25:01.01645329Z","response":"V","done":false}
-" {"model":"codellama","created_at":"2024-09-20T23:25:01.177902785Z","response":"im","done":false}
-" {"model":"codellama","created_at":"2024-09-20T23:25:01.341776729Z","response":" is","done":false}
-" {"model":"codellama","created_at":"2024-09-20T23:25:01.506237509Z","response":" the","done":false}
-" {"model":"codellama","created_at":"2024-09-20T23:25:01.670272033Z","response":" best","done":false}
+" { "model": "codellama", "created_at": "2024-09-20T23:25:01.016453290Z", "response": "V", "done": false }
+" { "model": "codellama", "created_at": "2024-09-20T23:25:01.177902785Z", "response": "im", "done": false.}
+" { "model": "codellama", "created_at": "2024-09-20T23:25:01.341776729Z", "response": " is", "done": false.}
+" { "model": "codellama", "created_at": "2024-09-20T23:25:01.506237509Z", "response": " the", "done": false.}
+" { "model": "codellama", "created_at": "2024-09-20T23:25:01.670272033Z", "response": " best", "done": false.}
 " ...
-" {"model":"codellama","created_at":"2024-09-20T23:25:06.675058548Z","response":"","done":true,"done_reason":"stop","context":[...],"total_duration":7833808817,"load_duration":10021098,"prompt_eval_count":31,"prompt_eval_duration":2122796000,"eval_count":35,"eval_duration":5658536000}
+" { "model": "codellama", "created_at": "2024-09-20T23:25:06.675058548Z", "response": "", "done": true, "done_reason": "stop", "context": [...], "total_duration": 7833808817, "load_duration": 10021098, "prompt_eval_count": 31, "prompt_eval_duration": 2122796000, "eval_count": 35, "eval_duration": 5658536000 }
 " ```
 "
 " See: {tests} tests/units/autoload_proompter_callback_channel_CompleteToHistory.vader
@@ -87,7 +87,7 @@ endfunction
 " Date: Fri, 20 Sep 2024 23:25:06 GMT
 " Content-Type: application/json
 "
-" {"model":"codellama","created_at":"2024-09-20T23:25:01.01645329Z","response":"V","done":false}
+" { "model": "codellama", "created_at": "2024-09-20T23:25:01.01645329Z", "response": "V", "done": false }
 " ```
 "
 " ```
@@ -96,7 +96,7 @@ endfunction
 " Date: Fri, 20 Sep 2024 23:25:01 GMT
 " Content-Type: application/json
 "
-" {"model":"codellama","created_at":"2024-09-20T23:25:01.177902785Z","response":"im","done":false}
+" { "model": "codellama", "created_at": "2024-09-20T23:25:01.177902785Z", "response": "im", "done": false }
 " ```
 "
 " See: {tests} tests/units/autoload_proompter_callback_channel_StreamToMessages.vader
