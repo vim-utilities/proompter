@@ -47,6 +47,7 @@ Execute (proompter#callback#channel#CompleteToHistory -- Handles well formated H
         \         'role': 'assistant',
         \         'content': ' The sky appears blue because of a phenomenon called Rayleigh scattering.',
         \         'images': v:null,
+        \         'tool_calls': v:null,
         \       },
         \     },
         \   ],

@@ -50,6 +50,7 @@ function! proompter#callback#channel#CompleteToHistory(api_response, configurati
         \     'role': 'assistant',
         \     'content': '',
         \     'images': [],
+        \     'tool_calls': [],
         \   },
         \ }
 
@@ -58,13 +59,25 @@ function! proompter#callback#channel#CompleteToHistory(api_response, configurati
 
     let l:entry.message.content .= l:api_data.message.content
 
-    if get(l:api_data.message, 'images', v:null) != v:null && type(l:api_data.message.images) == v:t_list
+    if type(get(l:api_data.message, 'images', v:null)) == v:t_list
       call extend(l:entry.message.images, l:api_data.message.images)
+    endif
+
+    if type(get(l:api_data.message, 'tool_calls', v:null)) == v:t_list
+      call extend(l:entry.message.tool_calls, l:api_data.message.tool_calls)
     endif
   endfor
 
-  if !len(l:entry.message.images)
+  if len(l:entry.message.images)
+    echoe 'Not yet implemented!'
+  else
     let l:entry.message.images = v:null
+  endif
+
+  if len(l:entry.message.tool_calls)
+    echoe 'Not yet implemented!'
+  else
+    let l:entry.message.tool_calls = v:null
   endif
 
   call add(a:state.messages, l:entry)
@@ -112,6 +125,7 @@ function! proompter#callback#channel#StreamToMessages(api_response, configuratio
         \     'role': 'pending',
         \     'content': '',
         \     'images': [],
+        \     'tool_calls': [],
         \   },
         \ }
 
@@ -141,13 +155,25 @@ function! proompter#callback#channel#StreamToMessages(api_response, configuratio
 
     let l:entry.message.content .= l:api_data.message.content
 
-    if get(l:api_data.message, 'images', v:null) != v:null && type(l:api_data.message.images) == v:t_list
+    if type(get(l:api_data.message, 'images', v:null)) == v:t_list
       call extend(l:entry.message.images, l:api_data.message.images)
+    endif
+
+    if type(get(l:api_data.message, 'tool_calls', v:null)) == v:t_list
+      call extend(l:entry.message.tool_calls, l:api_data.message.tool_calls)
     endif
   endfor
 
-  if !len(l:entry.message.images)
+  if len(l:entry.message.images)
+    echoe 'Not yet implemented!'
+  else
     let l:entry.message.images = v:null
+  endif
+
+  if len(l:entry.message.tool_calls)
+    echoe 'Not yet implemented!'
+  else
+    let l:entry.message.tool_calls = v:null
   endif
 
   if l:http_response.body[-1].done
@@ -233,7 +259,8 @@ function! proompter#callback#channel#StreamToBuffer(api_response, configurations
         \   'message': {
         \     'role': 'pending',
         \     'content': '',
-        \     'images': v:null,
+        \     'images': [],
+        \     'tool_calls': [],
         \   },
         \ }
 
@@ -275,12 +302,12 @@ function! proompter#callback#channel#StreamToBuffer(api_response, configurations
 
     call proompter#buffer#ConcatenateWithLastLine(l:out_bufnr, l:api_data.message.content)
 
-    if l:api_data.message.images != v:null
-      if type(l:entry.message.images) != v:t_list
-        let l:entry.message.images = []
-      endif
-
+    if type(get(l:api_data.message, 'images', v:null)) == v:t_list
       call extend(l:entry.message.images, l:api_data.message.images)
+    endif
+
+    if type(get(l:api_data.message, 'tool_calls', v:null)) == v:t_list
+      call extend(l:entry.message.tool_calls, l:api_data.message.tool_calls)
     endif
   endfor
 
@@ -293,8 +320,16 @@ function! proompter#callback#channel#StreamToBuffer(api_response, configurations
 
     call proompter#buffer#ConcatenateWithLastLine(l:out_bufnr, "\n\n")
 
-    if type(l:entry.message.images) != v:t_none && len(l:entry.message.images)
+    if len(l:entry.message.images)
       call proompter#callback#channel#SaveImages(-1, a:configurations, a:state)
+    else
+      let l:entry.message.images = v:null
+    endif
+
+    if len(l:entry.message.tool_calls)
+      echoe 'Not yet implemented!'
+    else
+      let l:entry.message.tool_calls = v:null
     endif
   endif
 
