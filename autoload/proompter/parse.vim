@@ -43,6 +43,7 @@ function! proompter#parse#MessageOrResponseFromAPI(data) abort
         \     'role': 'assistant',
         \     'content': get(a:data, 'response', get(get(a:data, 'message', {}), 'content', '')),
         \     'images': get(a:data, 'images', v:null),
+        \     'tool_calls': get(a:data, 'tool_calls', get(get(a:data, 'message', {}), 'tool_calls', v:null)),
         \   },
         \   'context': get(a:data, 'context', v:null),
         \   'done': a:data.done,

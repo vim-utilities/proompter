@@ -16,6 +16,7 @@ Execute (proompter#parse#MessageOrResponseFromAPI -- Detects and normaizes data 
         \     'role': 'assistant',
         \     'content': 'The',
         \     'images': v:null,
+        \     'tool_calls': v:null,
         \   },
         \   'context': v:null,
         \   'done': v:false,
@@ -32,7 +33,7 @@ Execute (proompter#parse#MessageOrResponseFromAPI -- Detects and normaizes data 
         \   'message': {
         \     'role': 'assistant',
         \     'content': 'The',
-        \     'images': v:null
+        \     'images': v:null,
         \   },
         \   'done': v:false,
         \ }
@@ -44,6 +45,7 @@ Execute (proompter#parse#MessageOrResponseFromAPI -- Detects and normaizes data 
         \     'role': 'assistant',
         \     'content': 'The',
         \     'images': v:null,
+        \     'tool_calls': v:null,
         \   },
         \   'context': v:null,
         \   'done': v:false,
@@ -52,7 +54,6 @@ Execute (proompter#parse#MessageOrResponseFromAPI -- Detects and normaizes data 
 
   let api_response = proompter#parse#MessageOrResponseFromAPI(data)
   AssertEqual api_response, expected
-
 " }}}
 ""
 
