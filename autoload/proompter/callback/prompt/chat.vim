@@ -51,7 +51,7 @@ function! proompter#callback#prompt#chat#Preamble(kwargs) abort
   let l:messages = []
 
   let l:filetype = get(a:kwargs, 'filetype', &filetype)
-  if !len(l:filetype)
+  if !len(l:filetype) || l:filetype == 'markdown'
     return l:messages
   endif
 
