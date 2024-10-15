@@ -307,7 +307,7 @@ function! proompter#SendHighlightedText(prefix_input = '', configurations = g:pr
   if len(&filetype)
         \ && exists('g:markdown_fenced_languages')
         \ && indexof(g:markdown_fenced_languages, { _index, entry ->
-        \      match(entry, '\v<' . &filetype . '>')
+        \      entry =~ '\v<' . &filetype . '>'
         \    }) >= 0
 
     let l:selection = ['```' . &filetype] + l:selection + ['```']
