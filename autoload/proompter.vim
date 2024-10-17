@@ -5,35 +5,33 @@
 
 
 ""
-" Parameter: {string} value - What will eventually be sent to LLM
-" Parameter: {define__configurations} configurations
-" Parameter: {define__proompter_state} state - Dictionary
+" Parameters:~
+" - {value} |string| what will eventually be sent to LLM
+" - {configurations} |ProompterConfigurations| default `g:proompter`
+" - {state} |ProompterState| default `g:proompter_state`
 "
-" Entry added to `a:state.messages` will have a format similar to;
-"
-" ```
-" {
-"   "model": "codellama",
-"   "created_at": "2024-09-20T23:25:06.675058548Z",
-"   "message": {
-"     "role": "user",
-"     "content": "Tell me Vim is the best text editor.",
-"     "image": v:null,
+" Entry added to `a:state.messages` will have a format similar to >
+"   {
+"     "model": "codellama",
+"     "created_at": "2024-09-20T23:25:06.675058548Z",
+"     "message": {
+"       "role": "user",
+"       "content": "Tell me Vim is the best text editor.",
+"       "image": v:null,
+"     }
 "   }
-" }
-" ```
+" <
 "
 " ...  if an input callback function can be found then `message.content` in
 " above example will be overwritten by content values of that function
 " separated by two newlines.
 "
-" Example:
+" Example: call~ >
+"   let message = 'Tell me in one sentence why Bash is the best'
+"   call proompter#SendPromptToGenerate(message)
+" <
 "
-" ```vim
-" :call proompter#SendPromptToGenerate('Tell me in one sentence why Bash is the best scripting language')
-" ```
-"
-" Throw: when `value` is empty or zero length
+" @throws ProompterError `Empty input value`
 "
 " Note: if `g:proompter.models['model_name'].prompt_callbacks` is defined then
 "       resulting prompt sent to LLM is built by `prompt_callbacks.post`
@@ -47,10 +45,13 @@
 " Dev: without the slicing output of `shellescape` the append/prepend-ed
 "      single-quotes which ain't gonna be good within a larger JSON object
 "
-" See: {docs} :help strftime()
-" See: {docs} :help reltime()
+" See: documentation~
+" - |strftime()|
+" - |reltime()|
 "
 " TODO: preform feature detection for `strftime` and `reltime`
+"
+" @public
 function! proompter#SendPromptToChat(value, configurations = g:proompter, state = g:proompter_state) abort
   if len(a:value) == 0
     throw 'Proompter: empty input value'
@@ -141,17 +142,17 @@ function! proompter#SendPromptToChat(value, configurations = g:proompter, state 
 endfunction
 
 ""
-" Parameter: {string} value - What will eventually be sent to LLM
-" Parameter: {define__configurations} configurations
-" Parameter: {define__proompter_state} state - Dictionary
+" Parameters:~
+" - {value} |string| what will eventually be sent to LLM
+" - {configurations} |ProompterConfigurations| default `g:proompter`
+" - {state} |ProompterState| default `g:proompter_state`
 "
-" Example:
+" Example: call~ >
+"   let message = 'Tell me in one sentence why Bash is the best'
+"   call proompter#SendPromptToGenerate(message)
+" <
 "
-" ```vim
-" :call proompter#SendPromptToGenerate('Tell me in one sentence why Bash is the best scripting language')
-" ```
-"
-" Throw: when `value` is empty or zero length
+" @throws ProompterError `Empty input value`
 "
 " Note: if `g:proompter.models['model_name'].prompt_callbacks` is defined then
 "       resulting prompt sent to LLM is built by `prompt_callbacks.post`
@@ -164,6 +165,8 @@ endfunction
 "
 " Dev: without the slicing output of `shellescape` the append/prepend-ed
 "      single-quotes which ain't gonna be good within a larger JSON object
+"
+" @public
 function! proompter#SendPromptToGenerate(value, configurations = g:proompter, state = g:proompter_state) abort
   if len(a:value) == 0
     throw 'Proompter: empty input value'
@@ -248,16 +251,20 @@ function! proompter#SendPromptToGenerate(value, configurations = g:proompter, st
 endfunction
 
 ""
-" Parameter: {string} value - What will eventually be sent to LLM
-" Parameter: {define__configurations} configurations
+" Parameters:~
+" - {value} |string| what will eventually be sent to LLM
+" - {configurations} |ProompterConfigurations| default `g:proompter`
+" - {state} |ProompterState| default `g:proompter_state`
 "
-" Example:
+" Example: call~ >
+"   let message = 'Tell me in one sentence why Bash is the best'
+"   call proompter#SendPrompt(message)
+" <
 "
-" ```vim
-" :call proompter#SendPrompt('Tell me in one sentence why Bash is the best scripting language')
-" ```
-"
-" Throw: when `value` is empty or zero length
+" @throws ProompterError with message similar to
+" >
+"   Nothing implemented for API endpoint in  -> [url]
+" <
 "
 " Note: if `g:proompter.models['model_name'].prompt_callbacks` is defined then
 "       resulting prompt sent to LLM is built by `prompt_callbacks.post`
@@ -270,6 +277,8 @@ endfunction
 "
 " Dev: without the slicing output of `shellescape` the append/prepend-ed
 "      single-quotes which ain't gonna be good within a larger JSON object
+"
+" @public
 function! proompter#SendPrompt(value, configurations = g:proompter, state = g:proompter_state) abort
   let l:api_endpoint = split(a:configurations.api.url, '/')[-1]
   let l:api_endpoint = split(l:api_endpoint, '?')[0]
@@ -284,25 +293,28 @@ endfunction
 ""
 " Send range or visually selected text to LLM
 "
-" Parameter: {string} prefix_input Optional text prefixed to line range
-" Parameter: {define__configurations}
+" Parameters:~
+" - {prefix} |string| default `""` what will eventually be sent to LLM
+" - {configurations} |ProompterConfigurations| default `g:proompter`
+" - {state} |ProompterState| default `g:proompter_state`
 "
 " Note: if `&filetype` is recognized member of `g:markdown_fenced_languages`
 " then selected text will be fenced with a name triple backticks.
 "
-" Example:
+" Example: call~ >
+"   :'<,'>call proompter#SendHighlightedText()
 "
-" ```vim
-" :'<,'>call proompter#SendHighlightedText()
+"   :69,420call proompter#SendHighlightedText()
 "
-" :69,420call proompter#SendHighlightedText()
+"   :call proompter#SendHighlightedText('What does this line do?')
+" <
 "
-" :call proompter#SendHighlightedText('What does this line do?')
-" ```
+" See: documentation~
+" - |optional-function-argument|
+" - |g:markdown_fenced_languages|
 "
-" See: {docs} :help optional-function-argument
-" See: {docs} :help g:markdown_fenced_languages
-function! proompter#SendHighlightedText(prefix_input = '', configurations = g:proompter, state = g:proompter_state) abort range
+" @public
+function! proompter#SendHighlightedText(prefix = '', configurations = g:proompter, state = g:proompter_state) abort range
   let l:selection = getline(a:firstline, a:lastline)
 
   if len(&filetype) && exists('g:markdown_fenced_languages')
@@ -312,8 +324,8 @@ function! proompter#SendHighlightedText(prefix_input = '', configurations = g:pr
     endif
   endif
 
-  if len(a:prefix_input)
-    let l:selection = [a:prefix_input, ''] + l:selection
+  if len(a:prefix)
+    let l:selection = [a:prefix, ''] + l:selection
   endif
 
   let l:value = join(l:selection, "\n")
@@ -327,8 +339,14 @@ function! proompter#Cancel(state = g:proompter_state, configurations = g:proompt
 endfunction
 
 ""
+" Attempt to load a model into memory
 "
-" See: {link} https://github.com/ollama/ollama/blob/main/docs/api.md#load-a-model
+" @throws ProompterError `Unknown endpoing in -> a:configurations.api.url`
+"
+" See: links~
+" - https://github.com/ollama/ollama/blob/main/docs/api.md#load-a-model
+"
+" @public
 function! proompter#Load(configurations = g:proompter, state = g:proompter_state) abort
   let l:model_data = { "model": a:configurations.select.model_name }
 
@@ -350,8 +368,14 @@ function! proompter#Load(configurations = g:proompter, state = g:proompter_state
 endfunction
 
 ""
+" Tell API it is okay to release memory for a model
 "
-" See: {link} https://github.com/ollama/ollama/blob/main/docs/api.md#load-a-model
+" @throws ProompterError `Unknown endpoing in -> a:configurations.api.url`
+"
+" See: links~
+" - https://github.com/ollama/ollama/blob/main/docs/api.md#load-a-model
+"
+" @public
 function! proompter#Unload(configurations = g:proompter, state = g:proompter_state) abort
   let l:model_data = {
         \   "model": a:configurations.select.model_name,

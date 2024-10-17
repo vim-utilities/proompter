@@ -7,34 +7,14 @@
 ""
 " Normalize response from Ollama API `/api/chat` and `/api/generate` endpoints 
 "
-" Returns: dictionary with shape similar to
+" Parameters:~
+" - {data} |dictionary| should conform to expectations of either
+"   |APIResponseChat| or |APIResponseGenerate|
 "
-" ```
-" {
-"   "model": "llama3.2",
-"   "created_at": "2023-08-04T08:52:19.385406455-07:00",
-"   "message": {
-"     "role": "assistant",
-"     "content": "The",
-"     "images": v:null
-"   },
-"   "context": v:null,
-"   "done": v:false,
-"   "done_reason": v:null,
-" }
-" ```
+" Returns:~
+" |APIResponseNormalized| data structure
 "
-" Attribution:
-"
-" - https://github.com/ollama/ollama/blob/main/docs/api.md#chat-request-with-history
-"
-" Recognized API endpoint from `g:proompter.api.url`;
-"
-" - `/api/generate` returns {"response": "{string} }
-"
-" - `/api/chat` returns either;
-"   - {"message": {"role":"assistant"}, {"content":"{string}"}, {"images":null}}
-"   - {"message": {"role":"assistant"}, {"content":"{string}"}, {"images":["Base64"]}}
+" @public
 function! proompter#parse#MessageOrResponseFromAPI(data) abort
   let l:result = {
         \   'model': a:data.model,
@@ -52,5 +32,69 @@ function! proompter#parse#MessageOrResponseFromAPI(data) abort
 
   return l:result
 endfunction
+
+""
+" @dict APIResponseNormalized
+"
+" Merged data from |APIResponseChat| and |APIResponseGenerate|
+"
+" |dictionary| with shape similar to >
+"   {
+"     "model": "llama3.2",
+"     "created_at": "2023-08-04T08:52:19.385406455-07:00",
+"     "message": {
+"       "role": "assistant",
+"       "content": "The",
+"       "images": v:null
+"       "tool_calls": v:null
+"     },
+"     "context": v:null,
+"     "done": v:false,
+"     "done_reason": v:null,
+"   }
+" <
+
+""
+" @dict APIResponseChat
+"
+" Example: /api/chat~ >
+"   {
+"     "model": "llama3.2",
+"     "created_at": "2023-12-12T14:13:43.416799Z",
+"     "message": {
+"       "role": "assistant",
+"       "content": "Hello! How are you today?"
+"     },
+"     "done": true,
+"     "total_duration": 5191566416,
+"     "load_duration": 2154458,
+"     "prompt_eval_count": 26,
+"     "prompt_eval_duration": 383809000,
+"     "eval_count": 298,
+"     "eval_duration": 4799921000
+"   }
+" <
+"
+" Attribution:
+" - https://github.com/ollama/ollama/blob/main/docs/api.md#chat-request-with-history
+
+""
+" @dict APIResponseGenerate
+"
+" Example: /api/generate~ >
+"   {
+"     "model": "llama3.2",
+"     "created_at": "2023-08-04T19:22:45.499127Z",
+"     "response": "The sky is blue because it is the color of the sky.",
+"     "done": true,
+"     "context": [1, 2, 3],
+"     "total_duration": 4935886791,
+"     "load_duration": 534986708,
+"     "prompt_eval_count": 26,
+"     "prompt_eval_duration": 107345000,
+"     "eval_count": 237,
+"     "eval_duration": 4289432000
+"   }
+" <
 
 " vim: expandtab

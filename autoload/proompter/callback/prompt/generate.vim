@@ -2,58 +2,70 @@
 " proompter.vim - Provide integration with local Ollama LLM API
 " Maintainer: S0AndS0 <https://github.com/S0AndS0>
 " URL: https://github.com/vim-utilities/proompter
+"
+" These are indented to be used when path of `g:proompter.api.url` ends with
+" `/api/generate`
+
 
 
 ""
-" Return start of prompt with content similar to following;
-"
+" Return start of prompt with content similar to following >
 "   You an expert with javascript and delight in solving problems succinctly!
 "
-"   Content between "<HISTORY>" and "</HISTORY>"  may provide
-"   additional context to the following input.
+"   Content between "<HISTORY>" and "</HISTORY>"  may provide additional
+"   context to the following input.
 "
 "   Past output from you will be surrounded by "<RESPONSE>" and "</RESPONSE>"
 "   tags, please consider it but as suspect.
 "
 "   Input from me will be surrounded by "<PROOMPT>" and "</PROOMPT>" tags,
 "   please pay most attention to the last instance.
+" <
 "
-" Parameter: {dictionary} kwargs - Has the following key/value pares defined
+" Parameter: {kwargs} |dictionary| has the following key/value pares defined;
+" - `filetype` |string| of what file type is operated on
+" - `history_tags` |dictionary| with `start` and `stop` values defined to help
+"   clue-in LLM of past context
+" - `input_tags` |dictionary| with `start` and `stop` values defined to help
+"   LLM focus on latest input
+" - `response_tags` |dictionary| with `start` and `stop` values defined to
+"   help LLM remember previous outputs
+" - `configurations` |ProompterConfigurations| ignored for now
+" - `state` |ProompterState| ignored for now
 "
-"   - {define__configurations} configurations - Dictionary
-"   - {number} context_size - Max prompt/response results that are re-shared
-"   - {string} filetype - What file type is operated on
-"   - {dictionary} history_tags - With `start` and `stop` values defined to
-"     help clue-in LLM of past context
-"   - {dictionary} input_tags - With `start` and `stop` values defined to help
-"     LLM focus on latest input
-"   - {dictionary} response_tags - With `start` and `stop` values defined to
-"     help LLM remember previous outputs
+" Example: configuration snippet~ >
+"   let g:proompter = {
+"         \   'api': {
+"         \     'url': 'http://127.0.0.1:11434/api/generate',
+"         \     'prompt_callbacks': {
+"         \       'generate': {
+"         \         'preamble': { _configurations, _state ->
+"         \           proompter#callback#prompt#generate#Preamble({
+"         \             'filetype': 'javascript',
+"         \             'history_tags': {
+"         \               'start': '<HISTORY>',
+"         \               'end': '</HISTORY>'
+"         \             },
+"         \             'input_tags': {
+"         \               'start': '<PROOMPT>',
+"         \               'end': '</PROOMPT>'
+"         \             },
+"         \             'response_tags': {
+"         \               'start': '<RESPONSE>',
+"         \               'end': '</RESPONSE>'
+"         \             },
+"         \           })
+"         \         },
+"         \       },
+"         \     },
+"         \   },
+"         \ }
+" <
 "
-" Example: configuration snippet
+" See: tests~
+" - tests/units/autoload_proompter_callback_prompt_generate_Preamble.vader
 "
-" ```vim
-" let g:proompter = {
-"       \   'api': {
-"       \     'url': 'http://127.0.0.1:11434/api/generate',
-"       \     'prompt_callbacks': {
-"       \       'generate': {
-"       \         'preamble': { configurations, _state ->
-"       \           proompter#callback#prompt#generate#Preamble({
-"       \             'configurations': configurations,
-"       \             'filetype': 'javascript',
-"       \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
-"       \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
-"       \             'response_tags': { 'start': '<RESPONSE>', 'end': '</RESPONSE>'},
-"       \           })
-"       \         },
-"       \       },
-"       \     },
-"       \   },
-"       \ }
-" ```
-"
-" See: {tests} tests/units/autoload_proompter_callback_prompt_generate_Preamble.vader
+" @public
 function! proompter#callback#prompt#generate#Preamble(kwargs) abort
   let l:lines = []
 
@@ -117,8 +129,7 @@ function! proompter#callback#prompt#generate#Preamble(kwargs) abort
 endfunction
 
 ""
-" Returns a string formatted from `kwargs.input` and `kwargs.input_tag`
-"
+" Returns a string formatted from `kwargs.input` and `kwargs.input_tag` >
 "   <HISTORY>
 "   <PROOMPT>
 "   Tell me in one sentence why Vim is the best editor for programming.
@@ -127,68 +138,78 @@ endfunction
 "   Vim is the best!
 "   </RESPONSE>
 "   </HISTORY>
+" <
 "
-" Parameter: {dictionary} kwargs - Has the following key/value pares defined
-"
-"   - {string} value - Text to prompt LLM with
-"   - {dictionary} history_tags - With `start` and `stop` values defined to
-"     help clue-in LLM of past context
-"   - {dictionary} input_tags - With `start` and `stop` values defined to help
-"     LLM focus on latest input
-"   - {dictionary} response_tags - With `start` and `stop` values defined to
-"     help LLM remember previous outputs
+" Parameter: {kwargs} |dictionary| Has the following key/value pares defined;
+" - `value` |string| to prompt LLM with
+" - `history_tags` with `start` and `stop` values defined to help clue-in LLM
+"   of past context
+" - `input_tags` with `start` and `stop` values defined to help LLM focus on
+"   latest input
+" - `response_tags` with `start` and `stop` values defined to help LLM
+"   remember previous outputs
+" - `configurations` |ProompterConfigurations| ignored for now
+" - `state` |ProompterState| dictionary that may contain a list of `messages`
 "
 " Warning: expects `a:kwargs.state.messages` to be dictionary list _shaped_
-" similar to;
-"
-" ```
-" [
-"   {
-"     "message": {
-"       "role": "user",
-"       "content": "... Maybe a question about a technical topic...",
+" similar to >
+"   [
+"     {
+"       "message": {
+"         "role": "user",
+"         "content": "... Maybe a question about a technical topic...",
+"       },
 "     },
-"   },
-"   {
-"     "message": {
-"       "role": "assistant",
-"       "content": "Are your finger-tips talking to you too?",
+"     {
+"       "message": {
+"         "role": "assistant",
+"         "content": "Are your finger-tips talking to you too?",
+"       },
 "     },
-"   },
-" ]
-" ```
+"   ]
+" <
 "
-" Example: configuration snippet
+" Example: configuration snippet~ >
+"   let g:proompter = {
+"         \   'api': {
+"         \     'url': 'http://127.0.0.1:11434/api/generate',
+"         \     'prompt_callbacks': {
+"         \       'generate': {
+"         \         'context': { _configurations, state ->
+"         \           proompter#callback#prompt#generate#Context({
+"         \             'state': state,
+"         \             'context_size': 5,
+"         \             'history_tags': {
+"         \               'start': '<HISTORY>',
+"         \               'end': '</HISTORY>'
+"         \             },
+"         \             'input_tags': {
+"         \               'start': '<PROOMPT>',
+"         \               'end': '</PROOMPT>'
+"         \             },
+"         \             'response_tags': {
+"         \               'start': '<RESPONSE>',
+"         \               'end': '</RESPONSE>'
+"         \             },
+"         \           })
+"         \         },
+"         \       },
+"         \     },
+"         \   },
+"         \ }
+" <
 "
-" ```vim
-" let g:proompter = {
-"       \   'api': {
-"       \     'url': 'http://127.0.0.1:11434/api/generate',
-"       \     'prompt_callbacks': {
-"       \       'generate': {
-"       \         'context': { configurations, state ->
-"       \           proompter#callback#prompt#generate#Context({
-"       \             'configurations': configurations,
-"       \             'state': state,
-"       \             'context_size': 5,
-"       \             'history_tags': { 'start': '<HISTORY>', 'end': '</HISTORY>'},
-"       \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
-"       \             'response_tags': { 'start': '<RESPONSE>', 'end': '</RESPONSE>'},
-"       \           })
-"       \         },
-"       \       },
-"       \     },
-"       \   },
-"       \ }
-" ```
+" Dev: note to remove tags surrounding later via something like >
+"   echo substitute(_input_, '</\?PROOMPT>', '', 'g')
+" <
 "
-" Dev: remove tags surrounding later via something like;
+" See: documentation+
+" - |proompter#parse#MessageOrResponseFromAPI|
 "
-" ```vim
-" echo substitute(_input_, '</\?PROOMPT>', '', 'g')
-" ```
+" See: tests+
+" - tests/units/autoload_proompter_callback_prompt_generate_Context.vader
 "
-" See: {tests} tests/units/autoload_proompter_callback_prompt_generate_Context.vader
+" @public
 function! proompter#callback#prompt#generate#Context(kwargs) abort
   let l:lines = []
 
@@ -237,46 +258,48 @@ function! proompter#callback#prompt#generate#Context(kwargs) abort
 endfunction
 
 ""
-" Returns a string formatted from `kwargs.input` and `kwargs.input_tag`
-"
+" Returns a string formatted from `kwargs.input` and `kwargs.input_tag` >
 "   <PROOMPT>
 "   Tell me in one sentence why Vim is the best editor for programming.
 "   </PROOMPT>
+" <
 "
-" Parameter: {dictionary} kwargs - Has the following key/value pares defined
+" Parameter: {kwargs} |dictionary| Has the following key/value pares defined;
+" - `value` |string| text to prompt LLM with
+" - `input_tags` dictionary with `start` and `stop` values defined to help LLM
+"   focus on latest input
+" - `configurations` |ProompterConfigurations| ignored for now
+" - `state` |ProompterState| ignored for now
 "
-"   - {string} value - Text to prompt LLM with
-"   - {dictionary} input_tags - With `start` and `stop` values defined to help
-"     LLM focus on latest input
+" Example: configuration snippet~ >
+"   let g:proompter = {
+"         \   'api': {
+"         \     'url': 'http://127.0.0.1:11434/api/generate',
+"         \     'prompt_callbacks': {
+"         \       'generate': {
+"         \         'input': { value, _configurations, _state ->
+"         \           proompter#callback#prompt#generate#Input({
+"         \             'value': value,
+"         \             'input_tags': {
+"         \               'start': '<PROOMPT>',
+"         \               'end': '</PROOMPT>'
+"         \             },
+"         \           })
+"         \         },
+"         \       },
+"         \     },
+"         \   },
+"         \ }
+" <
 "
-" Example: configuration snippet
+" Dev: note to remove tags surrounding later via something like >
+"   echo substitute(_input_, '</\?PROOMPT>', '', 'g')
+" <
 "
-" ```vim
-" let g:proompter = {
-"       \   'api': {
-"       \     'url': 'http://127.0.0.1:11434/api/generate',
-"       \     'prompt_callbacks': {
-"       \       'generate': {
-"       \         'input': { value, configurations, _state ->
-"       \           proompter#callback#prompt#generate#Input({
-"       \             'value': value,
-"       \             'configurations': configurations,
-"       \             'input_tags': { 'start': '<PROOMPT>', 'end': '</PROOMPT>'},
-"       \           })
-"       \         },
-"       \       },
-"       \     },
-"       \   },
-"       \ }
-" ```
+" See: tests~
+" - tests/units/autoload_proompter_callback_prompt_generate_Input.vader
 "
-" Dev: remove tags surrounding later via something like;
-"
-" ```vim
-" echo substitute(_input_, '</\?PROOMPT>', '', 'g')
-" ```
-"
-" See: {tests} tests/units/autoload_proompter_callback_prompt_generate_Input.vader
+" @public
 function! proompter#callback#prompt#generate#Input(kwargs) abort
   let l:lines = []
 
@@ -297,40 +320,45 @@ function! proompter#callback#prompt#generate#Input(kwargs) abort
 endfunction
 
 ""
+" @dict PromptCallbackDataGenerate
+
+""
 " Merge together outputs from other prompt callback functions and write to
 " defined output buffer before returning newline separated string for LLM
 "
-" Parameter: {dictionary} kwargs - Has the following defined
+" Parameter:~
+" - {kwargs} |dictionary| Has the following defined;
+"   - `data` |PromptCallbackDataGenerate| with `preamble`, `context`,
+"     `prompt`, and `input` keys pointing to values.
+"   - `out_bufnr` - buffer |number| used for output, if |v:null| one will be
+"     created automatically via |proompter#buffer#MakeProomptLog| with the
+"     name "proompt-log.md", or you man set a string value to customize the
+"     buffer name.
+"   - `configurations` |ProompterConfigurations| ignored for now
+"   - `state` |ProompterState| ignored for now
 "
-"   - {dictionary} data - with `preamble`, `context`, `prompt`, and `input`
-"     keys pointing to string values.
-"   - {dictionary} out_bufnr - buffer number used for output, if `v:null` one
-"     will be created automatically via `proompter#buffer#MakeProomptLog`
-"     with the name "proompt-log.md", or you man set a {string} value to
-"     customize the buffer name.
+" Example: configuration snippet~ >
+"   let g:proompter = {
+"         \   'api': {
+"         \     'url': 'http://127.0.0.1:11434/api/generate',
+"         \     'prompt_callbacks': {
+"         \       'generate': {
+"         \         'post': { callbacks_data, _configurations, _state ->
+"         \           proompter#callback#prompt#generate#Post({
+"         \             'data': callbacks_data,
+"         \             'out_bufnr': v:null,
+"         \           })
+"         \         },
+"         \       },
+"         \     },
+"         \   },
+"         \ }
+" <
 "
-" Example: configuration snippet
+" See: tests~
+" - tests/units/autoload_proompter_callback_prompt_generate_Post.vader
 "
-" ```vim
-" let g:proompter = {
-"       \   'api': {
-"       \     'url': 'http://127.0.0.1:11434/api/generate',
-"       \     'prompt_callbacks': {
-"       \       'generate': {
-"       \         'post': { prompt_callbacks_data, configurations, _state ->
-"       \           proompter#callback#prompt#generate#Post({
-"       \             'data': prompt_callbacks_data,
-"       \             'configurations': configurations,
-"       \             'out_bufnr': v:null,
-"       \           })
-"       \         },
-"       \       },
-"       \     },
-"       \   },
-"       \ }
-" ```
-"
-" See: {tests} tests/units/autoload_proompter_callback_prompt_generate_Post.vader
+" @public
 function! proompter#callback#prompt#generate#Post(kwargs) abort
   let l:lines = []
 

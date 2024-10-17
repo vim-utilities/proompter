@@ -3,35 +3,37 @@
 " Maintainer: S0AndS0 <https://github.com/S0AndS0>
 " URL: https://github.com/vim-utilities/proompter
 
+
+
 ""
-" Return dictionary with `version`, `code`, and `text` parsed from first line
-" of HTTP response, or an empty dictionary if first few characters do not
-" match expectations.
+" @dict HTTPStatus
 "
-" Parameter: {string} `data`
+" Example: HTTP Status Vim dictionary~ >
+"   {
+"     'version': '1.1',
+"     'code': 200,
+"     'text': 'OK',
+"   }
+" <
 "
-" Example: HTTP response data
+" {version} is a |string| because we cannot trust that a server/service may
+" report a non-float compatible number
 "
-" ```
-" HTTP/1.1 200 OK
-" Server: SimpleHTTP/0.6 Python/3.12.6
-" Date: Sat, 28 Sep 2024 23:29:00 GMT
-" Content-Type: application/json
+" {code} |number| Generally 200 to 299 are okay, less than 200 are for
+" information, 300 to 399 are redirection, and anything higher are errors.
 "
-" { "model": "codellama", "created_at": "2024-09-28T23:29:00.299380014Z", "response": " V", "done": false }
-" ```
+" {text} |string|
 "
-" Example: resulting Vim dictionary
+" See: MDN documentation for details about HTTP Status codes and data~
+" - https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+" - https://developer.mozilla.org/en-US/docs/Web/API/Response/statusText
+
+""
+" Parses first line of input {data} |string| and returns either an empty
+" dictionary, if it cannot parse input, or a |HTTPStatus| dictionary with
+" `version`, `code`, and `text` keys/value pares.
 "
-" ```
-" {
-"   'version': '1.1',
-"   'code': '200',
-"   'text': 'OK',
-" }
-" ```
-"
-" See: {tests} tests/units/autoload_proompter_http_parse_response_ExtractStatus.vader
+" @public
 function! proompter#http#parse#response#ExtractStatus(data) abort
   let l:status = {}
 
@@ -55,33 +57,39 @@ function! proompter#http#parse#response#ExtractStatus(data) abort
 endfunction
 
 ""
-" Convert HTTP headers into Vim dictionary, or return empty dictionary if no
-" headers are parsed from input data.
+" @dict HTTPHeaders
 "
-" Parameter: {string} `data`
+" {string} `key` Whatever string was read between first colon (`:`) and start
+" of each line
 "
-" Example: HTTP response data
+" {string} `value` Everything after first colon (`:`) and end of each line
 "
-" ```
-" HTTP/1.1 200 OK
-" Server: SimpleHTTP/0.6 Python/3.12.6
-" Date: Sat, 28 Sep 2024 23:29:00 GMT
-" Content-Type: application/json
+" Example: HTTP response data~ >
+"   HTTP/1.1 200 OK
+"   Server: SimpleHTTP/0.6 Python/3.12.6
+"   Date: Sat, 28 Sep 2024 23:29:00 GMT
+"   Content-Type: application/json
 "
-" { "model": "codellama", "created_at": "2024-09-28T23:29:00.299380014Z", "response": " V", "done": false }
-" ```
+"   {"key":"value"}
+" <
 "
-" Example: resulting Vim dictionary
+" Example: HTTP Headers Vim dictionary~ >
+"   {
+"     'Content-Type': 'application/json',
+"     'Date': 'Sat, 28 Sep 2024 23:29:00 GMT',
+"     'Server': 'SimpleHTTP/0.6 Python/3.12.6',
+"   }
+" <
+
+""
+" Parses lines of input {data} |string| until first blank line ("\r\n\r\n")
+" and returns either an empty dictionary, if it cannot parse input, or a
+" |HTTPHeaders| dictionary.
 "
-" ```
-" {
-"   'Content-Type': 'application/json',
-"   'Date': 'Sat, 28 Sep 2024 23:29:00 GMT',
-"   'Server': 'SimpleHTTP/0.6 Python/3.12.6',
-" }
-" ```
+" See: tests~
+" - tests/units/autoload_proompter_http_parse_response_ExtractHeaders.vader
 "
-" See: {tests} tests/units/autoload_proompter_http_parse_response_ExtractHeaders.vader
+" @public
 function! proompter#http#parse#response#ExtractHeaders(data) abort
   let l:headers = {}
 
@@ -120,40 +128,44 @@ function! proompter#http#parse#response#ExtractHeaders(data) abort
 endfunction
 
 ""
-" Returns dictionary list built by parsing body as JSON dictionaries
+" Returns dictionary list built by parsing body as JSON dictionaries from
+" input |string| {data}.
 "
-" Example: HTTP response from `/api/generate`
+" Example: HTTP response from `/api/generate`~ >
+"   HTTP/1.1 200 OK
+"   Server: SimpleHTTP/0.6 Python/3.12.6
+"   Date: Sat, 28 Sep 2024 23:29:00 GMT
+"   Content-Type: application/json
 "
-" ```
-" HTTP/1.1 200 OK
-" Server: SimpleHTTP/0.6 Python/3.12.6
-" Date: Sat, 28 Sep 2024 23:29:00 GMT
-" Content-Type: application/json
+"   {"model":"codellama","created_at":"2024-09-28T23:29:00.299380014Z","response":"{","done":false}
+"   {"model":"codellama","created_at":"2024-09-20T23:25:01.670272033Z","response":"\"foo","done":true}
+" <
 "
-" { "model": "codellama", "created_at": "2024-09-28T23:29:00.299380014Z", "response": " {", "done": false }
-" { "model": "codellama", "created_at": "2024-09-20T23:25:01.670272033Z", "response": " \"foo", "done": true }
-" ```
+" Example: resulting Vim dictionary from `/api/generate`~ >
+"   [
+"     {
+"       "model": "codellama",
+"       "created_at": "2024-09-28T23:29:00.299380014Z",
+"       "response": "{",
+"       "done": v:false
+"     },
+"     {
+"       "model": "codellama",
+"       "created_at": "2024-09-20T23:25:01.670272033Z",
+"       "response": '"foo',
+"       "done": v:true
+"     }
+"   ]
+" <
 "
-" Example: resulting Vim dictionary from `/api/generate`
+" See: documentation~
+" - |APIResponseChat|
+" - |APIResponseGenerate|
 "
-" ```
-" [
-"   {
-"     "model": "codellama",
-"     "created_at": "2024-09-28T23:29:00.299380014Z",
-"     "response": " {",
-"     "done": v:false
-"   },
-"   {
-"     "model": "codellama",
-"     "created_at": "2024-09-20T23:25:01.670272033Z",
-"     "response": ' "foo',
-"     "done": v:true
-"   }
-" ]
-" ```
+" See: tests~
+" - tests/units/autoload_proompter_http_parse_response_ExtractJSONDicts.vader
 "
-" See: {tests} tests/units/autoload_proompter_http_parse_response_ExtractJSONDicts.vader
+" @public
 function! proompter#http#parse#response#ExtractJSONDicts(data) abort
   let l:dictionary_list = []
 

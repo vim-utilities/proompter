@@ -7,42 +7,44 @@
 " Actions play nice with tests, however, for those using the Linux Subsystem
 " on Windows or Cygwin there may be a performance hit :-(
 
+
+
 ""
 " Encode string to Base64 via `system` call
 "
-" Parameter: {string} `string` Input to pipe to `base64` command
+" Parameter: {input} |string| to pipe to `base64` command
 "
-" Throws: 'No string value' if input is zero length
-" Throws: following format string when `v:shell_error` is non-zero
+" @throws ProompterError `Empty input value` if input is zero length
+" @throws ProompterError with following format if `v:shell_error` is non-zero
+" >
+"   Failed command: printf "%s" '_string_' | base64 --wrap=0
+"     Exit status: _number_
+" <
 "
-" ```
-" Failed command: printf "%s" '<string>' | base64 --wrap=0
-"   Exit status: <number>
-" ```
+" Example: input~ >
+"   echo proompter#base64#EncodeString('Howdy reader!')
+" <
 "
-" Example: input
+" Example: result~ >
+"   SG93ZHkgcmVhZGVyIQ==
+" <
 "
-" ```vim
-" echo proompter#base64#EncodeString('Howdy reader!')
-" ```
+" See: documentation~
+" - :help system()
+" - :help shellescape()
+" - :help v:shell_error
 "
-" Example: result
-"
-" ```
-" SG93ZHkgcmVhZGVyIQ==
-" ```
-"
-" See: {docs} :help system()
-" See: {docs} :help shellescape()
-" See: {docs} :help v:shell_error
-" See: {tests} tests/units/autoload_proompter_base64.vader
-function! proompter#base64#EncodeString(string) abort
-  if !len(a:string)
-    throw 'No string value'
+" See: tests~
+" - tests/units/autoload_proompter_base64.vader
+" 
+" @public
+function! proompter#base64#EncodeString(input) abort
+  if !len(a:input)
+    throw 'ProompterError Empty input value'
   endif
 
-  let l:string = shellescape(a:string)
-  let l:command = 'printf "%s" ' . l:string . ' | base64 --wrap=0'
+  let l:input = shellescape(a:input)
+  let l:command = 'printf "%s" ' . l:input . ' | base64 --wrap=0'
 
   let l:result = system(l:command)
   if v:shell_error
@@ -54,39 +56,39 @@ endfunction
 ""
 " Decode string from Base64 via `system` call
 "
-" Parameter: {string} `string` Input to pipe to `base64` command
+" Parameters:~
+" - {input} |string| Input to pipe to `base64` command
 "
-" Throws: 'No string value' if input is zero length
-" Throws: following format string when `v:shell_error` is non-zero
+" @throws ProompterError `Empty input value` if input is zero length
+" @throws ProompterError with following format if `v:shell_error` is non-zero
+" >
+"   Failed command: printf "%s" '_string_' | base64 --decode
+"     Exit status: _number_
+" <
 "
-" ```
-" Failed command: printf "%s" '<string>' | base64 --decode
-"   Exit status: <number>
-" ```
+" Example: input~ >
+"   echo proompter#base64#EncodeString('SG93ZHkgcmVhZGVyIQ==')
+" <
+" Example: result~ >
+"   Howdy reader!
+" <
 "
-" Example: input
+" See: documentation~
+" - |system()|
+" - |shellescape()|
+" - |v:shell_error|
 "
-" ```vim
-" echo proompter#base64#EncodeString('SG93ZHkgcmVhZGVyIQ==')
-" ```
+" See: tests~
+" - tests/units/autoload_proompter_base64.vader
 "
-" Example: result
-"
-" ```
-" Howdy reader!
-" ```
-"
-" See: {docs} :help system()
-" See: {docs} :help shellescape()
-" See: {docs} :help v:shell_error
-" See: {tests} tests/units/autoload_proompter_base64.vader
-function! proompter#base64#DecodeString(string) abort
-  if !len(a:string)
-    throw 'No string value'
+" @public
+function! proompter#base64#DecodeString(input) abort
+  if !len(a:input)
+    throw 'ProompterError Empty input value'
   endif
 
-  let l:string = shellescape(a:string)
-  let l:command = 'printf "%s" ' . l:string . ' | base64 --decode'
+  let l:input = shellescape(a:input)
+  let l:command = 'printf "%s" ' . l:input . ' | base64 --decode'
 
   let l:result = system(l:command)
   if v:shell_error
@@ -98,36 +100,37 @@ endfunction
 ""
 " Encode file at `path` via `system` call to `base64`
 "
-" Parameter: {string} `path` Input to file for `base64` to encode
+" Parameters:~
+" - {path} |string| input to file for `base64` to encode
 "
-" Throws: 'No path value' if input is zero length
-" Throws: 'Cannot read file -> <path>' when file cannot be read
-" Throws: following format string when `v:shell_error` is non-zero
+" @throws ProompterError `Empty path value` if input is zero length
+" @throws ProompterError `Cannot read file -> <path>` when file cannot be read
+" @throws ProompterError with following format if `v:shell_error` is non-zero
+" >
+"   Failed command: printf "%s" '<string>' | base64 --decode
+"     Exit status: <number>
+" <
 "
-" ```
-" Failed command: printf "%s" '<string>' | base64 --decode
-"   Exit status: <number>
-" ```
+" Example: create and pass input file~ >
+"   let path = '/tmp/test.txt'
+"   call writefile(['Howdy reader!'], path)
+"   echo proompter#base64#EncodeFile(path)
+" <
 "
-" Example: create and pass input file
+" Example: result~ >
+"   SG93ZHkgcmVhZGVyIQo=
+" <
 "
-" ```vim
-" let path = '/tmp/test.txt'
-" call writefile(['Howdy reader!'], path)
-" echo proompter#base64#EncodeFile(path)
-" ```
+" See: documentation~
+" - |filereadable()|
+" - |system()|
+" - |shellescape()|
+" - |v:shell_error|
 "
-" Example: result
+" See: tests~
+" - tests/units/autoload_proompter_base64.vader
 "
-" ```
-" SG93ZHkgcmVhZGVyIQo=
-" ```
-"
-" See: {docs} :help filereadable()
-" See: {docs} :help system()
-" See: {docs} :help shellescape()
-" See: {docs} :help v:shell_error
-" See: {tests} tests/units/autoload_proompter_base64.vader
+" @public
 function! proompter#base64#EncodeFile(path) abort
   if !len(a:path)
     throw 'No path value'
@@ -150,42 +153,42 @@ endfunction
 ""
 " Decode `string` to file at `path` via `system` call to `base64`
 "
-" Parameter: {string} `string` Encoded string to pipe to `base64`
-" Parameter: {string} `path` File for `base64` to save decoded results to
-" Parameter: {string} `flags` TODO
+" Parameters:~
+" - {string} |string| encoded to pipe to `base64`
+" - {path} |string| file path for `base64` to save decoded results to
+" - {flags} |string| default `""` TODO implement `flags` parser to have
+"   similar behavior to `writefile`
 "
-" Throws: 'No string value' if input is zero length
-" Throws: 'No path value' if input is zero length
-" Throws: 'File already exists -> <path>' when file cannot be overwritten
-" Throws: following format string when `v:shell_error` is non-zero
+" @throws ProompterError `Empty string value` if input is zero length
+" @throws ProompterError `Empty path value` if path is zero length
+" @throws ProompterError `File already exists -> <path>` when file cannot be
+" overwritten
+" @throws ProompterError with following format if `v:shell_error` is non-zero
+" >
+"   Failed command: printf "%s" '<string>' | base64 --decode > <path>
+"     Exit status: <number>
+" <
 "
-" ```
-" Failed command: printf "%s" '<string>' | base64 --decode > <path>
-"   Exit status: <number>
-" ```
+" Example: create and pass input file~ >
+"   let path = '/tmp/decode.txt'
+"   call proompter#base64#DecodeToFile('SG93ZHkgcmVhZGVyIQo=', path)
+"   !cat /tmp/decode.txt
+" <
 "
-" Example: create and pass input file
+" Example: result~ >
+"   Howdy reader!
+" <
 "
-" ```vim
-" let path = '/tmp/decode.txt'
-" call proompter#base64#DecodeToFile('SG93ZHkgcmVhZGVyIQo=', path)
-" !cat /tmp/decode.txt
-" ```
+" See: documentation~
+" - |filereadable()|
+" - |system()|
+" - |shellescape()|
+" - |v:shell_error|
 "
-" Example: result
+" See: tests~
+" - tests/units/autoload_proompter_base64.vader
 "
-" ```
-" Howdy reader!
-" ```
-"
-" See: {docs} :help filereadable()
-" See: {docs} :help system()
-" See: {docs} :help shellescape()
-" See: {docs} :help v:shell_error
-" See: {tests} tests/units/autoload_proompter_base64.vader
-" TODO: implement `flags` parser to have similar behavior to `writefile`
-"
-" See: {tests} tests/units/autoload_proompter_base64.vader
+" @public
 function! proompter#base64#DecodeToFile(string, path, flags = '') abort
   if !len(a:string)
     throw 'No string value'

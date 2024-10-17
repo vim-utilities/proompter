@@ -4,14 +4,17 @@
 " URL: https://github.com/vim-utilities/proompter
 
 
+
 ""
 " Return bufnr of new buffer after setting it up for logging proompts
 "
-" Parameter: {string|v:null} buffer_name - Name output buffer should use
+" Parameters:~
+" - {buffer_name} |string| or |v:null| name output buffer should use
 "
-" Attribution:
-"
+" Attribution:~
 " - https://stackoverflow.com/questions/8316139/how-to-set-the-default-to-unfolded-when-you-open-a-file
+"
+" @public
 function! proompter#buffer#MakeProomptLog(buffer_name) abort
   let l:old_bufnr = bufnr('%')
 
@@ -46,13 +49,19 @@ endfunction
 " and only if new `content` contains a newline character (`\n`) will a newline
 " be inserted into target buffer.
 "
-" Parameter: {number} `bufnr` Any available buffer to write to
-" Parameter: {string} `content` Line, or lines separated by `\n`, to write
+" Parameters:~
+" - {bufnr} |number| any available buffer to write to
+" - {content} |string| line, or lines separated by `\n`, to write
 "
-" See: {doc} :help getbufline()
-" See: {doc} :help split()
-" See: {doc} :help setbufline()
-" See: {tests} tests/units/autoload_proompter_buffer_ConcatinateWithLastLine.vader
+" See: documentation~
+" - |getbufline()|
+" - |split()|
+" - |setbufline()|
+"
+" See: tests~
+" - tests/units/autoload_proompter_buffer_ConcatinateWithLastLine.vader
+"
+" @public
 function! proompter#buffer#ConcatenateWithLastLine(bufnr, content) abort
   let l:buffer_last_line = get(getbufline(a:bufnr, '$'), 0, '')
   let l:buffer_last_line .= a:content

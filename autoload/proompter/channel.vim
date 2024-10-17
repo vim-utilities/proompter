@@ -6,11 +6,17 @@
 
 ""
 "
-" Parameter: {define__configurations} configurations
-" Parameter: {define__proompter_state} state
+" Parameters:~
+" - {configurations} |ProompterConfigurations| default `g:proompter`
+" - {state} |ProompterState| default `g:proompter_state`
 "
-" See: {docs} :help closure
-" See: {tests} tests/units/autoload_proompter_channel_CreateOptions.vader
+" See: documentation~
+" - |closure|
+"
+" See: tests~
+" - tests/units/autoload_proompter_channel_CreateOptions.vader
+"
+" @public
 function! proompter#channel#CreateOptions(configurations = g:proompter, state = g:proompter_state) abort
   let l:channel_options = deepcopy(a:configurations.channel.options)
   if type(get(l:channel_options, 'callback')) != v:t_func
@@ -35,18 +41,24 @@ endfunction
 ""
 " Set `a:state.channel` if not already defined then return result of `ch_open(...)`
 "
-" Parameter: {define__configurations} configurations
-" Parameter: {define__proompter_state} state
+" Parameters:~
+" - {configurations} |ProompterConfigurations| default `g:proompter`
+" - {state} |ProompterState| default `g:proompter_state`
 "
-" Throw: when `a:state.channel` is in a "buffered" state
+" @throws ProompterError when channel state is buffered with
+" >
+"   Channel cannot be written to and may have something reading from it
+" <
 " Warns: when `a:state.channel` is in a "fail" state
 "
 " Notes:
-"
 " - Will attempt to re-open channel if state is "closed"
 " - We must use a closure to capture bufnr and pass it into callback
 "
-" See: {tests} tests/units/autoload_proompter_channel_GetOrSetOpen.vader
+" See: tests~
+" - tests/units/autoload_proompter_channel_GetOrSetOpen.vader
+"
+" @public
 function! proompter#channel#GetOrSetOpen(configurations = g:proompter, state = g:proompter_state) abort
   if get(a:state, 'channel', v:null) == v:null
     let l:channel_options = proompter#channel#CreateOptions(a:configurations, a:state)
