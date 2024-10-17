@@ -1,0 +1,40 @@
+
+""
+" {{{
+Execute (proompter#http#encode#Request -- Creates HTTP POST request as expected):
+  let url = 'http://127.0.0.1:68419/generate'
+
+  let options = {
+        \   'method': 'post',
+        \   'headers': {
+        \     'Content-Type': 'application/json',
+        \     'Host': 'http://127.0.0.1:41968',
+        \   },
+        \   'body': {
+        \     'key': 'value',
+        \   }
+        \ }
+
+  let request = proompter#http#encode#Request(url, options)
+
+  let separator = "\r\n"
+  let request_lines = split(request, separator)
+
+  AssertEqual request_lines[0][:3], toupper(options.method)
+  AssertEqual request_lines[-1], json_encode(options.body)
+
+Execute (proompter#http#encode#Request -- Throws when encoding un-encodable type):
+  let url = 'http://127.0.0.1:68419/generate'
+
+  let options = {
+        \   'method': 'post',
+        \   'headers': {
+        \     'Host': 'http://127.0.0.1:41968',
+        \   },
+        \   'body': function("tr")
+        \ }
+
+  AssertThrows call proompter#http#encode#Request(g:url, g:options)
+  AssertEqual g:vader_exception, 'ProompterError Unknown type for a:kwargs.body -> ' . type(options.body)
+" }}}
+
