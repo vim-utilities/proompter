@@ -1,0 +1,9 @@
+{
+  "name": "proompter",
+  "description": "Provide integration with local Ollama LLM API",
+  "version": "0.0.6",
+  "author": "S0AndS0 <https://github.com/S0AndS0>",
+  "maintainer": "S0AndS0 <https://github.com/S0AndS0>",
+  "repository": { "type": "git", "url": "git://github.com/vim-utilities/proompter" },
+  "dependencies": {}
+}
