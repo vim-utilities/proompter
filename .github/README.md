@@ -14,6 +14,7 @@ Leverage local LLM via Vim to boost bug breading within your code
 
 - [:arrow_up: Top of Document][heading__top]
 - [:building_construction: Requirements][heading__requirements]
+  - [Development dependencies][heading__development_dependencies]
 - [:zap: Quick Start][heading__quick_start]
   - [List available user paths for SystemD services][heading__list_available_user_paths_for_systemd_services]
   - [Install with Vim package manager of choice][heading__install_with_vim_package_manager_of_choice]
@@ -62,6 +63,36 @@ Linux package managers are able to install Vim directly, eg...
 [ollama](https://github.com/ollama/ollama) to be installed and running, as well
 as [Python](https://www.python.org/) run-time to facilitate
 `scripts/proompter-channel-proxy.py` service.
+
+
+---
+
+
+### Development dependencies
+[heading__development_dependencies]: #development-dependencies
+
+
+- [Vim Doc](https://github.com/vim-utilities/vimdoc) for help from doc-comments
+   ```bash
+   git clone https://github.com/vim-utilities/vimdoc
+   pushd vimdoc
+   python setup.py config
+   python setup.py build
+   pipx install .
+   popd
+   ```
+   > Execute with `vimdoc .`
+   >
+   > Note; until certain bugs are fixed upstream it is necessary to use the
+   > patched version of `vimdoc` which handles longer lines, and Vim 8
+   > parameters a _bit_ more correctly.
+- [Vader](https://github.com/junegunn/vader.vim) for testing code
+   ```vim
+   call plug#begin('~/.vim/plugged')
+     Plug 'junegunn/vader.vim'
+   call plug#end()
+   ```
+   > Execute with `scripts/vader-run-tests.sh --cicd --test units`
 
 
 ______
