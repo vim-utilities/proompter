@@ -48,7 +48,7 @@ function! proompter#base64#EncodeString(input) abort
 
   let l:result = system(l:command)
   if v:shell_error
-    throw "Failed command: " . l:command . "\n\tExit status: " . v:shell_error
+    throw "ProompterError Failed command: " . l:command . "\n\tExit status: " . v:shell_error
   endif
   return l:result
 endfunction
@@ -92,7 +92,7 @@ function! proompter#base64#DecodeString(input) abort
 
   let l:result = system(l:command)
   if v:shell_error
-    throw "Failed command: " . l:command . "\n\tExit status: " . v:shell_error
+    throw "ProompterError Failed command: " . l:command . "\n\tExit status: " . v:shell_error
   endif
   return l:result
 endfunction
@@ -133,11 +133,11 @@ endfunction
 " @public
 function! proompter#base64#EncodeFile(path) abort
   if !len(a:path)
-    throw 'No path value'
+    throw 'ProompterError Empty path value'
   endif
 
   if !filereadable(a:path)
-    throw 'Cannot read file -> ' . a:path
+    throw 'ProompterError Cannot read file -> ' . a:path
   endif
 
   let l:path = shellescape(a:path)
@@ -145,7 +145,7 @@ function! proompter#base64#EncodeFile(path) abort
 
   let l:result = system(l:command)
   if v:shell_error
-    throw "Failed command: " . l:command . "\n\tExit status: " . v:shell_error
+    throw "ProompterError Failed command: " . l:command . "\n\tExit status: " . v:shell_error
   endif
   return l:result
 endfunction
@@ -191,15 +191,15 @@ endfunction
 " @public
 function! proompter#base64#DecodeToFile(string, path, flags = '') abort
   if !len(a:string)
-    throw 'No string value'
+    throw 'ProompterError Empty string value'
   endif
 
   if !len(a:path)
-    throw 'No path value'
+    throw 'ProompterError Empty path value'
   endif
 
   if filereadable(a:path)
-    throw 'File already exists -> ' . a:path
+    throw 'ProompterError File already exists -> ' . a:path
   endif
 
   let l:path = shellescape(a:path)
@@ -208,7 +208,7 @@ function! proompter#base64#DecodeToFile(string, path, flags = '') abort
 
   let l:result = system(l:command)
   if v:shell_error
-    throw "Failed command: " . l:command . "\n\tExit status: " . v:shell_error
+    throw "ProompterError Failed command: " . l:command . "\n\tExit status: " . v:shell_error
   endif
   return l:result
 endfunction

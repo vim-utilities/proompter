@@ -37,7 +37,7 @@ Before(proompter#http#parse#response#ExtractStatus -- Build HTTP response data):
 
   let expected_200 = {
         \   'version': '1.1',
-        \   'code': '200',
+        \   'code': 200,
         \   'text': 'OK',
         \ }
   let http_response_lines_list_from_chat = [
@@ -90,7 +90,7 @@ Execute(proompter#http#parse#response#ExtractStatus -- Is not fooled by multiple
 Then(Extracted expected status data, nothing more and nothing less):
   let expected = {
         \   'version': '4.19',
-        \   'code': '568',
+        \   'code': 568,
         \   'text': 'Wat is happening?!',
         \ }
   AssertEqual len(expected), len(g:status)

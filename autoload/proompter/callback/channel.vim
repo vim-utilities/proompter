@@ -37,7 +37,7 @@ function! proompter#callback#channel#CompleteToHistory(response, configurations 
   let l:http_response = proompter#http#parse#Response(a:response)
   if l:http_response.status.code < 200 || l:http_response.status.code >= 300
     throw join([
-          \   'HTTP response not okay ->',
+          \   'ProompterError HTTP response not okay ->',
           \   l:http_response.status.code,
           \   l:http_response.status.text,
           \ ], ' ')
@@ -141,7 +141,7 @@ function! proompter#callback#channel#StreamToMessages(response, configurations =
   let l:http_response = proompter#http#parse#Response(a:response)
   if len(l:http_response.status) && (l:http_response.status.code < 200 || l:http_response.status.code >= 300)
     throw join([
-          \   'HTTP response not okay ->',
+          \   'ProompterError HTTP response not okay ->',
           \   l:http_response.status.code,
           \   l:http_response.status.text,
           \ ], ' ')
@@ -280,7 +280,7 @@ function! proompter#callback#channel#StreamToBuffer(response, configurations, st
   let l:http_response = proompter#http#parse#Response(a:response)
   if len(l:http_response.status) && (l:http_response.status.code < 200 || l:http_response.status.code >= 300)
     throw join([
-          \   'HTTP response not okay ->',
+          \   'ProompterError HTTP response not okay ->',
           \   l:http_response.status.code,
           \   l:http_response.status.text,
           \ ], ' ')
@@ -377,7 +377,7 @@ function! proompter#callback#channel#SaveImages(index = -1, configurations = g:p
   let l:entry = get(get(a:state, 'messages', []), a:index, {})
   let l:images = get(l:entry, 'images', v:null)
   if l:images == v:null
-    throw 'No images at message index ->' . a:message_index
+    throw 'ProompterError No images at message index ->' . a:index
   endif
 
   let l:paths = []
@@ -400,12 +400,7 @@ function! proompter#callback#channel#SaveImages(index = -1, configurations = g:p
     if filereadable(l:path) && filewritable(l:path)
       call add(l:paths, path)
     else
-      if len(l:paths)
-        echow 'Failed to write image ->' l:path
-        return l:paths
-      else
-        throw 'Failed to write image -> ' . l:path
-      endif
+      echow 'ProompterWarning Failed to write image ->' l:path
     endif
   endfor
 

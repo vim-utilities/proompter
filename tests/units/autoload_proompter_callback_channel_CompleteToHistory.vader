@@ -80,7 +80,7 @@ Execute (proompter#callback#channel#CompleteToHistory -- Throws when status code
 
   AssertThrows call proompter#callback#channel#CompleteToHistory(g:api_response, g:configurations, g:state)
 
-  AssertEqual g:vader_exception, 'HTTP response not okay -> 500 Internal Server Error'
+  AssertEqual g:vader_exception, 'ProompterError HTTP response not okay -> 500 Internal Server Error'
   AssertEqual state, expected_state, 'Unexpected mutation of state'
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
 " }}}

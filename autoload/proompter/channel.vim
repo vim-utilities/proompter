@@ -73,7 +73,7 @@ function! proompter#channel#GetOrSetOpen(configurations = g:proompter, state = g
     let a:state.channel = ch_open(a:configurations.channel.address, l:channel_options)
     return a:state.channel
   elseif l:channel_status == 'buffered'
-    throw 'Proompter: Channel cannot be written to and may have something reading from it'
+    throw 'ProompterError Channel cannot be written to and may have something reading from it'
   elseif l:channel_status == 'closed'
     let l:channel_options = proompter#channel#CreateOptions(a:configurations, a:state)
     let a:state.channel = ch_open(a:configurations.channel.address, l:channel_options)
