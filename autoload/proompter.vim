@@ -54,7 +54,7 @@
 " @public
 function! proompter#SendPromptToChat(value, configurations = g:proompter, state = g:proompter_state) abort
   if len(a:value) == 0
-    throw 'Proompter: empty input value'
+    throw 'ProompterError Empty input value'
   endif
 
   let l:model_name = a:configurations.select.model_name
@@ -134,7 +134,14 @@ function! proompter#SendPromptToChat(value, configurations = g:proompter, state 
 
   call add(a:state.messages, l:entry)
 
-  let l:post_payload = proompter#http#encode#Post(l:model.data, a:configurations)
+  let l:post_payload = proompter#http#encode#Request(a:configurations.api.url, {
+        \   'method': 'post',
+        \   'headers': {
+        \     'Host': a:configurations.channel.address,
+        \     'Content-Type': 'application/json',
+        \   },
+        \   'body': l:model.data,
+        \ })
 
   let l:channel = proompter#channel#GetOrSetOpen(a:configurations, a:state)
 
@@ -169,7 +176,7 @@ endfunction
 " @public
 function! proompter#SendPromptToGenerate(value, configurations = g:proompter, state = g:proompter_state) abort
   if len(a:value) == 0
-    throw 'Proompter: empty input value'
+    throw 'ProompterError Empty input value'
   endif
 
   let l:model_name = a:configurations.select.model_name
@@ -243,7 +250,14 @@ function! proompter#SendPromptToGenerate(value, configurations = g:proompter, st
 
   call add(a:state.messages, l:entry)
 
-  let l:post_payload = proompter#http#encode#Post(l:model.data, a:configurations)
+  let l:post_payload = proompter#http#encode#Request(a:configurations.api.url, {
+        \   'method': 'post',
+        \   'headers': {
+        \     'Host': a:configurations.channel.address,
+        \     'Content-Type': 'application/json',
+        \   },
+        \   'body': l:model.data,
+        \ })
 
   let l:channel = proompter#channel#GetOrSetOpen(a:configurations, a:state)
 
@@ -287,7 +301,7 @@ function! proompter#SendPrompt(value, configurations = g:proompter, state = g:pr
   elseif l:api_endpoint == 'generate'
     return proompter#SendPromptToGenerate(a:value, a:configurations, a:state)
   endif
-  throw 'Nothing implemented for API endpoint in  ->' . a:configurations.api.url
+  throw 'ProompterError Nothing implemented for API endpoint in  ->' . a:configurations.api.url
 endfunction
 
 ""
@@ -357,10 +371,17 @@ function! proompter#Load(configurations = g:proompter, state = g:proompter_state
   elseif l:api_endpoint == 'generate'
     let l:model_data.prompt = ''
   else
-    throw 'Unknown endpoing in -> a:configurations.api.url'
+    throw 'ProompterError Unknown endpoing in -> a:configurations.api.url'
   endif
 
-  let l:post_payload = proompter#http#encode#Post(l:model_data, a:configurations)
+  let l:post_payload = proompter#http#encode#Request(a:configurations.api.url, {
+        \   'method': 'post',
+        \   'headers': {
+        \     'Host': a:configurations.channel.address,
+        \     'Content-Type': 'application/json',
+        \   },
+        \   'body': l:model.data,
+        \ })
 
   let l:channel = proompter#channel#GetOrSetOpen(a:configurations, a:state)
 
@@ -389,10 +410,17 @@ function! proompter#Unload(configurations = g:proompter, state = g:proompter_sta
   elseif l:api_endpoint == 'generate'
     let l:model_data.prompt = ''
   else
-    throw 'Unknown endpoing in -> a:configurations.api.url'
+    throw 'ProompterError Unknown endpoing in -> a:configurations.api.url'
   endif
 
-  let l:post_payload = proompter#http#encode#Post(l:model_data, a:configurations)
+  let l:post_payload = proompter#http#encode#Request(a:configurations.api.url, {
+        \   'method': 'post',
+        \   'headers': {
+        \     'Host': a:configurations.channel.address,
+        \     'Content-Type': 'application/json',
+        \   },
+        \   'body': l:model.data,
+        \ })
 
   let l:channel = proompter#channel#GetOrSetOpen(a:configurations, a:state)
 

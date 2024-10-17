@@ -49,8 +49,14 @@ function! proompter#http#parse#response#ExtractStatus(data) abort
 
   let l:first_line = a:data[:l:match_results.byteidx-1]
   let l:status_parts = split(l:first_line, ' ')
+  let l:code = str2nr(l:status_parts[1])
+  if string(l:code) == l:status_parts[1]
+    let l:status.code = l:code
+  else
+    return l:status
+  endif
+
   let l:status.version = split(l:status_parts[0], '/')[-1]
-  let l:status.code = l:status_parts[1]
   let l:status.text = join(l:status_parts[2:], ' ')
 
   return l:status
