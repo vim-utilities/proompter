@@ -12,8 +12,8 @@ The format is based on [Keep a Changelog][] and this project adheres to
 [heading__unreleased]: #unreleased
 
 
+- [ ] Support function/tools request calls from/to LLMs
 - [ ] Proxy traffic between Vim `channel` and Ollama API
-  - [ ] HTTP Response parser handles non-`200` status codes
   - [ ] releases listening port
    > Note; `kill -SIGINT <PID>` works for interactive sessions, but doesn't
    > when backgrounded within Vader test runner script?!
@@ -26,6 +26,16 @@ The format is based on [Keep a Changelog][] and this project adheres to
 
 [python-hot-reload]: https://stackoverflow.com/questions/29960634/reload-the-currently-running-python-script
 [vllm]: https://docs.vllm.ai/en/latest/getting_started/quickstart.html
+
+______
+
+
+## [0.0.7] - 2024-10-17
+
+
+- [X] Build documentation from doc-comments
+- [X] HTTP Response parser handles non-`200` status codes
+
 
 ______
 
