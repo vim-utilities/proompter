@@ -23,24 +23,40 @@ else
 	printf >&2 '  %s\n' "${_files_to_be_commited[@]}"
 fi
 
-_args=(
+_test_args=(
 	--test 'units'
 	--cicd
 )
 
 if [[ -x "${__G_DIR__}/scripts/vader-run-tests.sh" ]]; then
-	_exec_path="${__G_DIR__}/scripts/vader-run-tests.sh"
+	_test_exec_path="${__G_DIR__}/scripts/vader-run-tests.sh"
+	_vimdoc_target="${__G_DIR__}"
 elif [[ -x "${__GG_DIR__}/scripts/vader-run-tests.sh" ]]; then
-	_exec_path="${__GG_DIR__}/scripts/vader-run-tests.sh"
+	_test_exec_path="${__GG_DIR__}/scripts/vader-run-tests.sh"
+	_vimdoc_target="${__GG_DIR__}"
 else
 	printf >&2 'Cannot find executable path for -> scripts/vader-run-tests.sh\n'
 	exit 127
 fi
 
+_vimdoc_exec_path="$(which vimdoc)"
+if grep -qE -- '\.vim\>' <<<"${_files_to_be_commited[*]}"; then
+	if [[ -x "${_vimdoc_exec_path}" ]]; then
+		printf >&2 '%s: Running vimdoc because you are committing:\n' "${__NAME__}"
+		printf >&2 '  %s\n' "${_files_to_be_commited[@]}"
+		"${_vimdoc_exec_path}" "${_vimdoc_target}"
+	else
+		printf >&2 '%s: Warning no vimdoc executable found but changes detected for vim files\n' "${__NAME__}"
+	fi
+fi
+
+
+
+
 ##
 # Warning: doing `command 2>&1 | parser` causes spaces to be injected outside
 # of what `parser` can capture?!
-"${_exec_path}" "${_args[@]}" 2> >(
+"${_test_exec_path}" "${_test_args[@]}" 2> >(
 		awk 'BEGIN {
 			delete _buffered_lines;
 			_current_vader_file = "";
