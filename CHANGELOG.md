@@ -30,6 +30,31 @@ The format is based on [Keep a Changelog][] and this project adheres to
 ______
 
 
+## [0.1.0] - 2024-11-¿?
+
+
+:warning: Massive re-write/organization of features!
+
+`g:proompter.api.url` should **not** define a path, and selecting a completion
+endpoint is now the recommended way of choosing between `/api/chat` or
+`/api/generate` options, eg.
+
+```diff
+ let g:proompter = {
+       \   'select': {
+       \     'model_name': 'codellama',
++      \     'completion_endpoint': 'chat',
+       \   },
+       \   'api': {
+-      \     'url': 'http://127.0.0.1:11434/api/chat',
++      \     'url': 'http://127.0.0.1:11434',
+       \   },
+```
+
+
+______
+
+
 ## [0.0.7] - 2024-10-17
 
 
