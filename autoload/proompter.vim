@@ -31,7 +31,7 @@
 "   call proompter#SendPromptToGenerate(message)
 " <
 "
-" @throws ProompterError `Empty input value`
+" @throws ProompterError `Non-string value`
 "
 " Note: if `g:proompter.models['model_name'].prompt_callbacks` is defined then
 "       resulting prompt sent to LLM is built by `prompt_callbacks.post`
@@ -53,8 +53,8 @@
 "
 " @public
 function! proompter#SendPromptToChat(value, configurations = g:proompter, state = g:proompter_state) abort
-  if len(a:value) == 0
-    throw 'ProompterError Empty input value'
+  if type(a:value) != v:t_string
+    throw 'ProompterError Non-string value'
   endif
 
   let l:model_name = a:configurations.select.model_name
@@ -159,7 +159,7 @@ endfunction
 "   call proompter#SendPromptToGenerate(message)
 " <
 "
-" @throws ProompterError `Empty input value`
+" @throws ProompterError `Non-string value`
 "
 " Note: if `g:proompter.models['model_name'].prompt_callbacks` is defined then
 "       resulting prompt sent to LLM is built by `prompt_callbacks.post`
@@ -175,8 +175,8 @@ endfunction
 "
 " @public
 function! proompter#SendPromptToGenerate(value, configurations = g:proompter, state = g:proompter_state) abort
-  if len(a:value) == 0
-    throw 'ProompterError Empty input value'
+  if type(a:value) != v:t_string
+    throw 'ProompterError Non-string value'
   endif
 
   let l:model_name = a:configurations.select.model_name
@@ -367,11 +367,9 @@ function! proompter#Load(configurations = g:proompter, state = g:proompter_state
   let l:api_endpoint = split(a:configurations.api.url, '/')[-1]
   let l:api_endpoint = split(l:api_endpoint, '?')[0]
   if l:api_endpoint == 'chat'
-    let l:model_data.messages = []
+    return proompter#SendPromptToChat('', a:configurations, a:state)
   elseif l:api_endpoint == 'generate'
-    let l:model_data.prompt = ''
-  else
-    throw 'ProompterError Unknown endpoing in -> a:configurations.api.url'
+    return proompter#SendPromptToGenerate('', a:configurations, a:state)
   endif
 
   let l:post_payload = proompter#http#encode#Request(a:configurations.api.url, {
@@ -391,7 +389,7 @@ endfunction
 ""
 " Tell API it is okay to release memory for a model
 "
-" @throws ProompterError `Unknown endpoing in -> a:configurations.api.url`
+" @throws ProompterError `Unknown endpoing in -> a:configurations.select.completion_endpoint`
 "
 " See: links~
 " - https://github.com/ollama/ollama/blob/main/docs/api.md#load-a-model
@@ -406,11 +404,9 @@ function! proompter#Unload(configurations = g:proompter, state = g:proompter_sta
   let l:api_endpoint = split(a:configurations.api.url, '/')[-1]
   let l:api_endpoint = split(l:api_endpoint, '?')[0]
   if l:api_endpoint == 'chat'
-    let l:model_data.messages = []
+    return proompter#SendPromptToChat('', a:configurations, a:state)
   elseif l:api_endpoint == 'generate'
-    let l:model_data.prompt = ''
-  else
-    throw 'ProompterError Unknown endpoing in -> a:configurations.api.url'
+    return proompter#SendPromptToGenerate('', a:configurations, a:state)
   endif
 
   let l:post_payload = proompter#http#encode#Request(a:configurations.api.url, {
