@@ -48,7 +48,7 @@ Before(proompter#http#parse#response#ExtractStatus -- Build HTTP response data):
         \   '',
         \ ]
   call extend(http_response_lines_list_from_chat, mapnew(data_from_chat, { _index, data ->
-        \   json_encode(data)
+        \   proompter#json#Stringify(data)
         \ }))
 
   let http_data_from_chat = join(http_response_lines_list_from_chat, http_response_line_separator)

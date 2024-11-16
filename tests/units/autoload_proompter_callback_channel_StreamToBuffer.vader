@@ -10,31 +10,31 @@ Execute (proompter#callback#channel#StreamToBuffer -- Handles JSON stream with o
         \   'Date: Fri, 20 Sep 2024 23:25:06 GMT',
         \   'Content-Type: application/json',
         \   '',
-        \   json_encode({
+        \   proompter#json#Stringify({
         \     'model': 'codellama',
         \     'created_at': '2024-09-20T23:25:01.01645329Z',
         \     'response': 'V',
         \     'done': v:false,
         \   }),
-        \   json_encode({
+        \   proompter#json#Stringify({
         \     'model': 'codellama',
         \     'created_at': '2024-09-20T23:25:01.177902785Z',
         \     'response': 'im',
         \     'done': v:false,
         \   }),
-        \   json_encode({
+        \   proompter#json#Stringify({
         \     'model': 'codellama',
         \     'created_at': '2024-09-20T23:25:01.341776729Z',
         \     'response': ' is',
         \     'done': v:false,
         \   }),
-        \   json_encode({
+        \   proompter#json#Stringify({
         \     'model': 'codellama',
         \     'created_at': '2024-09-20T23:25:01.506237509Z',
         \     'response': ' the',
         \     'done': v:false,
         \   }),
-        \   json_encode({
+        \   proompter#json#Stringify({
         \     'model': 'codellama',
         \     'created_at': '2024-09-20T23:25:06.675058548Z',
         \     'response': ' best',
@@ -97,13 +97,13 @@ Execute(proompter#callback#channel#StreamToBuffer -- Handles JSON with newlines)
         \   'Date: Fri, 20 Sep 2024 23:25:06 GMT',
         \   'Content-Type: application/json',
         \   '',
-        \   json_encode({
+        \   proompter#json#Stringify({
         \     'model': 'codellama',
         \     'created_at': '2024-09-20T23:25:01.01645329Z',
         \     'response': 'Vim is the best!',
         \     'done': v:false,
         \   }),
-        \   json_encode({
+        \   proompter#json#Stringify({
         \     'model': 'codellama',
         \     'created_at': '2024-09-20T23:25:06.675058548Z',
         \     'response': "\nAnd there is no\ndoubt about it",

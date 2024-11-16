@@ -21,7 +21,7 @@ Execute (proompter#http#encode#Request -- Creates HTTP POST request as expected)
   let request_lines = split(request, separator)
 
   AssertEqual request_lines[0][:3], toupper(options.method)
-  AssertEqual request_lines[-1], json_encode(options.body)
+  AssertEqual request_lines[-1], proompter#json#Stringify(options.body)
 
 Execute (proompter#http#encode#Request -- Throws when encoding un-encodable type):
   let url = 'http://127.0.0.1:68419/generate'
