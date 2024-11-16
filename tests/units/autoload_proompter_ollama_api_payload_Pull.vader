@@ -1,0 +1,49 @@
+
+Before():
+  let configurations = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \   'api': {
+        \     'url': 'http://127.0.0.1:11434',
+        \   },
+        \   'channel': {
+        \     'address': '127.0.0.1:41968',
+        \     'options': {
+        \       'mode': 'raw',
+        \       'callback': v:null,
+        \     },
+        \   },
+        \   'models': {
+        \     'codellama': {
+        \       'parameters': {
+        \         'raw': v:false,
+        \         'stream': v:true,
+        \       },
+        \     },
+        \   },
+        \ }
+
+  let state = {
+        \   'messages': [],
+        \   'channel': v:null,
+        \ }
+
+  let expected_configurations = deepcopy(g:configurations)
+  let expected_state = deepcopy(g:state)
+
+After(-- Did not mutate global configurations or state unexpectedly):
+  AssertEqual g:state, g:expected_state, 'Unexpected mutation of state'
+  AssertEqual g:configurations, g:expected_configurations, 'Unexpected mutation of configurations'
+
+""
+" {{{
+Execute(proompter#ollama#api#payload#Pull -- Throws on empty name):
+  AssertThrows call proompter#ollama#api#payload#Pull({
+        \   'name': '',
+        \   'configurations': g:configurations,
+        \ })
+  AssertEqual g:vader_exception, 'ProompterError Empty name'
+" }}}
+""
+

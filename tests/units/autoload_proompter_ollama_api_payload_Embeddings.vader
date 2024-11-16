@@ -1,0 +1,78 @@
+
+Before():
+  let configurations = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \   'api': {
+        \     'url': 'http://127.0.0.1:11434',
+        \   },
+        \   'channel': {
+        \     'address': '127.0.0.1:41968',
+        \     'options': {
+        \       'mode': 'raw',
+        \       'callback': v:null,
+        \     },
+        \   },
+        \   'models': {
+        \     'codellama': {
+        \       'parameters': {
+        \         'raw': v:false,
+        \         'stream': v:true,
+        \       },
+        \     },
+        \   },
+        \ }
+
+  let state = {
+        \   'messages': [],
+        \   'channel': v:null,
+        \ }
+
+  let expected_configurations = deepcopy(g:configurations)
+  let expected_state = deepcopy(g:state)
+
+After(-- Did not mutate global configurations or state unexpectedly):
+  AssertEqual g:state, g:expected_state, 'Unexpected mutation of state'
+  AssertEqual g:configurations, g:expected_configurations, 'Unexpected mutation of configurations'
+
+""
+" {{{
+Execute(proompter#ollama#api#payload#Embeddings -- Builds expected data structure):
+  let prompt = 'Here is an article about llamas...'
+
+  let payload = proompter#ollama#api#payload#Embeddings({
+        \   'prompt': 'Here is an article about llamas...',
+        \   'configurations': g:configurations,
+        \ })
+
+  let expected_payload = {
+        \   'url': join([g:configurations.api.url, 'api/embeddings'], '/'),
+        \   'options': {
+        \     'method': 'post',
+        \     'headers': {
+        \       'Host': g:configurations.channel.address,
+        \       'Content-Type': 'application/json',
+        \     },
+        \     'body': {
+        \       'model': g:configurations.select.model_name,
+        \       'prompt': g:prompt,
+        \     },
+        \   },
+        \ }
+
+  AssertEqual payload, expected_payload
+" }}}
+""
+
+""
+" {{{
+Execute(proompter#ollama#api#payload#Embeddings -- Throws on empty prompt):
+  AssertThrows call proompter#ollama#api#payload#Embeddings({
+        \   'prompt': '',
+        \   'configurations': g:configurations,
+        \ })
+  AssertEqual g:vader_exception, 'ProompterError Empty prompt'
+" }}}
+""
+
