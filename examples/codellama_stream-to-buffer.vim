@@ -6,9 +6,10 @@
 let g:proompter = {
       \   'select': {
       \     'model_name': 'codellama',
+      \     'completion_endpoint': 'chat',
       \   },
       \   'api': {
-      \     'url': 'http://127.0.0.1:11434/api/chat',
+      \     'url': 'http://127.0.0.1:11434',
       \     'prompt_callbacks': {
       \       'chat': {
       \         'preamble': { configurations, state ->

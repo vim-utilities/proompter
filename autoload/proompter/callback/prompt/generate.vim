@@ -3,8 +3,8 @@
 " Maintainer: S0AndS0 <https://github.com/S0AndS0>
 " URL: https://github.com/vim-utilities/proompter
 "
-" These are indented to be used when path of `g:proompter.api.url` ends with
-" `/api/generate`
+" These are indented to be used when `g:proompter.select.completion_endpoint`
+" is `generate`
 
 
 
@@ -35,8 +35,12 @@
 "
 " Example: configuration snippet~ >
 "   let g:proompter = {
+"         \   'select': {
+"         \     'model_name': 'codellama',
+"         \     'completion_endpoint': 'generate',
+"         \   },
 "         \   'api': {
-"         \     'url': 'http://127.0.0.1:11434/api/generate',
+"         \     'url': 'http://127.0.0.1:11434',
 "         \     'prompt_callbacks': {
 "         \       'generate': {
 "         \         'preamble': { _configurations, _state ->
@@ -171,8 +175,12 @@ endfunction
 "
 " Example: configuration snippet~ >
 "   let g:proompter = {
+"         \   'select': {
+"         \     'model_name': 'codellama',
+"         \     'completion_endpoint': 'generate',
+"         \   },
 "         \   'api': {
-"         \     'url': 'http://127.0.0.1:11434/api/generate',
+"         \     'url': 'http://127.0.0.1:11434',
 "         \     'prompt_callbacks': {
 "         \       'generate': {
 "         \         'context': { _configurations, state ->
@@ -273,8 +281,12 @@ endfunction
 "
 " Example: configuration snippet~ >
 "   let g:proompter = {
+"         \   'select': {
+"         \     'model_name': 'codellama',
+"         \     'completion_endpoint': 'generate',
+"         \   },
 "         \   'api': {
-"         \     'url': 'http://127.0.0.1:11434/api/generate',
+"         \     'url': 'http://127.0.0.1:11434',
 "         \     'prompt_callbacks': {
 "         \       'generate': {
 "         \         'input': { value, _configurations, _state ->
@@ -339,8 +351,12 @@ endfunction
 "
 " Example: configuration snippet~ >
 "   let g:proompter = {
+"         \   'select': {
+"         \     'model_name': 'codellama',
+"         \     'completion_endpoint': 'generate',
+"         \   },
 "         \   'api': {
-"         \     'url': 'http://127.0.0.1:11434/api/generate',
+"         \     'url': 'http://127.0.0.1:11434',
 "         \     'prompt_callbacks': {
 "         \       'generate': {
 "         \         'post': { callbacks_data, _configurations, _state ->

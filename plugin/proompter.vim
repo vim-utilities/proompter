@@ -60,9 +60,10 @@ let g:proompter__loaded = 1
 "   let s:defaults = {
 "         \   'select': {
 "         \     'model_name': 'codellama',
+"         \     'completion_endpoint': 'chat',
 "         \   },
 "         \   'api': {
-"         \     'url': 'http://127.0.0.1:11434/api/generate',
+"         \     'url': 'http://127.0.0.1:11434',
 "         \     'prompt_callbacks': {
 "         \       'chat': {},
 "         \       'generate': {},
@@ -93,9 +94,10 @@ let g:proompter__loaded = 1
 let s:defaults = {
       \   'select': {
       \     'model_name': 'codellama',
+      \     'completion_endpoint': 'chat',
       \   },
       \   'api': {
-      \     'url': 'http://127.0.0.1:11434/api/generate',
+      \     'url': 'http://127.0.0.1:11434',
       \     'prompt_callbacks': {
       \       'chat': {},
       \       'generate': {},
@@ -128,19 +130,26 @@ let s:defaults = {
 "   let g:proompter = {
 "         \   'select': {
 "         \     'model_name': 'codellama',
+"         \     'completion_endpoint': 'chat',
 "         \   },
 "         \ }
 " <
 " {string} `select.model_name` Name used for API requests as well as optional
 " key name into {ProompterConfigurationsModels}
 "
+" {string} `select.completion_endpoint` API end point used for prompting,
+" currently `chat` or `generate` are supported for Ollama
 
 ""
 " @dict ProompterConfigurationsAPI
 " Example: `g:proompter.api`~ >
 "   let g:proompter = {
+"         \   'select': {
+"         \     'model_name': 'codellama',
+"         \     'completion_endpoint': 'generate',
+"         \   },
 "         \   'api': {
-"         \     'url': 'http://127.0.0.1:11434/api/generate',
+"         \     'url': 'http://127.0.0.1:11434',
 "         \     'prompt_callbacks': {
 "         \       'chat': {},
 "         \       'generate': {},
@@ -160,8 +169,12 @@ let s:defaults = {
 "
 " Example: `g:proompter.api.prompt_callbacks.generate`~ >
 "   let g:proompter = {
+"         \   'select': {
+"         \     'model_name': 'codellama',
+"         \     'completion_endpoint': 'generate',
+"         \   },
 "         \   'api': {
-"         \     'url': 'http://127.0.0.1:11434/api/generate',
+"         \     'url': 'http://127.0.0.1:11434',
 "         \     'prompt_callbacks': {
 "         \       'chat': {
 "         \         'preamble': function('ChatPreamble'),
@@ -181,12 +194,12 @@ let s:defaults = {
 "         \ }
 " <
 "
-" - {ProompterConfigurationsAPIPromptCallbacksChat} `chat` Collection of callback
-"   function references to use when `g:proompter.api.url` endpoint path is
-"   `/api/chat`
-" - {ProompterConfigurationsAPIPromptCallbacksGenerate} `generate` Collection of
-"   callback function references to use when `g:proompter.api.url` endpoint
-"   path is `/api/generate`
+" - {ProompterConfigurationsAPIPromptCallbacksChat} `chat` Collection of
+"   callback function references to use when
+"   `g:proompter.select.completion_endpoint` is `chat`
+" - {ProompterConfigurationsAPIPromptCallbacksGenerate} `generate` Collection
+"   of callback function references to use when
+"   `g:proompter.select.completion_endpoint` is `generate`
 
 ""
 " @dict ProompterConfigurationsAPIPromptCallbacksChat
@@ -194,7 +207,7 @@ let s:defaults = {
 " Example: `g:proompter.api.prompt_callbacks.chat`~ >
 "   let g:proompter = {
 "         \   'api': {
-"         \     'url': 'http://127.0.0.1:11434/api/chat',
+"         \     'url': 'http://127.0.0.1:11434',
 "         \     'prompt_callbacks': {
 "         \       'chat': {
 "         \         'preamble': function('ChatPreamble'),
@@ -278,8 +291,12 @@ let s:defaults = {
 "
 " Example: `g:proompter.api.prompt_callbacks.generate`~ >
 "   let g:proompter = {
+"         \   'select': {
+"         \     'model_name': 'codellama',
+"         \     'completion_endpoint': 'generate',
+"         \   },
 "         \   'api': {
-"         \     'url': 'http://127.0.0.1:11434/api/generate',
+"         \     'url': 'http://127.0.0.1:11434',
 "         \     'prompt_callbacks': {
 "         \       'generate': {
 "         \         'preamble': function('GeneratePreamble'),

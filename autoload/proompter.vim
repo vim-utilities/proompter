@@ -57,8 +57,9 @@ function! proompter#SendPromptToChat(value, configurations = g:proompter, state 
     throw 'ProompterError Non-string value'
   endif
 
+  " TODO: maybe be less gross about this
   let l:model_name = a:configurations.select.model_name
-  let l:model = deepcopy(get(a:configurations.models, l:model_name, {
+  let l:model = deepcopy(get(get(a:configurations, 'models', {}), l:model_name, {
         \   'prompt_callbacks': {
         \     'chat': {},
         \     'generate': {},
@@ -134,14 +135,10 @@ function! proompter#SendPromptToChat(value, configurations = g:proompter, state 
 
   call add(a:state.messages, l:entry)
 
-  let l:post_payload = proompter#http#encode#Request(a:configurations.api.url, {
-        \   'method': 'post',
-        \   'headers': {
-        \     'Host': a:configurations.channel.address,
-        \     'Content-Type': 'application/json',
-        \   },
-        \   'body': l:model.data,
-        \ })
+  let l:model.data.configurations = a:configurations
+  let l:payload_data = proompter#ollama#api#payload#Chat(l:model.data)
+
+  let l:post_payload = proompter#http#encode#Request(l:payload_data.url, l:payload_data.options)
 
   let l:channel = proompter#channel#GetOrSetOpen(a:configurations, a:state)
 
@@ -250,14 +247,11 @@ function! proompter#SendPromptToGenerate(value, configurations = g:proompter, st
 
   call add(a:state.messages, l:entry)
 
-  let l:post_payload = proompter#http#encode#Request(a:configurations.api.url, {
-        \   'method': 'post',
-        \   'headers': {
-        \     'Host': a:configurations.channel.address,
-        \     'Content-Type': 'application/json',
-        \   },
-        \   'body': l:model.data,
-        \ })
+  let l:model.data.configurations = a:configurations
+
+  let l:payload_data = proompter#ollama#api#payload#Generate(l:model.data)
+
+  let l:post_payload = proompter#http#encode#Request(l:payload_data.url, l:payload_data.options)
 
   let l:channel = proompter#channel#GetOrSetOpen(a:configurations, a:state)
 
@@ -294,14 +288,13 @@ endfunction
 "
 " @public
 function! proompter#SendPrompt(value, configurations = g:proompter, state = g:proompter_state) abort
-  let l:api_endpoint = split(a:configurations.api.url, '/')[-1]
-  let l:api_endpoint = split(l:api_endpoint, '?')[0]
+  let l:api_endpoint = get(get(a:configurations, 'select', {}), 'completion_endpoint', v:null)
   if l:api_endpoint == 'chat'
     return proompter#SendPromptToChat(a:value, a:configurations, a:state)
   elseif l:api_endpoint == 'generate'
     return proompter#SendPromptToGenerate(a:value, a:configurations, a:state)
   endif
-  throw 'ProompterError Nothing implemented for API endpoint in  ->' . a:configurations.api.url
+  throw 'ProompterError Nothing implemented for API endpoint in  -> a:configurations.select.completion_endpoint'
 endfunction
 
 ""
@@ -348,6 +341,11 @@ endfunction
 
 ""
 " Wrapper for `ch_close` for whatever channel is in `a:state.channel`
+"
+" Notes:~
+"
+" - 2024-11-10 closing a channel causes API, eventually, to figure out no one
+"   is listening which leads to canceling of further prompt processing.
 function! proompter#Cancel(state = g:proompter_state, configurations = g:proompter) abort
   call ch_close(a:state.channel)
 endfunction
@@ -355,7 +353,7 @@ endfunction
 ""
 " Attempt to load a model into memory
 "
-" @throws ProompterError `Unknown endpoing in -> a:configurations.api.url`
+" @throws ProompterError `Unknown endpoint in -> a:configurations.select.completion_endpoint`
 "
 " See: links~
 " - https://github.com/ollama/ollama/blob/main/docs/api.md#load-a-model
@@ -364,32 +362,20 @@ endfunction
 function! proompter#Load(configurations = g:proompter, state = g:proompter_state) abort
   let l:model_data = { "model": a:configurations.select.model_name }
 
-  let l:api_endpoint = split(a:configurations.api.url, '/')[-1]
-  let l:api_endpoint = split(l:api_endpoint, '?')[0]
+  let l:api_endpoint = get(get(a:configurations, 'select', {}), 'completion_endpoint', v:null)
   if l:api_endpoint == 'chat'
     return proompter#SendPromptToChat('', a:configurations, a:state)
   elseif l:api_endpoint == 'generate'
     return proompter#SendPromptToGenerate('', a:configurations, a:state)
   endif
 
-  let l:post_payload = proompter#http#encode#Request(a:configurations.api.url, {
-        \   'method': 'post',
-        \   'headers': {
-        \     'Host': a:configurations.channel.address,
-        \     'Content-Type': 'application/json',
-        \   },
-        \   'body': l:model.data,
-        \ })
-
-  let l:channel = proompter#channel#GetOrSetOpen(a:configurations, a:state)
-
-  call ch_sendraw(l:channel, l:post_payload)
+  throw 'ProompterError Unknown endpoint in -> a:configurations.select.completion_endpoint'
 endfunction
 
 ""
 " Tell API it is okay to release memory for a model
 "
-" @throws ProompterError `Unknown endpoing in -> a:configurations.select.completion_endpoint`
+" @throws ProompterError `Unknown endpoint in -> a:configurations.select.completion_endpoint`
 "
 " See: links~
 " - https://github.com/ollama/ollama/blob/main/docs/api.md#load-a-model
@@ -401,26 +387,14 @@ function! proompter#Unload(configurations = g:proompter, state = g:proompter_sta
         \   "keep_alive": 0,
         \ }
 
-  let l:api_endpoint = split(a:configurations.api.url, '/')[-1]
-  let l:api_endpoint = split(l:api_endpoint, '?')[0]
+  let l:api_endpoint = get(get(a:configurations, 'select', {}), 'completion_endpoint', v:null)
   if l:api_endpoint == 'chat'
     return proompter#SendPromptToChat('', a:configurations, a:state)
   elseif l:api_endpoint == 'generate'
     return proompter#SendPromptToGenerate('', a:configurations, a:state)
   endif
 
-  let l:post_payload = proompter#http#encode#Request(a:configurations.api.url, {
-        \   'method': 'post',
-        \   'headers': {
-        \     'Host': a:configurations.channel.address,
-        \     'Content-Type': 'application/json',
-        \   },
-        \   'body': l:model.data,
-        \ })
-
-  let l:channel = proompter#channel#GetOrSetOpen(a:configurations, a:state)
-
-  call ch_sendraw(l:channel, l:post_payload)
+  throw 'ProompterError Unknown endpoint in -> a:configurations.select.completion_endpoint'
 endfunction
 
 " vim: expandtab

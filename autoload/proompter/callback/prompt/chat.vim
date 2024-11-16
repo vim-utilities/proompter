@@ -3,8 +3,8 @@
 " Maintainer: S0AndS0 <https://github.com/S0AndS0>
 " URL: https://github.com/vim-utilities/proompter
 "
-" These are indented to be used when path of `g:proompter.api.url` ends with
-" `/api/chat`
+" These are indented to be used when `g:proompter.select.completion_endpoint`
+" is `chat`
 
 
 
@@ -28,8 +28,12 @@
 "
 " Example: configuration snippet~ >
 "   let g:proompter = {
+"         \   "select": {
+"         \     "model_name": "codellama",
+"         \     "completion_endpoint": "chat",
+"         \   },
 "         \   "api": {
-"         \     "url": "http://127.0.0.1:11434/api/chat",
+"         \     "url": "http://127.0.0.1:11434",
 "         \     "prompt_callbacks": {
 "         \       "chat": {
 "         \         "preamble": { _configurations, _state ->
@@ -103,8 +107,12 @@ endfunction
 "
 " Example: configuration snippet~ >
 "   let g:proompter = {
+"         \   "select": {
+"         \     "model_name": "codellama",
+"         \     "completion_endpoint": "chat",
+"         \   },
 "         \   "api": {
-"         \     "url": "http://127.0.0.1:11434/api/chat",
+"         \     "url": "http://127.0.0.1:11434",
 "         \     "prompt_callbacks": {
 "         \       "chat": {
 "         \         "context": { _configurations, state ->
@@ -159,8 +167,12 @@ endfunction
 "
 " Example: configuration snippet~ >
 "   let g:proompter = {
+"         \   "select": {
+"         \     "model_name": "codellama",
+"         \     "completion_endpoint": "chat",
+"         \   },
 "         \   "api": {
-"         \     "url": "http://127.0.0.1:11434/api/chat",
+"         \     "url": "http://127.0.0.1:11434",
 "         \     "prompt_callbacks": {
 "         \       "chat": {
 "         \         "input": function("proompter#callback#prompt#chat#Input"),
@@ -194,8 +206,12 @@ endfunction
 "
 " Example: configuration snippet~ >
 "   let g:proompter = {
+"         \   "select": {
+"         \     "model_name": "codellama",
+"         \     "completion_endpoint": "chat",
+"         \   },
 "         \   "api": {
-"         \     "url": "http://127.0.0.1:11434/api/chat",
+"         \     "url": "http://127.0.0.1:11434",
 "         \     "prompt_callbacks": {
 "         \       "chat": {
 "         \         "post": {
