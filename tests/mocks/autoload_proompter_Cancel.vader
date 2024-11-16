@@ -1,0 +1,36 @@
+
+""
+" {{{
+Execute (proompter#Cancel -- Closes any channel saved at 'a:state.channel'):
+  function! MockChannelCallback(channel, response) abort
+    throw "Don't call me Shirley"
+  endfunction
+
+  let configurations = {
+        \   'channel': {
+        \     'address': '127.0.0.1:41968',
+        \     'options': {
+        \       'mode': 'raw',
+        \       'callback': function('MockChannelCallback'),
+        \     },
+        \   },
+        \ }
+
+  let state = {
+        \   'messages': [],
+        \   'channel': ch_open(configurations.channel.address, deepcopy(configurations.channel.options)),
+        \ }
+  sleep 100m
+
+  let expected_configurations = deepcopy(configurations)
+
+  let expected_state = deepcopy(state)
+
+  call proompter#Cancel(state, configurations)
+
+  AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
+  AssertEqual state.messages, expected_state.messages, 'Unexpected mutation of state.messages'
+  AssertEqual ch_info(state.channel).status, 'closed'
+" }}}
+""
+
