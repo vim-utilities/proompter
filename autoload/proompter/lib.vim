@@ -63,8 +63,8 @@ endfunction
 " Merged dictionaries without mutation and returns resulting |dictionary|
 "
 " Parameters:~
-" {defaults} |dictionary| of default key/value pares
-" {...} |list| of up to 20 dictionaries to merge into returned data
+" - {defaults} |dictionary| of default key/value pares
+" - {...} |list| of up to 20 dictionaries to merge into returned data
 "
 " See: documentation~
 " |type()|
