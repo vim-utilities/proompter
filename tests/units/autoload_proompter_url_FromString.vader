@@ -1,0 +1,30 @@
+""
+" {{{
+Execute (proompter#url#FromString -- Parses components from URL as expected):
+  let data = 'http://example.com:41968/api/generate?first=one&second=2'
+
+  let result = proompter#url#FromString(data)
+
+  AssertEqual result.protocol, 'http'
+  AssertEqual result.hostname, 'example.com'
+  AssertEqual result.port, '41968'
+  AssertEqual result.host, 'example.com:41968'
+  AssertEqual result.pathname, '/api/generate'
+  AssertEqual result.search, '?first=one&second=2'
+  AssertEqual result.searchParams, {'first': 'one', 'second': '2'}
+  AssertEqual result.href, data
+  AssertEqual result.origin, 'http://example.com:41968'
+
+" }}}
+""
+
+""
+" {{{
+
+Execute (proompter#url#FromString -- Throws when no protocol can be parsed):
+  let data = '//example.com/api/generate?key=value'
+  AssertThrows call proompter#url#FromString(g:data)
+  AssertEqual g:vader_exception, 'ProompterError failed to parse protocol from data'
+
+" }}}
+""

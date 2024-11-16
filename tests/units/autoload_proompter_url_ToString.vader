@@ -1,0 +1,11 @@
+""
+" {{{
+Execute (proompter#url#ToString -- Parses components into URL as expected):
+  let url = 'http://example.com:41968/api/generate?first=one&second=2'
+  let data = proompter#url#FromString('http://example.com:41968/api/generate?first=one&second=2')
+  let result = proompter#url#ToString(data)
+  AssertEqual result, url
+
+" }}}
+""
+
