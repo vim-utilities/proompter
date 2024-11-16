@@ -1,0 +1,29 @@
+
+""
+" {{{
+Execute (proompter#json#encode#Literal -- Encodes v:null):
+  let data = v:null
+  let result = proompter#json#encode#Literal(data)
+  AssertEqual result, 'null'
+
+Execute (proompter#json#encode#Literal -- Encodes v:true):
+  let data = v:true
+  let result = proompter#json#encode#Literal(data)
+  AssertEqual result, 'true'
+
+Execute (proompter#json#encode#Literal -- Encodes v:false):
+  let data = v:false
+  let result = proompter#json#encode#Literal(data)
+  AssertEqual result, 'false'
+
+" }}}
+""
+
+""
+" {{{
+Execute (proompter#json#encode#Literal -- Throws when not given a literal):
+  let data = 'foo'
+  AssertThrows call proompter#json#encode#Literal(g:data)
+  AssertEqual g:vader_exception, 'ProompterError failed to parse data as literal -> ' . data
+" }}}
+""

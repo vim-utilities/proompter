@@ -1,0 +1,36 @@
+
+""
+" {{{
+Execute (proompter#json#decode#Number -- Parses a complex number):
+  let data = '-419.68'
+
+  let result = proompter#json#decode#Number(data, 0)
+
+  let expected = {
+        \   'value': data,
+        \   'consumed': len(data),
+        \ }
+
+  AssertEqual result, expected
+" }}}
+""
+
+""
+" {{{
+Execute (proompter#json#decode#Number -- Throws when first character is not sign or digit):
+  let data = 'foo'
+  AssertThrows call proompter#json#decode#Number(g:data, 0)
+  AssertEqual g:vader_exception, 'ProompterError expected `-` or `\d` but got -> `' . data[0] . '`'
+
+Execute (proompter#json#decode#Number -- Throws when nth character is decimal point but no preceding integer was found):
+  let data = '-.'
+  AssertThrows call proompter#json#decode#Number(g:data, 0)
+  AssertEqual g:vader_exception, 'ProompterError expected `\d` but got -> `' . data[1] . '`'
+
+Execute (proompter#json#decode#Number -- Throws when non-number is given):
+  let data = '-f'
+  AssertThrows call proompter#json#decode#Number(g:data, 0)
+  AssertEqual g:vader_exception, 'ProompterError failed to parse number between -> 0 and ' . (len(data) - 1)
+" }}}
+""
+

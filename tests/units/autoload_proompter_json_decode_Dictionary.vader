@@ -1,0 +1,55 @@
+
+""
+" {{{
+Execute (proompter#json#decode#Dictionary -- Parses simple dictionary with string key/value):
+  let data = '{"key":"value"}'
+  let result = proompter#json#decode#Dictionary(data, 0)
+  let expected = { 'value': json_decode(data), 'consumed': len(data) }
+  AssertEqual result, expected
+
+Execute (proompter#json#decode#Dictionary -- Parses nested dictionary with string key/value):
+  let data = '{"outer":{"inner":"value"}}'
+  let result = proompter#json#decode#Dictionary(data, 0)
+  let expected = { 'value': json_decode(data), 'consumed': len(data) }
+  AssertEqual result, expected
+
+Execute (proompter#json#decode#Dictionary -- Parses two key dictionary with string key/value-s):
+  let data = '{"first":"foo","second":"bar"}'
+  let result = proompter#json#decode#Dictionary(data, 0)
+  let expected = { 'value': json_decode(data), 'consumed': len(data) }
+  AssertEqual result, expected
+
+Execute (proompter#json#decode#Dictionary -- Parses simple dictionary with string key and complex number value):
+  let data = '{"key":-419.68}'
+  let result = proompter#json#decode#Dictionary(data, 0)
+  let expected = { 'value': json_decode('{"key":"-419.68"}'), 'consumed': len(data) }
+  AssertEqual result, expected
+
+Execute (proompter#json#decode#Dictionary -- Parses simple dictionary with string key and literal values):
+  let data = "{\"null\": null,\n\t\"true\" : true\r\n,  \"false\"\r\n\t : false\n}"
+  let result = proompter#json#decode#Dictionary(data, 0)
+  let expected = { 'value': json_decode(data), 'consumed': len(data) }
+  AssertEqual result, expected
+
+Execute (proompter#json#decode#Dictionary -- Parses escape sequences as expected):
+  let data = '{"newline":"\n", "return":"\r", "tab": "\t"}'
+  let result = proompter#json#decode#Dictionary(data, 0)
+  let expected = { 'value': json_decode(data), 'consumed': len(data) }
+  AssertEqual result, expected
+
+" }}}
+""
+
+""
+" {{{
+Execute (proompter#json#decode#Dictionary -- Throws when colon is not proceeded by key):
+  let data = '{:}'
+  AssertThrows call proompter#json#decode#Dictionary(g:data, 0)
+  AssertEqual g:vader_exception, 'ProompterError expected `"` but got `:` at `1`'
+
+Execute (proompter#json#decode#Dictionary -- Throws when comma is not proceeded by value):
+  let data = '{"key",}'
+  AssertThrows call proompter#json#decode#Dictionary(g:data, 0)
+  AssertEqual g:vader_exception, 'ProompterError expected `"`, `}`, or `]` but got `,` at `6`'
+" }}}
+""

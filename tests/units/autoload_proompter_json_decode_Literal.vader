@@ -1,0 +1,43 @@
+
+""
+" [{{
+Execute (proompter#json#decode#Literal -- Parses null):
+  let data = 'null'
+  let result = proompter#json#decode#Literal(data, 0)
+  let expected = { 'value': v:null, 'consumed': len(data) }
+  AssertEqual result, expected
+
+Execute (proompter#json#decode#Literal -- Parses true):
+  let data = 'true'
+  let result = proompter#json#decode#Literal(data, 0)
+  let expected = { 'value': v:true, 'consumed': len(data) }
+  AssertEqual result, expected
+
+Execute (proompter#json#decode#Literal -- Parses false):
+  let data = 'false'
+  let result = proompter#json#decode#Literal(data, 0)
+  let expected = { 'value': v:false, 'consumed': len(data) }
+  AssertEqual result, expected
+
+" }}}
+""
+
+""
+" {{{
+Execute (proompter#json#decode#Literal -- Throws when literal null is not found):
+  let data = 'nope'
+  AssertThrows call proompter#json#decode#Literal(g:data, 0)
+  AssertEqual g:vader_exception, 'ProompterError failed to parse literal expected `null`, `true`, or `false` but got -> `' . data . '`'
+
+Execute (proompter#json#decode#Literal -- Throws when literal true is not found):
+  let data = 'top'
+  AssertThrows call proompter#json#decode#Literal(g:data, 0)
+  AssertEqual g:vader_exception, 'ProompterError failed to parse literal expected `null`, `true`, or `false` but got -> `' . data . '`'
+
+Execute (proompter#json#decode#Literal -- Throws when literal true is not found):
+  let data = 'foo'
+  AssertThrows call proompter#json#decode#Literal(g:data, 0)
+  AssertEqual g:vader_exception, 'ProompterError failed to parse literal expected `null`, `true`, or `false` but got -> `' . data . '`'
+" }}}
+""
+

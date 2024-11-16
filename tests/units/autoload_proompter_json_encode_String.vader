@@ -1,0 +1,45 @@
+
+""
+" {{{
+Execute (proompter#json#encode#String -- Encodes letters):
+  let data = 'foo'
+  let result = proompter#json#encode#String(data)
+  let expected = '"' . data . '"'
+  AssertEqual expected, result
+
+Execute (proompter#json#encode#String -- Encodes digits):
+  let data = '419'
+  let result = proompter#json#encode#String(data)
+  let expected = '"' . data . '"'
+  AssertEqual expected, result
+
+Execute (proompter#json#encode#String -- Encodes escaped quotas):
+  let data = '\"'
+  let result = proompter#json#encode#String(data)
+  let expected = '"\\' . data . '"'
+  AssertEqual expected, result
+
+Execute (proompter#json#encode#String -- Escapes un-escaped quotas):
+  let data = '"'
+  let result = proompter#json#encode#String(data)
+  let expected = '"\""'
+  AssertEqual expected, result
+
+Execute (proompter#json#encode#String -- Does not do odd things with special and/or escaped characters):
+  let data = "\n\r\t\""
+  let result = proompter#json#encode#String(data)
+  let expected = '"\n\r\t\""'
+  AssertEqual expected, result
+
+" }}}
+""
+
+""
+" {{{
+" Execute (proompter#json#encode#String -- Throws when ):
+"   let data = ''
+"   AssertThrows call proompter#json#encode#String(g:data)
+"   AssertEqual g:vader_exception, ''
+" }}}
+""
+

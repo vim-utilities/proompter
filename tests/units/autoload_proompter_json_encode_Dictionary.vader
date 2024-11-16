@@ -1,0 +1,53 @@
+
+""
+" {{{
+Execute (proompter#json#encode#Dictionary -- Encodes simple dictionary with string value):
+  let data = { "key": "value" }
+  let result = proompter#json#encode#Dictionary(data)
+  AssertEqual result, json_encode(data)
+
+Execute (proompter#json#encode#Dictionary -- Encodes nested dictionary with string value):
+  let data = { "outer": { "inner": "value" } }
+  let result = proompter#json#encode#Dictionary(data)
+  AssertEqual result, json_encode(data)
+
+Execute (proompter#json#encode#Dictionary -- Encodes dictionary with nested list):
+  let data = { "key": ["value"] }
+  let result = proompter#json#encode#Dictionary(data)
+  AssertEqual result, json_encode(data)
+
+Execute (proompter#json#encode#Dictionary -- Encodes dictionary with integer and stringy float):
+  let data = { 'integer': 1336, 'floater': '419.68' }
+  let result = proompter#json#encode#Dictionary(data)
+  AssertEqual result, '{"integer":1336,"floater":419.68}'
+
+Execute (proompter#json#encode#Dictionary -- Encodes dictionary with special and escaped characters):
+  let data = { 'newlines': "\r\n", 'quote': "\"", 'tab': "\t", 'escaped': '\r\n\t' }
+  let result = proompter#json#encode#Dictionary(data)
+  AssertEqual result, json_encode(data)
+" }}}
+""
+
+""
+" {{{
+Execute (proompter#json#encode#Dictionary -- Throws when not given a non-dictionary):
+  function! MockChannelCallback(channel, response) abort
+    throw "Don't call me Shirley"
+  endfunction
+
+  let Ref = function("MockChannelCallback")
+  AssertThrows call proompter#json#encode#Dictionary(g:Ref)
+  AssertEqual g:vader_exception, 'ProompterError expected dictionary type but got -> `2`'
+
+Execute (proompter#json#encode#Dictionary -- Throws when not given an unexpected value type):
+  function! MockChannelCallback(channel, response) abort
+    throw "Don't call me Shirley"
+  endfunction
+
+  let data = { 'callback': function("MockChannelCallback") }
+  echo 'type(data.callback) ->' type(data.callback)
+  AssertThrows call proompter#json#encode#Dictionary(g:data)
+  AssertEqual g:vader_exception, 'ProompterError unknown value type for key `callback`'
+" }}}
+""
+

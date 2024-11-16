@@ -1,0 +1,24 @@
+
+""
+" {{{
+Execute (proompter#json#Stringify -- Encodes simple key/value strings):
+  let data = {'key': 'value'}
+  let result = proompter#json#Stringify(data)
+  AssertEqual json_encode(data), result
+
+Execute (proompter#json#Stringify -- Encodes simple list of strings):
+  let data = ['foo', 'bar']
+  let result = proompter#json#Stringify(data)
+  AssertEqual json_encode(data), result
+" }}}
+""
+
+""
+" {{{
+Execute (proompter#json#Stringify -- Throws when not given dictionary or list):
+  let data = 'nope'
+  AssertThrows call proompter#json#Stringify(g:data)
+  AssertEqual g:vader_exception, 'ProompterError expected type `v:t_dict` or `v:t_list` but got `' . type(data) . '`'
+" }}}
+""
+

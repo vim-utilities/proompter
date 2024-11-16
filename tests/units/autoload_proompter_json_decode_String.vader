@@ -1,0 +1,45 @@
+
+""
+" {{{
+Execute (proompter#json#decode#String -- Parses a simple string):
+  let data = '"key"'
+  let result = proompter#json#decode#String(data, 0)
+  let expected = { 'value': data[1:len(data)-2], 'consumed': len(data) }
+  AssertEqual result, expected
+
+Execute (proompter#json#decode#String -- Parses a complex string):
+  let data = '"foo\""'
+  let result = proompter#json#decode#String(data, 0)
+  let expected = { 'value': json_decode('{"value":' . data . '}').value, 'consumed': len(data) }
+  AssertEqual result, expected
+
+Execute (proompter#json#decode#String -- Parses a newline correctly):
+  let data = "\"\n\""
+  let result = proompter#json#decode#String(data, 0)
+  let expected = { 'value': data[1:len(data)-2], 'consumed': len(data) }
+  AssertEqual result, expected
+
+Execute (proompter#json#decode#String -- Parses a literal backslash-n correctly):
+  let data = '"\n"'
+  let result = proompter#json#decode#String(data, 0)
+  let expected = { 'value': json_decode('{"value":' . data . '}').value, 'consumed': len(data) }
+  AssertEqual result, expected
+
+Execute (proompter#json#decode#String -- Handles escape sequences as expected):
+  let data = "\"\r\n\t\""
+  let result = proompter#json#decode#String(data, 0)
+  let expected = { 'value': data[1:len(data)-2], 'consumed': len(data) }
+  AssertEqual result, expected
+" }}}
+""
+
+""
+" {{{
+Execute (proompter#json#decode#String -- Throws when given a malformed string):
+  let data = '"f'
+  AssertThrows call proompter#json#decode#String(g:data, 0)
+  AssertEqual g:vader_exception, 'ProompterError failed to parse string between -> 0 and ' . len(data[0] - 1)
+
+" }}}
+""
+

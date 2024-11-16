@@ -1,0 +1,46 @@
+
+""
+" {{{
+Execute (proompter#json#encode#Number -- Encodes float with exponent):
+  let data = -4.196800e+02
+  let result = proompter#json#encode#Number(data)
+  if v:numbersize == 64
+    AssertEqual result, printf('%.16f', data)
+  elseif v:numbersize == 32
+    AssertEqual result, printf('%.7f', data)
+  else
+    AssertEqual result, printf('%f', data)
+  endif
+
+Execute (proompter#json#encode#Number -- Encodes integer):
+  let data = 419
+  let result = proompter#json#encode#Number(data)
+  let expected = string(data)
+  AssertEqual expected, result
+
+Execute (proompter#json#encode#Number -- Encodes signed stringy float):
+  let data = '-419.68'
+  let result = proompter#json#encode#Number(data)
+  AssertEqual result, data
+
+Execute (proompter#json#encode#Number -- Encodes hexadecimal):
+  let data = 0xdeadbeef
+  let result = proompter#json#encode#Number(data)
+  AssertEqual result, string(data)
+
+Execute (proompter#json#encode#Number -- Encodes binary):
+  let data = 0b1000100
+  let result = proompter#json#encode#Number(data)
+  AssertEqual result, string(data)
+
+" }}}
+""
+
+""
+" {{{
+Execute (proompter#json#encode#Number -- Throws when not given a number):
+  let data = 'foo'
+  AssertThrows call proompter#json#encode#Number(g:data)
+  AssertEqual g:vader_exception, 'ProompterError failed to parse data as number -> ' . data
+" }}}
+""

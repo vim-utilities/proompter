@@ -1,0 +1,45 @@
+
+""
+" {{{
+Execute (proompter#json#Parse -- Parses simple dictionary):
+  let data = '{"key":"value"}'
+  let result = proompter#json#Parse(data, 0)
+  let expected = json_decode(data)
+  AssertEqual result, expected
+
+Execute (proompter#json#Parse -- Parses simple list):
+  let data = '["foo","bar"]'
+  let result = proompter#json#Parse(data, 0)
+  let expected = json_decode(data)
+  AssertEqual result, expected
+
+Execute (proompter#json#Parse -- Parses nested dictionary):
+  let data = '{"outer":{"inner":"value"}}'
+  let result = proompter#json#Parse(data, 0)
+  let expected = json_decode(data)
+  AssertEqual result, expected
+
+Execute (proompter#json#Parse -- Parses nested dictionary with nested list):
+  let data = '{"outer":{"inner":[["foo", null, true, false]]}}'
+  let result = proompter#json#Parse(data, 0)
+  let expected = json_decode(data)
+  AssertEqual result, expected
+
+Execute (proompter#json#Parse -- Parses dictionary special character):
+  let data = '{"outer":{"inner":[["foo", null, true, false]]}}'
+  let result = proompter#json#Parse(data, 0)
+  let expected = json_decode(data)
+  AssertEqual result, expected
+
+" }}}
+""
+
+""
+" {{{
+Execute (proompter#json#Parse -- Throws when literal null is not found):
+  let data = 'nope'
+  AssertThrows call proompter#json#Parse(g:data, 0)
+  AssertEqual g:vader_exception, 'ProompterError expected `{` or `[` but got `' . data[0] . '` at `0`'
+" }}}
+""
+

@@ -1,0 +1,66 @@
+
+""
+" {{{
+Execute (proompter#json#encode#List -- Encodes simple list with string value):
+  let data = [ 'value' ]
+  let result = proompter#json#encode#List(data)
+  AssertEqual result, json_encode(data)
+
+Execute (proompter#json#encode#List -- Encodes nested list with string values):
+  let data = [ 'outer', [ 'inner' ] ]
+  let result = proompter#json#encode#List(data)
+  AssertEqual result, json_encode(data)
+
+Execute (proompter#json#encode#List -- Encodes list with nested dictionary):
+  let data = [{ 'key': 'value' }]
+  let result = proompter#json#encode#List(data)
+  AssertEqual result, json_encode(data)
+
+Execute (proompter#json#encode#List -- Encodes list with integer and stringy float):
+  let data = [1336, '-419.68']
+  let result = proompter#json#encode#List(data)
+  AssertEqual result, '[1336,-419.68]'
+
+Execute (proompter#json#encode#List -- Encodes list with lots of stringy floats):
+  let data = [
+        \   '0.5670403838157654',
+        \   '0.009260174818336964',
+        \   '0.23178744316101074',
+        \   '-0.2916173040866852',
+        \   '-0.8924556970596313',
+        \   '0.8785552978515625',
+        \   '-0.34576427936553955',
+        \   '0.5742510557174683',
+        \   '-0.04222835972905159',
+        \   '-0.137906014919281',
+        \ ]
+  let result = proompter#json#encode#List(data)
+  let expected = substitute(json_encode(data), '"', '', 'g')
+  AssertEqual len(result), len(expected)
+  AssertEqual result, expected
+
+" }}}
+""
+
+""
+" {{{
+Execute (proompter#json#encode#List -- Throws when not given a non-list):
+  function! MockChannelCallback(channel, response) abort
+    throw "Don't call me Shirley"
+  endfunction
+
+  let Ref = function("MockChannelCallback")
+  AssertThrows call proompter#json#encode#List(g:Ref)
+  AssertEqual g:vader_exception, 'ProompterError expected list type but got -> `2`'
+
+Execute (proompter#json#encode#List -- Throws when not given an unexpected value type):
+  function! MockChannelCallback(channel, response) abort
+    throw "Don't call me Shirley"
+  endfunction
+
+  let data = [ function("MockChannelCallback") ]
+  AssertThrows call proompter#json#encode#List(g:data)
+  AssertEqual g:vader_exception, 'ProompterError unknown value type for index `0`'
+" }}}
+""
+

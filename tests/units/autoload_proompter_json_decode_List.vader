@@ -1,0 +1,56 @@
+
+""
+" [{{
+Execute (proompter#json#decode#List -- Parses simple list with string values):
+  let data = '["foo","bar"]'
+  let result = proompter#json#decode#List(data, 0)
+  let expected = { 'value': json_decode(data), 'consumed': len(data) }
+  AssertEqual result, expected
+
+Execute (proompter#json#decode#List -- Parses simple list with number values):
+  let data = '[-419.68,1337]'
+  let result = proompter#json#decode#List(data, 0)
+  let expected = { 'value': json_decode('["-419.68","1337"]'), 'consumed': len(data) }
+  AssertEqual result, expected
+
+Execute (proompter#json#decode#List -- Parses simple list with literal values):
+  let data = '[null,true,false]'
+  let result = proompter#json#decode#List(data, 0)
+  let expected = { 'value': json_decode(data), 'consumed': len(data) }
+  AssertEqual result, expected
+
+Execute (proompter#json#decode#List -- Parses list with dictionary values):
+  let data = '[{"stringy":"bar"},{"floater":-419.86}]'
+  let result = proompter#json#decode#List(data, 0)
+  let expected = { 'value': json_decode('[{"stringy":"bar"},{"floater":"-419.86"}]'), 'consumed': len(data) }
+  AssertEqual result, expected
+
+Execute (proompter#json#decode#List -- Parses nested lists):
+  let data = '[["foo"],["bar"]]'
+  let result = proompter#json#decode#List(data, 0)
+  let expected = { 'value': json_decode(data), 'consumed': len(data) }
+  AssertEqual result, expected
+
+Execute (proompter#json#decode#List -- Parses nested lists with dictionaries and blank spaces):
+  let data = "[[\"foo\"],\n[{\r\n\t\"key\" : \"value\"\r\n}]]"
+  let result = proompter#json#decode#List(data, 0)
+  let expected = { 'value': json_decode(data), 'consumed': len(data) }
+  AssertEqual result, expected
+
+" }}}
+""
+
+""
+" [{{
+Execute (proompter#json#decode#List -- Throws when parsing unexpected character):
+  let data = '[Wat'
+  AssertThrows call proompter#json#decode#List(g:data, 0)
+  AssertEqual g:vader_exception, 'ProompterError unexpected character `W` at `1`'
+
+Execute (proompter#json#decode#List -- Throws when missing closing square bracket):
+  let data = '[0'
+  AssertThrows call proompter#json#decode#List(g:data, 0)
+  AssertEqual g:vader_exception, 'ProompterError expected `]` but got `0` at `1`'
+
+" }}}
+""
