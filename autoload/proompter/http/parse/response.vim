@@ -204,7 +204,7 @@ function! proompter#http#parse#response#ExtractJSONDicts(data) abort
     elseif l:character == '}'
       let l:curly_depth -= 1
       if l:curly_depth == 0
-        call add(l:dictionary_list, json_decode(a:data[l:slice_start:l:index]))
+        call add(l:dictionary_list, proompter#json#Parse(a:data[l:slice_start:l:index]))
 
         let l:slice_start = l:index + 1
         let l:inside_string = v:false
