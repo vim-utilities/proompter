@@ -115,6 +115,8 @@ if ! ((${#_test})); then
 	_path_glob="tests/**/*.vader"
 elif grep -q -- ',' <<<"${_test}"; then
 	_path_glob="tests/{${_test}}/**/*.vader"
+elif [[ -f "${_test}" ]]; then
+	_path_glob="${_test}"
 else
 	_path_glob="tests/${_test}/**/*.vader"
 fi
