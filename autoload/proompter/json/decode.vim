@@ -247,8 +247,7 @@ endfunction
 " Extract a key or value from `data`, starting at `index`, surrounded by
 " double-quotes and return |dictionary| with `value` and `consumed` defined.
 function! proompter#json#decode#String(data, index) abort
-  " let l:result = { 'value': v:null, 'consumed': v:null }
-  let l:result = { 'value': '', 'consumed': v:null }
+  let l:result = { 'value': v:null, 'consumed': v:null }
 
   let l:slice_start = a:index
   let l:slice_end = a:index
@@ -266,31 +265,11 @@ function! proompter#json#decode#String(data, index) abort
       else
         if l:character == '"'
           if l:escape_count == 0 || l:escape_count % 2 == 0
-            " let l:result.value = a:data[l:slice_start:l:slice_end-1]
-            " let l:result.value = json_decode({'value': a:data[l:slice_start:l:slice_end-1]}).value
+            let l:bad_idea = '{"value":' . a:data[l:slice_start-1:l:slice_end] . '}'
+            let l:result.value = json_decode(l:bad_idea).value
             let l:result.consumed = l:slice_end - a:index + 1
             return l:result
           endif
-        elseif l:escape_count % 2 == 1
-          " TODO: make this pretty
-          " case '\\': c = '\\'; break;
-          " case '"': c = '"'; break;
-          " case 'u': TODO do Unicode
-          if l:character == 'n'
-            let l:result.value .= "\n"
-          elseif l:character == 'r'
-            let l:result.value .= "\r"
-          elseif l:character == 't'
-            let l:result.value .= "\t"
-          elseif l:character == 'b'
-            let l:result.value .= "\b"
-          elseif l:character == 'f'
-            let l:result.value .= "\f"
-          " elseif l:character == '\'
-          "   let l:result.value .= "\\"
-          endif
-        else
-          let l:result.value .= l:character
         endif
         let l:escape_count = 0
       endif
