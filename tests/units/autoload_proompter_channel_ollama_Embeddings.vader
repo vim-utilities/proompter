@@ -1,0 +1,99 @@
+
+Before():
+  let configurations = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \   },
+        \ }
+
+  let state = {
+        \   'embeddings': {},
+        \ }
+
+  let expected_configurations = deepcopy(g:configurations)
+
+  let api_response = {
+        \   "embedding": [
+        \     '0.5670403838157654',
+        \     '0.009260174818336964',
+        \     '0.23178744316101074',
+        \     '-0.2916173040866852',
+        \     '-0.8924556970596313',
+        \     '0.8785552978515625',
+        \     '-0.34576427936553955',
+        \     '0.5742510557174683',
+        \     '-0.04222835972905159',
+        \     '-0.137906014919281',
+        \   ],
+        \ }
+
+
+After(-- Did not mutate global configurations):
+  AssertEqual g:configurations, g:expected_configurations, 'Unexpected mutation of configurations'
+
+""
+" {{{
+Execute(proompter#channel#ollama#Embeddings -- Mutates shared state only in expected ways):
+  let api_response_copy = deepcopy(g:api_response)
+
+  let expected_state = deepcopy(g:state)
+  let expected_state.embeddings[g:configurations.select.model_name] = [deepcopy(g:api_response)]
+
+  call proompter#channel#ollama#Embeddings({
+      \   'api_response': proompter#json#Stringify(g:api_response),
+      \   'configurations': g:configurations,
+      \   'state': g:state,
+      \ })
+
+  AssertEqual len(g:state.embeddings.codellama[-1].embedding), len(expected_state.embeddings.codellama[-1].embedding)
+  " for [index, embedding] in items(g:state.embeddings.codellama[-1].embedding)
+  "   AssertEqual printf('%.16f', embedding), printf('%.16f', expected_state.embeddings.codellama[-1].embedding[index])
+  " endfor
+  AssertEqual g:state.embeddings.codellama[-1].embedding, expected_state.embeddings.codellama[-1].embedding
+  AssertEqual g:state, expected_state
+  AssertEqual api_response, api_response_copy, 'Unexpected mutation of api_response'
+" }}}
+""
+
+""
+" {{{
+Execute(proompter#channel#ollama#Embeddings -- Throws Empty kwargs.configurations.select.model_name):
+  let api_response_copy = deepcopy(g:api_response)
+  let expected_state = deepcopy(g:state)
+
+  let configurations_copy = deepcopy(g:configurations)
+  let configurations_copy.select.model_name = ''
+
+  AssertThrows call proompter#channel#ollama#Embeddings({
+      \   'api_response': proompter#json#Stringify(g:api_response),
+      \   'configurations': g:configurations_copy,
+      \   'state': g:state,
+      \ })
+
+  AssertEqual g:vader_exception, 'ProompterError Empty kwargs.configurations.select.model_name'
+
+  AssertEqual g:state, expected_state
+  AssertEqual api_response, api_response_copy, 'Unexpected mutation of api_response'
+" }}}
+""
+
+""
+" {{{
+Execute(proompter#channel#ollama#Embeddings -- Throws Empty kwargs.api_response.embeddings):
+  let g:api_response.embedding = []
+  let api_response_copy = deepcopy(g:api_response)
+  let expected_state = deepcopy(g:state)
+
+  AssertThrows call proompter#channel#ollama#Embeddings({
+      \   'api_response': proompter#json#Stringify(g:api_response),
+      \   'configurations': g:configurations,
+      \   'state': g:state,
+      \ })
+
+  AssertEqual g:vader_exception, 'ProompterError Empty l:body_dict.embedding'
+
+  AssertEqual g:state, expected_state
+  AssertEqual api_response, api_response_copy, 'Unexpected mutation of api_response'
+" }}}
+""
+
