@@ -25,9 +25,10 @@ Default: `g:proompter`~
   let s:defaults = {
         \   'select': {
         \     'model_name': 'codellama',
+        \     'completion_endpoint': 'chat',
         \   },
         \   'api': {
-        \     'url': 'http://127.0.0.1:11434/api/generate',
+        \     'url': 'http://127.0.0.1:11434',
         \     'prompt_callbacks': {
         \       'chat': {},
         \       'generate': {},
@@ -161,6 +162,26 @@ Merged data from |APIResponseChat| and |APIResponseGenerate|
   }
 <
 
+                                       *proompter.APIResponseOllamaEmbeddings*
+
+Example: /api/embeddings~
+>
+  {
+    "embedding": [
+      0.5670403838157654,
+      0.009260174818336964,
+      0.23178744316101074,
+      -0.2916173040866852,
+      -0.8924556970596313,
+      0.8785552978515625,
+      -0.34576427936553955,
+      0.5742510557174683,
+      -0.04222835972905159,
+      -0.137906014919281
+    ]
+  }
+<
+
                                                        *proompter.HTTPHeaders*
 
 {string} `key` Whatever string was read between first colon (`:`) and start of
@@ -227,8 +248,12 @@ list of images to include in the message (for multimodal models such as
 Example: `g:proompter.api`~
 >
   let g:proompter = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \     'completion_endpoint': 'generate',
+        \   },
         \   'api': {
-        \     'url': 'http://127.0.0.1:11434/api/generate',
+        \     'url': 'http://127.0.0.1:11434',
         \     'prompt_callbacks': {
         \       'chat': {},
         \       'generate': {},
@@ -249,8 +274,12 @@ default callbacks for endpoints if not defined in
 Example: `g:proompter.api.prompt_callbacks.generate`~
 >
   let g:proompter = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \     'completion_endpoint': 'generate',
+        \   },
         \   'api': {
-        \     'url': 'http://127.0.0.1:11434/api/generate',
+        \     'url': 'http://127.0.0.1:11434',
         \     'prompt_callbacks': {
         \       'chat': {
         \         'preamble': function('ChatPreamble'),
@@ -271,11 +300,11 @@ Example: `g:proompter.api.prompt_callbacks.generate`~
 <
 
 {ProompterConfigurationsAPIPromptCallbacksChat} `chat` Collection of callback
-  function references to use when `g:proompter.api.url` endpoint path is
-  `/api/chat`
+  function references to use when `g:proompter.select.completion_endpoint` is
+  `chat`
 {ProompterConfigurationsAPIPromptCallbacksGenerate} `generate` Collection of
-  callback function references to use when `g:proompter.api.url` endpoint path
-  is `/api/generate`
+  callback function references to use when
+  `g:proompter.select.completion_endpoint` is `generate`
 
                      *proompter.ProompterConfigurationsAPIPromptCallbacksChat*
 
@@ -283,7 +312,7 @@ Example: `g:proompter.api.prompt_callbacks.chat`~
 >
   let g:proompter = {
         \   'api': {
-        \     'url': 'http://127.0.0.1:11434/api/chat',
+        \     'url': 'http://127.0.0.1:11434',
         \     'prompt_callbacks': {
         \       'chat': {
         \         'preamble': function('ChatPreamble'),
@@ -373,8 +402,12 @@ similar to
 Example: `g:proompter.api.prompt_callbacks.generate`~
 >
   let g:proompter = {
+        \   'select': {
+        \     'model_name': 'codellama',
+        \     'completion_endpoint': 'generate',
+        \   },
         \   'api': {
-        \     'url': 'http://127.0.0.1:11434/api/generate',
+        \     'url': 'http://127.0.0.1:11434',
         \     'prompt_callbacks': {
         \       'generate': {
         \         'preamble': function('GeneratePreamble'),
@@ -562,12 +595,15 @@ Example: `g:proompter.select.model_name`~
   let g:proompter = {
         \   'select': {
         \     'model_name': 'codellama',
+        \     'completion_endpoint': 'chat',
         \   },
         \ }
 <
 {string} `select.model_name` Name used for API requests as well as optional
 key name into {ProompterConfigurationsModels}
 
+{string} `select.completion_endpoint` API end point used for prompting,
+currently `chat` or `generate` are supported for Ollama
 
 ==============================================================================
 FUNCTIONS                                                *proompter-functions*
@@ -602,7 +638,7 @@ proompter#SendPromptToChat({value}, {configurations}, {state})
     call proompter#SendPromptToGenerate(message)
 <
 
-  Throws ERROR(ProompterError) `Empty input value`
+  Throws ERROR(ProompterError) `Non-string value`
 
   Note: if `g:proompter.models['model_name'].prompt_callbacks` is defined then
   resulting prompt sent to LLM is built by `prompt_callbacks.post`
@@ -636,7 +672,7 @@ proompter#SendPromptToGenerate({value}, {configurations}, {state})
     call proompter#SendPromptToGenerate(message)
 <
 
-  Throws ERROR(ProompterError) `Empty input value`
+  Throws ERROR(ProompterError) `Non-string value`
 
   Note: if `g:proompter.models['model_name'].prompt_callbacks` is defined then
   resulting prompt sent to LLM is built by `prompt_callbacks.post`
@@ -712,8 +748,8 @@ proompter#SendHighlightedText({prefix}, {configurations}, {state})
 proompter#Load({configurations}, {state})                   *proompter#Load()*
   Attempt to load a model into memory
 
-  Throws ERROR(ProompterError) `Unknown endpoing in ->
-  a:configurations.api.url`
+  Throws ERROR(ProompterError) `Unknown endpoint in ->
+  a:configurations.select.completion_endpoint`
 
   See: links~
   https://github.com/ollama/ollama/blob/main/docs/api.md#load-a-model
@@ -722,8 +758,8 @@ proompter#Load({configurations}, {state})                   *proompter#Load()*
 proompter#Unload({configurations}, {state})               *proompter#Unload()*
   Tell API it is okay to release memory for a model
 
-  Throws ERROR(ProompterError) `Unknown endpoing in ->
-  a:configurations.api.url`
+  Throws ERROR(ProompterError) `Unknown endpoint in ->
+  a:configurations.select.completion_endpoint`
 
   See: links~
   https://github.com/ollama/ollama/blob/main/docs/api.md#load-a-model
@@ -1120,8 +1156,12 @@ proompter#callback#prompt#chat#Preamble({kwargs})
   Example: configuration snippet~
 >
     let g:proompter = {
+          \   "select": {
+          \     "model_name": "codellama",
+          \     "completion_endpoint": "chat",
+          \   },
           \   "api": {
-          \     "url": "http://127.0.0.1:11434/api/chat",
+          \     "url": "http://127.0.0.1:11434",
           \     "prompt_callbacks": {
           \       "chat": {
           \         "preamble": { _configurations, _state ->
@@ -1185,8 +1225,12 @@ proompter#callback#prompt#chat#Context({kwargs})
   Example: configuration snippet~
 >
     let g:proompter = {
+          \   "select": {
+          \     "model_name": "codellama",
+          \     "completion_endpoint": "chat",
+          \   },
           \   "api": {
-          \     "url": "http://127.0.0.1:11434/api/chat",
+          \     "url": "http://127.0.0.1:11434",
           \     "prompt_callbacks": {
           \       "chat": {
           \         "context": { _configurations, state ->
@@ -1227,8 +1271,12 @@ proompter#callback#prompt#chat#Input({input}, {configurations}, {state})
   Example: configuration snippet~
 >
     let g:proompter = {
+          \   "select": {
+          \     "model_name": "codellama",
+          \     "completion_endpoint": "chat",
+          \   },
           \   "api": {
-          \     "url": "http://127.0.0.1:11434/api/chat",
+          \     "url": "http://127.0.0.1:11434",
           \     "prompt_callbacks": {
           \       "chat": {
           \         "input": function("proompter#callback#prompt#chat#Input"),
@@ -1260,8 +1308,12 @@ proompter#callback#prompt#chat#Post({kwargs})
   Example: configuration snippet~
 >
     let g:proompter = {
+          \   "select": {
+          \     "model_name": "codellama",
+          \     "completion_endpoint": "chat",
+          \   },
           \   "api": {
-          \     "url": "http://127.0.0.1:11434/api/chat",
+          \     "url": "http://127.0.0.1:11434",
           \     "prompt_callbacks": {
           \       "chat": {
           \         "post": {
@@ -1341,8 +1393,12 @@ proompter#callback#prompt#generate#Preamble({kwargs})
   Example: configuration snippet~
 >
     let g:proompter = {
+          \   'select': {
+          \     'model_name': 'codellama',
+          \     'completion_endpoint': 'generate',
+          \   },
           \   'api': {
-          \     'url': 'http://127.0.0.1:11434/api/generate',
+          \     'url': 'http://127.0.0.1:11434',
           \     'prompt_callbacks': {
           \       'generate': {
           \         'preamble': { _configurations, _state ->
@@ -1419,8 +1475,12 @@ proompter#callback#prompt#generate#Context({kwargs})
   Example: configuration snippet~
 >
     let g:proompter = {
+          \   'select': {
+          \     'model_name': 'codellama',
+          \     'completion_endpoint': 'generate',
+          \   },
           \   'api': {
-          \     'url': 'http://127.0.0.1:11434/api/generate',
+          \     'url': 'http://127.0.0.1:11434',
           \     'prompt_callbacks': {
           \       'generate': {
           \         'context': { _configurations, state ->
@@ -1478,8 +1538,12 @@ proompter#callback#prompt#generate#Input({kwargs})
   Example: configuration snippet~
 >
     let g:proompter = {
+          \   'select': {
+          \     'model_name': 'codellama',
+          \     'completion_endpoint': 'generate',
+          \   },
           \   'api': {
-          \     'url': 'http://127.0.0.1:11434/api/generate',
+          \     'url': 'http://127.0.0.1:11434',
           \     'prompt_callbacks': {
           \       'generate': {
           \         'input': { value, _configurations, _state ->
@@ -1525,8 +1589,12 @@ proompter#callback#prompt#generate#Post({kwargs})
   Example: configuration snippet~
 >
     let g:proompter = {
+          \   'select': {
+          \     'model_name': 'codellama',
+          \     'completion_endpoint': 'generate',
+          \   },
           \   'api': {
-          \     'url': 'http://127.0.0.1:11434/api/generate',
+          \     'url': 'http://127.0.0.1:11434',
           \     'prompt_callbacks': {
           \       'generate': {
           \         'post': { callbacks_data, _configurations, _state ->
@@ -1581,6 +1649,88 @@ proompter#channel#GetOrSetOpen({configurations}, {state})
 
   See: tests~
   tests/units/autoload_proompter_channel_GetOrSetOpen.vader
+
+
+proompter#channel#ollama#Embeddings({kwargs})
+                                       *proompter#channel#ollama#Embeddings()*
+  Mutates {kwargs} `.state.embeddings` by creating, if necessary, a
+  |dictionary| entry for `.configurations.select.model_name`, and then
+  appending `.api_response.embeddings` to shared state |list|
+
+  Parameter:~
+  {kwargs} |dictionary| with the following key/value pares defined;
+  `api_response` |APIResponseOllamaEmbeddings|
+  `configurations` |ProompterConfigurations| default `g:proompter` ignored
+  `state` |ProompterState| default `g:proompter_state` where `embeddings` will
+    be added to `state.embeddings` |list| for current
+    `.configurations.select.model_name`
+
+  Throws ERROR(ProompterError) `Empty kwargs.api_response.embeddings`
+
+  Throws ERROR(ProompterError) `Empty kwargs.configurations.select.model_name`
+
+  Example: configurations~
+>
+    let g:proompter = {
+          \   'select': {
+          \     'model_name': 'codellama',
+          \   },
+          \ }
+<
+
+  Example: API response~
+>
+    {
+      "embedding": [
+        0.5670403838157654,
+        0.009260174818336964,
+        0.23178744316101074,
+        -0.2916173040866852,
+        -0.8924556970596313,
+        0.8785552978515625,
+        -0.34576427936553955,
+        0.5742510557174683,
+        -0.04222835972905159,
+        -0.137906014919281,
+      ],
+    }
+<
+
+  Example: state mutation~
+>
+    let g:proompter_state = {
+          \   'embeddings': {
+          \     'codellama': [
+          \       {
+          \         "embedding": [
+          \           0.5670403838157654,
+          \           0.009260174818336964,
+          \           0.23178744316101074,
+          \           -0.2916173040866852,
+          \           -0.8924556970596313,
+          \           0.8785552978515625,
+          \           -0.34576427936553955,
+          \           0.5742510557174683,
+          \           -0.04222835972905159,
+          \           -0.137906014919281,
+          \         ],
+          \       }
+          \     ]
+          \   },
+          \ }
+<
+
+  See: functions~
+  |proompter#http#parse#Response|
+
+  See: links~
+  https://github.com/ollama/ollama/blob/main/docs/api.md#generate-embeddings
+
+  See: tests~
+  tests/units/autoload_proompter_channel_ollama_Embeddings.vader
+
+  Note: Currently there are no known easy avenues for associating
+  `/api/embeddings` call to the response.  Merge Requests are welcomed!
 
 
 proompter#http#encode#Request({url}, {kwargs})
@@ -1700,6 +1850,14 @@ proompter#http#parse#response#ExtractJSONDicts({data})
   tests/units/autoload_proompter_http_parse_response_ExtractJSONDicts.vader
 
 
+proompter#json#Parse({data}, {index})                 *proompter#json#Parse()*
+  Return |dictionary| or |list| parsed from `data` starting at `index`
+
+  Parameters:~
+  {data} |string|
+  {index} |Number| default `0`
+
+
 proompter#lib#MessagesJSONRead({path}, {configurations}, {state})
                                             *proompter#lib#MessagesJSONRead()*
   Reads file path as JSON data and returns a Vim |dictionary|, or |list|, data
@@ -1730,13 +1888,757 @@ proompter#lib#MessagesJSONWrite({path}, {configurations}, {state})
 proompter#lib#DictMerge({defaults})                *proompter#lib#DictMerge()*
   Merged dictionaries without mutation and returns resulting |dictionary|
 
-  Parameters:~ {defaults} |dictionary| of default key/value pares {...} |list|
-  of up to 20 dictionaries to merge into returned data
+  Parameters:~
+  {defaults} |dictionary| of default key/value pares
+  {...} |list| of up to 20 dictionaries to merge into returned data
 
   See: documentation~ |type()|
 
   See: links~
   https://vi.stackexchange.com/questions/20842/how-can-i-merge-two-dictionaries-in-vim
+
+
+proompter#ollama#api#payload#Generate({kwargs})
+                                     *proompter#ollama#api#payload#Generate()*
+  Return |dictionary| with `url` and request `options` defined.
+
+  Parameter: {kwargs} with following properties~
+  `prompt` |string| input LLM should respond to
+  `suffix` |string|
+  `images` |list| optional Base64 encoded images
+  `format` |string| currently only `json` is a valid value
+  `options` |dictionary| `Modelfile` edits
+  `stream` |Boolean| if `tools` are detected then automatically sets to
+    `v:false`, otherwise attempts to read `configurations` or defaults to
+    `v:true`
+  `template` optional override for what `Modelfile` defines
+  `context` |list| optional floating point numbers used to keep a short
+    conversational memory between prompts
+  `raw` |Boolean| default `v:true` to prevent additional prompt formatting
+  `keep_alive` |string| how long model will stay loaded into memory
+  `configurations` |ProompterConfigurations| default `g:proompter`, reads
+    `.selected.model_name`, `.channel.address`, `.api.url`, and
+    `.models[model_name].data`, without mutaiton
+
+  Note: when `suffix`, `format`, `options`, `system`, `stream`, `template`,
+  `raw`, and `keep_alive` when not set as `kwargs` properties, this function
+  will attempt to read defaults from `configurations.models[model_name].data`
+
+  Example: configurations~
+>
+    let configurations = {
+          \   'select': {
+          \     'model_name': 'codellama',
+          \     'completion_endpoint': 'chat',
+          \   },
+          \   'api': {
+          \     'url': 'http://127.0.0.1:11434',
+          \   },
+          \   'channel': {
+          \     'address': '127.0.0.1:41968',
+          \   },
+          \   'models': {
+          \     'codellama': {
+          \       'data': {
+          \         'stream': v:true,
+          \       },
+          \     },
+          \   },
+          \ }
+<
+
+  Example: build payload data~
+>
+    let payload_data = proompter#ollama#api#payload#Generate({
+          \   'prompt': 'Write a haiku about the Vim text editor',
+          \   'configurations': g:proompter,
+          \ })
+<
+
+  Example: result data structure~
+>
+    {
+      'url': 'http://127.0.0.1:11434/api/generate',
+      'options': {
+        'method': 'post',
+        'headers': {
+          'Host': '127.0.0.1:41968',
+          'Content-Type': 'application/json',
+        },
+        'body': {
+          'model': 'codellama',
+          'stream': v:true,
+          'prompt': 'Write a haiku about the Vim text editor',
+        },
+      },
+    }
+<
+
+  Throws ERROR(ProompterError) `Empty prompt`
+
+  See: functions~
+  |proompter#http#encode#Request|
+
+  See: links~
+  https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-completion
+
+  See: tests~
+  tests/mocks/autoload_proompter_ollama_api_payload_Generate.vader
+
+
+proompter#ollama#api#payload#Chat({kwargs})
+                                         *proompter#ollama#api#payload#Chat()*
+  Return |dictionary| with `url` and request `options` defined.
+
+  Parameter: {kwargs} with following properties~
+  `messages` |string| optional contents of `Modelfile`
+  `tools` |list| requires `stream` to be `v:false` contains |dictionary| list
+    of functions the model may request use of
+  `format` |string| currently only `json` is a valid value
+  `options` |dictionary| `Modelfile` edits
+  `stream` |Boolean| automatically sets to `v:false` if `tools` are defined
+  `keep_alive` |string| how long model will stay loaded into memory
+  `configurations` |ProompterConfigurations| default `g:proompter`, reads
+    `.selected.model_name`, `.channel.address`, `.api.url`, and
+    `.models[model_name].data`, without mutaiton
+
+  Note: when `tools`, `format`, `options`, `stream`, and `keep_alive` when not
+  set as `kwargs` properties, this function will attempt to read defaults from
+  `configurations.models[model_name].data`
+
+  Example: configurations~
+>
+    let configurations = {
+          \   'select': {
+          \     'model_name': 'codellama',
+          \     'completion_endpoint': 'chat',
+          \   },
+          \   'api': {
+          \     'url': 'http://127.0.0.1:11434',
+          \   },
+          \   'channel': {
+          \     'address': '127.0.0.1:41968',
+          \   },
+          \   'models': {
+          \     'codellama': {
+          \       'data': {
+          \         'stream': v:true,
+          \       },
+          \     },
+          \   },
+          \ }
+<
+
+  Example: build payload data~
+>
+    let payload_data = proompter#ollama#api#payload#Chat({
+          \   'messages': [
+          \     {
+          \       'role': 'system',
+          \       'content': 'You are an expert poet',
+          \     },
+          \     {
+          \       'role': 'user',
+          \       'content': 'Write a haiku about the Vim text editor',
+          \     },
+          \   ],
+          \   'configurations': g:proompter,
+          \ })
+<
+
+  Example: result data structure~
+>
+    {
+      'url': 'http://127.0.0.1:11434/api/chat',
+      'options': {
+        'method': 'post',
+        'headers': {
+          'Host': '127.0.0.1:41968',
+          'Content-Type': 'application/json',
+        },
+        'body': {
+          'model': 'codellama',
+          'stream': v:true,
+          'messages': [
+            {
+              'role': 'system',
+              'content': 'You are an expert poet',
+            },
+            {
+              'role': 'user',
+              'content': 'Write a haiku about the Vim text editor',
+            },
+          ],
+        },
+      },
+    }
+<
+
+  Throws ERROR(ProompterError) `Non-list messages`
+
+  See: functions~
+  |proompter#http#encode#Request|
+
+  See: links~
+  https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-chat-completion
+
+  See: tests~
+  tests/mocks/autoload_proompter_ollama_api_payload_Chat.vader
+
+
+proompter#ollama#api#payload#Create({kwargs})
+                                       *proompter#ollama#api#payload#Create()*
+  Return |dictionary| with `url` and request `options` defined.
+
+  Parameter: {kwargs} with following properties~
+  `name` |string| model to create
+  `modelfile` |string| optional contents of `Modelfile`
+  `stream` |Boolean| default `v:true` if `v:false` response will be single
+    JSON object instead of stream
+  `path` |string| `Modelfile` location
+  `configurations` |ProompterConfigurations| default `g:proompter`, reads
+    `.channel.address`, and `.api.url`, without mutation
+
+  Example: configurations~
+>
+    let configurations = {
+          \   'select': {
+          \     'model_name': 'codellama',
+          \     'completion_endpoint': 'chat',
+          \   },
+          \   'api': {
+          \     'url': 'http://127.0.0.1:11434',
+          \   },
+          \   'channel': {
+          \     'address': '127.0.0.1:41968',
+          \   },
+          \ }
+<
+
+  Example: build payload data~
+>
+    let payload_data = proompter#ollama#api#payload#Create({
+          \   'name': 'mario',
+          \   'modelfile': join([
+          \     'FROM llama3',
+          \     'SYSTEM You are mario from Super Mario Bros'
+          \   ], "\n"),
+          \   'configurations': g:proompter,
+          \ })
+<
+
+  Example: result data structure~
+>
+    {
+      'url': 'http://127.0.0.1:11434/api/create',
+      'options': {
+        'method': 'post',
+        'headers': {
+          'Host': '127.0.0.1:41968',
+          'Content-Type': 'application/json',
+        },
+      },
+    }
+<
+
+  See: functions~
+  |proompter#http#encode#Request|
+
+  See: links~
+  https://github.com/ollama/ollama/blob/main/docs/api.md#create-a-model
+
+  See: tests~
+  tests/mocks/autoload_proompter_ollama_api_payload_Create.vader
+
+
+proompter#ollama#api#payload#Tags({kwargs})
+                                         *proompter#ollama#api#payload#Tags()*
+  Return |dictionary| with `url` and request `options` defined.
+
+  Parameter: {kwargs} with following properties~
+  `configurations` |ProompterConfigurations| default `g:proompter`, reads
+    `.channel.address`, and `.api.url`, without mutation
+
+  Example: configurations~
+>
+    let configurations = {
+          \   'select': {
+          \     'model_name': 'codellama',
+          \     'completion_endpoint': 'chat',
+          \   },
+          \   'api': {
+          \     'url': 'http://127.0.0.1:11434',
+          \   },
+          \   'channel': {
+          \     'address': '127.0.0.1:41968',
+          \   },
+          \ }
+<
+
+  Example: build payload data~
+>
+    let payload_data = proompter#ollama#api#payload#Tags({
+          \   'configurations': g:proompter,
+          \ })
+<
+
+  Example: result data structure~
+>
+    {
+      'url': 'http://127.0.0.1:11434/api/tags',
+      'options': {
+        'method': 'get',
+        'headers': {
+          'Host': '127.0.0.1:41968',
+          'Content-Type': 'application/json',
+        },
+      },
+    }
+<
+
+  See: functions~
+  |proompter#http#encode#Request|
+
+  See: links~
+  https://github.com/ollama/ollama/blob/main/docs/api.md#list-local-models
+
+
+proompter#ollama#api#payload#Show({kwargs})
+                                         *proompter#ollama#api#payload#Show()*
+  Return |dictionary| with `url` and request `options` defined.
+
+  Parameter: {kwargs} with following properties~
+  `name` |string| default to `configurations.selected.model_name`, model name
+    to request information about
+  `verbose` |Boolean| default `v:false`, set to `v:true` to return more info
+  `configurations` |ProompterConfigurations| default `g:proompter`, reads
+    `.selected.model_name`, `.channel.address`, and `.api.url`, without
+  `state` |ProompterState| default `g:proompter_state` and currently ignored
+
+  Example: configurations~
+>
+    let configurations = {
+          \   'select': {
+          \     'model_name': 'codellama',
+          \     'completion_endpoint': 'chat',
+          \   },
+          \   'api': {
+          \     'url': 'http://127.0.0.1:11434',
+          \   },
+          \   'channel': {
+          \     'address': '127.0.0.1:41968',
+          \   },
+          \ }
+<
+
+  Example: build payload data~
+>
+    let payload_data = proompter#ollama#api#payload#Show({
+          \   'name': 'codellama',
+          \   'verbose': v:true,
+          \   'configurations': g:proompter,
+          \ })
+<
+
+  Example: result data structure~
+>
+    {
+      'url': 'http://127.0.0.1:11434/api/show',
+      'options': {
+        'method': 'post',
+        'headers': {
+          'Host': '127.0.0.1:41968',
+          'Content-Type': 'application/json',
+        },
+        'body': {
+          'name': 'codellama',
+          'verbose': v:false,
+        },
+      },
+    }
+<
+
+  Throws ERROR(ProompterError) `Empty name`
+
+  See: functions~
+  |proompter#http#encode#Request|
+
+  See: links~
+  https://github.com/ollama/ollama/blob/main/docs/api.md#show-model-information
+
+  See: tests~
+  tests/mocks/autoload_proompter_ollama_api_payload_Show.vader
+
+
+proompter#ollama#api#payload#Copy({kwargs})
+                                         *proompter#ollama#api#payload#Copy()*
+  Return |dictionary| with `url` and request `options` defined.
+
+  Parameter: {kwargs} with following properties~
+  `source` |string| model name to copy from API server's file system
+  `destination` |string| new model name based on `source`
+  `configurations` |ProompterConfigurations| default `g:proompter`, reads
+    `.channel.address`, and `.api.url`, without mutation
+
+  Example: build payload data~
+>
+    let payload_data = proompter#ollama#api#payload#Copy({
+          \   'source': 'codellama',
+          \   'destination': 'codellama-backup',
+          \   'configurations': g:proompter,
+          \ })
+<
+
+  Example: result data structure~
+>
+    {
+      'url': 'http://127.0.0.1:11434/api/copy',
+      'options': {
+        'method': 'post',
+        'headers': {
+          'Host': '127.0.0.1:41968',
+          'Content-Type': 'application/json',
+        },
+        'body': {
+          'source': 'codellama',
+          'destination': 'codellama-backup',
+        },
+      },
+    }
+<
+
+  Throws ERROR(ProompterError) `Empty source`
+  Throws ERROR(ProompterError) `Empty destination`
+
+  See: functions~
+  |proompter#http#encode#Request|
+
+  See: links~
+  https://github.com/ollama/ollama/blob/main/docs/api.md#copy-a-model
+
+  See: tests~
+  tests/mocks/autoload_proompter_ollama_api_payload_Copy.vader
+
+
+proompter#ollama#api#payload#Delete({kwargs})
+                                       *proompter#ollama#api#payload#Delete()*
+  Return |dictionary| with `url` and request `options` defined.
+
+  Parameter: {kwargs} with following properties~
+  `name` |string| of model to delete from API server's file system
+  `configurations` |ProompterConfigurations| default `g:proompter`, reads
+    `.channel.address`, and `.api.url`, without mutation
+
+  Example: configurations~
+>
+    let configurations = {
+          \   'select': {
+          \     'model_name': 'codellama',
+          \     'completion_endpoint': 'chat',
+          \   },
+          \   'api': {
+          \     'url': 'http://127.0.0.1:11434',
+          \   },
+          \   'channel': {
+          \     'address': '127.0.0.1:41968',
+          \   },
+          \ }
+<
+
+  Example: build payload data~
+>
+    let payload_data = proompter#ollama#api#payload#Delete({
+          \   'name': 'codellama',
+          \   'configurations': g:proompter,
+          \ })
+<
+
+  Example: result data structure~
+>
+    {
+      'url': 'http://127.0.0.1:11434/api/delete',
+      'options': {
+        'method': 'post',
+        'headers': {
+          'Host': '127.0.0.1:41968',
+          'Content-Type': 'application/json',
+        },
+        'body': {
+          'name': 'codellama',
+        },
+      },
+    }
+<
+
+  Throws ERROR(ProompterError) `Empty name`
+
+  See: functions~
+  |proompter#http#encode#Request|
+
+  See: links~
+  https://github.com/ollama/ollama/blob/main/docs/api.md#delete-a-model
+
+  See: tests~
+  tests/mocks/autoload_proompter_ollama_api_payload_Delete.vader
+
+
+proompter#ollama#api#payload#Pull({kwargs})
+                                         *proompter#ollama#api#payload#Pull()*
+  Return |dictionary| with `url` and request `options` defined.
+
+  Parameter: {kwargs} with following properties~
+  `name` |string| of model to pull
+  `stream` |Boolean| default `v:true` enable/disable streaming of responses
+  `configurations` |ProompterConfigurations| default `g:proompter`, reads
+    `.channel.address`, and `.api.url`, without mutation
+
+  Example: configurations~
+>
+    let configurations = {
+          \   'select': {
+          \     'model_name': 'codellama',
+          \     'completion_endpoint': 'chat',
+          \   },
+          \   'api': {
+          \     'url': 'http://127.0.0.1:11434',
+          \   },
+          \   'channel': {
+          \     'address': '127.0.0.1:41968',
+          \   },
+          \ }
+<
+
+  Example: build payload data~
+>
+    let payload_data = proompter#ollama#api#payload#Pull({
+          \   'name': 'codellama',
+          \   'configurations': g:proompter,
+          \ })
+<
+
+  Example: result data structure~
+>
+    {
+      'url': 'http://127.0.0.1:11434/api/pull',
+      'options': {
+        'method': 'post',
+        'headers': {
+          'Host': '127.0.0.1:41968',
+          'Content-Type': 'application/json',
+        },
+        'body': {
+          'name': 'codellama',
+          'stream': v:true,
+        },
+      },
+    }
+<
+
+  Throws ERROR(ProompterError) `Empty name`
+
+  See: functions~
+  |proompter#http#encode#Request|
+
+  See: links~
+  https://github.com/ollama/ollama/blob/main/docs/api.md#pull-a-model
+
+  See: tests~
+  tests/mocks/autoload_proompter_ollama_api_payload_Pull.vader
+
+
+proompter#ollama#api#payload#Embed({kwargs})
+                                        *proompter#ollama#api#payload#Embed()*
+  Return |dictionary| with `url` and request `options` defined.
+
+  Parameter: {kwargs} with following properties~
+  `input` |list| or |string| to generate embeddings for
+  `truncate` |Boolean| default `v:true` returns error if `v:false` and context
+    length is exceeded
+  `options` |dictionary| `Modelfile` edits
+  `keep_alive` |string| how long model will stay loaded into memory
+  `configurations` |ProompterConfigurations| default `g:proompter`, reads
+    `.selected.model_name`, `.channel.address`, and `.api.url`, without
+    mutation
+
+  Example: configurations~
+>
+    let configurations = {
+          \   'select': {
+          \     'model_name': 'codellama',
+          \     'completion_endpoint': 'chat',
+          \   },
+          \   'api': {
+          \     'url': 'http://127.0.0.1:11434',
+          \   },
+          \   'channel': {
+          \     'address': '127.0.0.1:41968',
+          \   },
+          \ }
+<
+
+  Example: build payload data~
+>
+    let payload_data = proompter#ollama#api#payload#Embed({
+          \   'input': ['Why is vim so good?', 'Is EMACS better?'],
+          \   'configurations': g:proompter,
+          \ })
+<
+
+  Example: result data structure~
+>
+    {
+      'url': 'http://127.0.0.1:11434/api/embed',
+      'options': {
+        'method': 'post',
+        'headers': {
+          'Host': '127.0.0.1:41968',
+          'Content-Type': 'application/json',
+        },
+        'body': {
+          'model': 'codellama',
+          'input': ['Why is vim so good?', 'Is EMACS better?'],
+        },
+      },
+    }
+<
+
+  Throws ERROR(ProompterError) `Empty input`
+
+  See: functions~
+  |proompter#http#encode#Request|
+
+  See: links~
+  https://github.com/ollama/ollama/blob/main/docs/api.md#generate-embeddings
+  https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values
+
+  See: tests~
+  tests/mocks/autoload_proompter_ollama_api_payload_Embed.vader
+
+
+proompter#ollama#api#payload#Ps({kwargs})  *proompter#ollama#api#payload#Ps()*
+  Return |dictionary| with `url` and request `options` defined.
+
+  Parameter: {kwargs} with following properties~
+  `configurations` |ProompterConfigurations| default `g:proompter`, reads
+    `.channel.address`, and `.api.url`, without mutation
+
+  Example: configurations~
+>
+    let configurations = {
+          \   'select': {
+          \     'model_name': 'codellama',
+          \     'completion_endpoint': 'chat',
+          \   },
+          \   'api': {
+          \     'url': 'http://127.0.0.1:11434',
+          \   },
+          \   'channel': {
+          \     'address': '127.0.0.1:41968',
+          \   },
+          \ }
+<
+
+  Example: build payload data~
+>
+    let payload_data = proompter#ollama#api#payload#Ps({
+          \   'configurations': g:proompter,
+          \ })
+<
+
+  Example: result data structure~
+>
+    {
+      'url': 'http://127.0.0.1:11434/api/ps',
+      'options': {
+        'method': 'get',
+        'headers': {
+          'Host': '127.0.0.1:41968',
+          'Content-Type': 'application/json',
+        },
+      },
+    }
+<
+
+  See: functions~
+  |proompter#http#encode#Request|
+
+  See: links~
+  https://github.com/ollama/ollama/blob/main/docs/api.md#list-running-models
+
+
+proompter#ollama#api#payload#Embeddings({kwargs})
+                                   *proompter#ollama#api#payload#Embeddings()*
+  Return |dictionary| with `url` and request `options` defined.
+
+  Parameter: {kwargs} with following properties~
+  `prompt` |string| to generate embeddings for
+  `options` |dictionary| `Modelfile` edits
+  `keep_alive` |string| how long model will stay loaded into memory
+  `configurations` |ProompterConfigurations| default `g:proompter`, reads
+    `.selected.model_name`, `.channel.address`, and `.api.url`, without
+    mutation
+
+  Example: configurations~
+>
+    let configurations = {
+          \   'select': {
+          \     'model_name': 'codellama',
+          \     'completion_endpoint': 'chat',
+          \   },
+          \   'api': {
+          \     'url': 'http://127.0.0.1:11434',
+          \   },
+          \   'channel': {
+          \     'address': '127.0.0.1:41968',
+          \   },
+          \   'models': {
+          \     'codellama': {
+          \       'parameters': {
+          \         'raw': v:false,
+          \         'stream': v:true,
+          \       },
+          \     },
+          \   },
+          \ }
+<
+
+  Example: build payload data~
+>
+    let payload_data = proompter#ollama#api#payload#Embeddings({
+          \   'prompt': 'Here is an article about llamas...',
+          \   'configurations': g:proompter,
+          \ })
+<
+
+  Example: result data structure~
+>
+    {
+      'url': 'http://127.0.0.1:11434/api/embeddings',
+      'options': {
+        'method': 'post',
+        'headers': {
+          'Host': '127.0.0.1:41968',
+          'Content-Type': 'application/json',
+        },
+        'body': {
+          'model': 'codellama',
+          'prompt': 'Here is an article about llamas...',
+        },
+      },
+    }
+<
+
+  Throws ERROR(ProompterError) `Empty prompt`
+
+  See: functions~
+  |proompter#http#encode#Request|
+
+  See: links~
+  https://github.com/ollama/ollama/blob/main/docs/api.md#generate-embeddings
+  https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values
+
+  See: tests~
+  tests/mocks/autoload_proompter_ollama_api_payload_Embeddings.vader
 
 
 proompter#parse#MessageOrResponseFromAPI({data})
