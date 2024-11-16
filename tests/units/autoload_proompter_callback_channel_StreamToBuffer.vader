@@ -156,7 +156,12 @@ Execute(proompter#callback#channel#StreamToBuffer -- Handles JSON with newlines)
 
   AssertEqual state, expected_state
   AssertEqual configurations, expected_configurations, 'Unexpected mutation of configurations'
-  AssertEqual getbufline(bufnr('[Vader-workbench]'), 0, '$')[-5:-3], split(expected_state.messages[-1].message.content, "\n")
+
+  let buffer_content = getbufline(bufnr('[Vader-workbench]'), 0, '$')[3:-3]
+  let expected_buffer_content = split(expected_state.messages[-1].message.content, "\n")
+
+  AssertEqual buffer_content, expected_buffer_content
+  AssertEqual len(buffer_content), 3
 
 Execute (proompter#callback#channel#StreamToBuffer -- Throws when status code is not in 200 range):
   let separator = "\r\n"
