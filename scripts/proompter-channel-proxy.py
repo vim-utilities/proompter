@@ -288,8 +288,7 @@ class ChannelProxy_Mock(ChannelProxy):
 
         response_string = ''
         for item in response_base64:
-            response_string += base64.b64decode(response_base64[0]).decode('utf-8')
-        # print('  response_string ->', response_string)
+            response_string += base64.b64decode(item).decode('utf-8')
 
         if len(response_string) <= 0:
             print('  response_string ->', response_string)
